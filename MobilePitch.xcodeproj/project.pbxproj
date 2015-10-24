@@ -13,6 +13,7 @@
 		D89DD41E1BDB15CD008284D4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D89DD41C1BDB15CD008284D4 /* LaunchScreen.storyboard */; };
 		D89DD4291BDB15CD008284D4 /* MobilePitchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4281BDB15CD008284D4 /* MobilePitchTests.m */; };
 		D89DD4341BDB15CD008284D4 /* MobilePitchUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4331BDB15CD008284D4 /* MobilePitchUITests.m */; };
+		D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4421BDB2981008284D4 /* SplashViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,8 @@
 		D89DD42F1BDB15CD008284D4 /* MobilePitchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MobilePitchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D89DD4331BDB15CD008284D4 /* MobilePitchUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MobilePitchUITests.m; sourceTree = "<group>"; };
 		D89DD4351BDB15CD008284D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D89DD4411BDB2981008284D4 /* SplashViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashViewController.h; sourceTree = "<group>"; };
+		D89DD4421BDB2981008284D4 /* SplashViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SplashViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +101,8 @@
 			children = (
 				D89DD40E1BDB15CD008284D4 /* AppDelegate.h */,
 				D89DD40F1BDB15CD008284D4 /* AppDelegate.m */,
+				D89DD4411BDB2981008284D4 /* SplashViewController.h */,
+				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
 				D89DD41A1BDB15CD008284D4 /* Assets.xcassets */,
 				D89DD41C1BDB15CD008284D4 /* LaunchScreen.storyboard */,
 				D89DD41F1BDB15CD008284D4 /* Info.plist */,
@@ -263,6 +268,7 @@
 			files = (
 				D89DD4101BDB15CD008284D4 /* AppDelegate.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
+				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,6 +402,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = MobilePitch/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.sparksc.MobilePitch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -407,6 +414,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = MobilePitch/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.sparksc.MobilePitch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
