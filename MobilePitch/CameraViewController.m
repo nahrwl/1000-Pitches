@@ -7,6 +7,7 @@
 //
 
 #import "CameraViewController.h"
+#import "AccessRequestViewController.h"
 
 #define kRecordButtonAnimationDuration 0.2f
 
@@ -33,6 +34,15 @@
 
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    double delayInSeconds = 1;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        //code to be executed on the main queue after delay
+        [self presentViewController:[[AccessRequestViewController alloc] init] animated:YES completion:nil];
+    });
+}
+
 - (BOOL)prefersStatusBarHidden {
     return YES;
 }
@@ -55,7 +65,7 @@
     static BOOL currentlyRecording = NO;
     if (!currentlyRecording) {
         // Start recording
-        NSLog(@"Start recording");
+        //NSLog(@"Start recording");
         // Animate start -> stop button change
         [self.view layoutIfNeeded];
         self.recordButtonHeightConstraint.constant = 28;
@@ -76,7 +86,7 @@
         
     } else {
         // Stop recording
-        NSLog(@"Stop recording");
+        //NSLog(@"Stop recording");
         // Animate stop -> start button change
         [self.view layoutIfNeeded];
         self.recordButtonHeightConstraint.constant = 50;

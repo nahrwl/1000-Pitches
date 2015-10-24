@@ -15,6 +15,7 @@
 		D89DD4341BDB15CD008284D4 /* MobilePitchUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4331BDB15CD008284D4 /* MobilePitchUITests.m */; };
 		D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4421BDB2981008284D4 /* SplashViewController.m */; };
 		D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4451BDC0441008284D4 /* CameraViewController.m */; };
+		D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,8 @@
 		D89DD4421BDB2981008284D4 /* SplashViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SplashViewController.m; sourceTree = "<group>"; };
 		D89DD4441BDC0441008284D4 /* CameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraViewController.h; sourceTree = "<group>"; };
 		D89DD4451BDC0441008284D4 /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraViewController.m; sourceTree = "<group>"; };
+		D89DD4471BDC38B4008284D4 /* AccessRequestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessRequestViewController.h; sourceTree = "<group>"; };
+		D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccessRequestViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +111,8 @@
 				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
 				D89DD4441BDC0441008284D4 /* CameraViewController.h */,
 				D89DD4451BDC0441008284D4 /* CameraViewController.m */,
+				D89DD4471BDC38B4008284D4 /* AccessRequestViewController.h */,
+				D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */,
 				D89DD41A1BDB15CD008284D4 /* Assets.xcassets */,
 				D89DD41C1BDB15CD008284D4 /* LaunchScreen.storyboard */,
 				D89DD41F1BDB15CD008284D4 /* Info.plist */,
@@ -273,6 +278,7 @@
 			files = (
 				D89DD4101BDB15CD008284D4 /* AppDelegate.m in Sources */,
 				D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */,
+				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
 				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
 			);
