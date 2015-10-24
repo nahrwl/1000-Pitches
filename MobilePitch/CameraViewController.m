@@ -35,11 +35,13 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    AccessRequestViewController *arvc = [[AccessRequestViewController alloc] init];
+    arvc.modalPresentationStyle = UIModalPresentationOverFullScreen;
     double delayInSeconds = 1;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         //code to be executed on the main queue after delay
-        [self presentViewController:[[AccessRequestViewController alloc] init] animated:YES completion:nil];
+        [self presentViewController:arvc animated:YES completion:nil];
     });
 }
 
@@ -118,7 +120,7 @@
     UIView *view = [[UIView alloc] init];
     self.view = view;
     
-    view.backgroundColor = [UIColor grayColor];
+    view.backgroundColor = [UIColor blackColor];
     
     // Top view
     UIView *topView = [[UIView alloc] init];
