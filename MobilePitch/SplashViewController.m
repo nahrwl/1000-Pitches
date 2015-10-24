@@ -7,8 +7,11 @@
 //
 
 #import "SplashViewController.h"
+#import "CameraViewController.h"
 
 @interface SplashViewController ()
+
+- (void)pitchButtonTapped:(UIButton *)sender;
 
 @end
 
@@ -18,11 +21,22 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     [self.navigationController setNavigationBarHidden:YES];
+    
+    // Status bar color updates - tell the nav controller that the content is dark
+    [self setNeedsStatusBarAppearanceUpdate];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)pitchButtonTapped:(UIButton *)sender {
+    [self.navigationController pushViewController:[[CameraViewController alloc] init] animated:YES];
+}
+
+- (UIStatusBarStyle) preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
 }
 
 - (void)loadView {
@@ -98,6 +112,9 @@
     UIImageView *arrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"right arrow"]];
     arrow.translatesAutoresizingMaskIntoConstraints = NO;
     [button addSubview:arrow];
+    
+    // Button Action
+    [button addTarget:self action:@selector(pitchButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     
     // AUTOLAYOUT
     NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, logo, headerLabel, listLabel, button);
