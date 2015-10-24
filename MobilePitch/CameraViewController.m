@@ -8,10 +8,15 @@
 
 #import "CameraViewController.h"
 
+#define kRecordButtonAnimationDuration 0.2f
+
 @interface CameraViewController ()
 
 @property (weak, nonatomic) UILabel *timerLabel;
+
 @property (weak, nonatomic) UIButton *recordButton;
+@property (weak, nonatomic) NSLayoutConstraint *recordButtonHeightConstraint;
+@property (weak, nonatomic) NSLayoutConstraint *recordButtonWidthConstraint;
 
 - (void)recordButtonTapped:(UIButton *)sender;
 - (void)toggleRecording;
@@ -42,7 +47,7 @@
 }
 
 - (void)recordButtonTapped:(UIButton *)sender {
-    NSLog(@"Record button tapped");
+    //NSLog(@"Record button tapped");
     [self toggleRecording];
 }
 
@@ -50,12 +55,52 @@
     static BOOL currentlyRecording = NO;
     if (!currentlyRecording) {
         // Start recording
-        
+        NSLog(@"Start recording");
         // Animate start -> stop button change
+        [self.view layoutIfNeeded];
+        self.recordButtonHeightConstraint.constant = 28;
+        self.recordButtonWidthConstraint.constant = 28;
+        [UIView animateWithDuration:kRecordButtonAnimationDuration animations:^{
+            [self.view layoutIfNeeded];
+        }];
         
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+        animation.fromValue = @(self.recordButton.layer.cornerRadius);
+        animation.toValue = @(4);
+        animation.duration = kRecordButtonAnimationDuration - 0.05;
+        [self.recordButton.layer setCornerRadius:4];
+        [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
+        
+        currentlyRecording = YES;
         
     } else {
         // Stop recording
+        NSLog(@"Stop recording");
+        // Animate stop -> start button change
+        [self.view layoutIfNeeded];
+        self.recordButtonHeightConstraint.constant = 50;
+        self.recordButtonWidthConstraint.constant = 50;
+        [UIView animateWithDuration:kRecordButtonAnimationDuration animations:^{
+            [self.view layoutIfNeeded];
+        }];
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+        animation.fromValue = @(self.recordButton.layer.cornerRadius);
+        animation.toValue = @(25);
+        animation.duration = kRecordButtonAnimationDuration - 0.1;
+        animation.beginTime = CACurrentMediaTime() + 0.05f;
+        
+        double delayInSeconds = 0.06;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            //code to be executed on the main queue after delay
+            [self.recordButton.layer setCornerRadius:25];
+        });
+        [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
+        
+        currentlyRecording = NO;
     }
 }
 
@@ -113,8 +158,13 @@
     recordButton.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
     recordButton.layer.cornerRadius = 25.0f; // make it a circle!
     // Size
-    [recordButton addConstraint:[NSLayoutConstraint constraintWithItem:recordButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f]];
-    [recordButton addConstraint:[NSLayoutConstraint constraintWithItem:recordButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f]];
+    NSLayoutConstraint *recordButtonHeightConstraint = [NSLayoutConstraint constraintWithItem:recordButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f];
+    [recordButton addConstraint:recordButtonHeightConstraint];
+    self.recordButtonHeightConstraint = recordButtonHeightConstraint;
+    
+    NSLayoutConstraint *recordButtonWidthConstraint = [NSLayoutConstraint constraintWithItem:recordButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f];
+    [recordButton addConstraint:recordButtonWidthConstraint];
+    self.recordButtonWidthConstraint = recordButtonWidthConstraint;
     
     // Bottom view back button
     UIButton *backButton = [[UIButton alloc] init];
