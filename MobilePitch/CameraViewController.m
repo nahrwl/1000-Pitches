@@ -16,6 +16,8 @@
 - (void)recordButtonTapped:(UIButton *)sender;
 - (void)toggleRecording;
 
+- (void)backButtonTapped:(UIButton *)sender;
+
 @end
 
 @implementation CameraViewController
@@ -33,6 +35,10 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)backButtonTapped:(UIButton *)sender {
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)recordButtonTapped:(UIButton *)sender {
@@ -114,6 +120,7 @@
     UIButton *backButton = [[UIButton alloc] init];
     backButton.translatesAutoresizingMaskIntoConstraints = NO;
     [bottomView addSubview:backButton];
+    [backButton addTarget:self action:@selector(backButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     // Appearance
     [backButton setImage:[UIImage imageNamed:@"left arrow"] forState:UIControlStateNormal];
     
