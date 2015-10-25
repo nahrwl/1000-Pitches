@@ -90,6 +90,7 @@
     [button setTitle:@"Grant Access" forState:UIControlStateNormal];
     button.titleLabel.font = [UIFont systemFontOfSize:48 weight:UIFontWeightSemibold];
     [button setTitleColor:[UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1] forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(okButtonTapped) forControlEvents:UIControlEventTouchUpInside];
 
     // Cancel Button
     UIButton *cancelButton = [[UIButton alloc] init];

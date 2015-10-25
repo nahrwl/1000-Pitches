@@ -8,6 +8,7 @@
 //  Much of this code was taken from Apple's AVCam demo.
 
 @import AVFoundation;
+@import Photos;
 
 #import "CameraViewController.h"
 #import "AccessRequestViewController.h"
@@ -23,13 +24,13 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     CamSetupResultSessionConfigurationFailed
 };
 
-@interface CameraViewController ()
+@interface CameraViewController () <AVCaptureFileOutputRecordingDelegate>
 
 // Views
-@property (nonatomic, weak) IBOutlet AAPLPreviewView *previewView;
+@property (weak, nonatomic) AAPLPreviewView *previewView;
 @property (weak, nonatomic) UILabel *timerLabel;
-@property (nonatomic, weak) UILabel *cameraUnavailableLabel;
-@property (nonatomic, weak) UIButton *resumeButton;
+@property (weak, nonatomic) UILabel *cameraUnavailableLabel;
+@property (weak, nonatomic) UIButton *resumeButton;
 @property (weak, nonatomic) UIButton *recordButton;
 @property (weak, nonatomic) NSLayoutConstraint *recordButtonHeightConstraint;
 @property (weak, nonatomic) NSLayoutConstraint *recordButtonWidthConstraint;
@@ -46,8 +47,6 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 @property (nonatomic) UIBackgroundTaskIdentifier backgroundRecordingID;
 
 // Methods
-- (void)recordButtonTapped:(UIButton *)sender;
-- (void)toggleRecording;
 - (void)backButtonTapped:(UIButton *)sender;
 
 @end
@@ -56,7 +55,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    /*
+    
     // Disable UI. The UI is enabled if and only if the session starts running.
     self.recordButton.enabled = NO;
     
@@ -119,7 +118,8 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
         self.backgroundRecordingID = UIBackgroundTaskInvalid;
         NSError *error = nil;
         
-        AVCaptureDevice *videoDevice = [CameraViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:AVCaptureDevicePositionBack];
+        AVCaptureDevice *videoDevice = [CameraViewController deviceWithMediaType:AVMediaTypeVideo
+                                                              preferringPosition:AVCaptureDevicePositionFront];
         AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
         
         if ( ! videoDeviceInput ) {
@@ -185,14 +185,14 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
         }
         
         [self.session commitConfiguration];
-    } );*/
+    } );
     
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    /*
+    
     dispatch_async( self.sessionQueue, ^{
         switch ( self.setupResult )
         {
@@ -232,7 +232,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
                 break;
             }
         }
-    } );*/
+    } );
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -240,7 +240,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     
     
 }
-/*
+
 - (void)viewDidDisappear:(BOOL)animated
 {
     dispatch_async( self.sessionQueue, ^{
@@ -311,15 +311,13 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
             }
             else {
                 dispatch_async( dispatch_get_main_queue(), ^{
-#warning Resume button disabled
-                    //self.resumeButton.hidden = NO;
+                    self.resumeButton.hidden = NO;
                 } );
             }
         } );
     }
     else {
-#warning Resume button disabled
-        //self.resumeButton.hidden = NO;
+        self.resumeButton.hidden = NO;
     }
 }
 
@@ -383,38 +381,82 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
             self.cameraUnavailableLabel.hidden = YES;
         }];
     }
-}*/
-
-
-
-
-
-
-
-
-- (BOOL)prefersStatusBarHidden {
-    return YES;
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+#pragma mark Actions
+
+- (IBAction)resumeInterruptedSession:(id)sender
+{
+    dispatch_async( self.sessionQueue, ^{
+        // The session might fail to start running, e.g., if a phone or FaceTime call is still using audio or video.
+        // A failure to start the session running will be communicated via a session runtime error notification.
+        // To avoid repeatedly failing to start the session running, we only try to restart the session running in the
+        // session runtime error handler if we aren't trying to resume the session running.
+        [self.session startRunning];
+        self.sessionRunning = self.session.isRunning;
+        if ( ! self.session.isRunning ) {
+            dispatch_async( dispatch_get_main_queue(), ^{
+                NSString *message = NSLocalizedString( @"Unable to resume", @"Alert message when unable to resume the session running" );
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AVCam" message:message preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"OK", @"Alert OK button" ) style:UIAlertActionStyleCancel handler:nil];
+                [alertController addAction:cancelAction];
+                [self presentViewController:alertController animated:YES completion:nil];
+            } );
+        }
+        else {
+            dispatch_async( dispatch_get_main_queue(), ^{
+                self.resumeButton.hidden = YES;
+            } );
+        }
+    } );
 }
 
-- (void)backButtonTapped:(UIButton *)sender {
-    [self.navigationController popViewControllerAnimated:YES];
+- (IBAction)toggleMovieRecording:(id)sender
+{
+    // Disable the Camera button until recording finishes, and disable the Record button until recording starts or finishes. See the
+    // AVCaptureFileOutputRecordingDelegate methods.
+    self.recordButton.enabled = NO;
+    
+    dispatch_async( self.sessionQueue, ^{
+        if ( ! self.movieFileOutput.isRecording ) {
+            if ( [UIDevice currentDevice].isMultitaskingSupported ) {
+                // Setup background task. This is needed because the -[captureOutput:didFinishRecordingToOutputFileAtURL:fromConnections:error:]
+                // callback is not received until AVCam returns to the foreground unless you request background execution time.
+                // This also ensures that there will be time to write the file to the photo library when AVCam is backgrounded.
+                // To conclude this background execution, -endBackgroundTask is called in
+                // -[captureOutput:didFinishRecordingToOutputFileAtURL:fromConnections:error:] after the recorded file has been saved.
+                self.backgroundRecordingID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:nil];
+            }
+            
+            // Update the orientation on the movie file output video connection before starting recording.
+            AVCaptureConnection *connection = [self.movieFileOutput connectionWithMediaType:AVMediaTypeVideo];
+            AVCaptureVideoPreviewLayer *previewLayer = (AVCaptureVideoPreviewLayer *)self.previewView.layer;
+            connection.videoOrientation = previewLayer.connection.videoOrientation;
+            
+            // Start recording to a temporary file.
+            NSString *outputFileName = [NSProcessInfo processInfo].globallyUniqueString;
+            NSString *outputFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[outputFileName stringByAppendingPathExtension:@"mov"]];
+            [self.movieFileOutput startRecordingToOutputFileURL:[NSURL fileURLWithPath:outputFilePath] recordingDelegate:self];
+        }
+        else {
+            [self.movieFileOutput stopRecording];
+        }
+    } );
+}
+#warning Create this gesture recognizer!
+- (IBAction)focusAndExposeTap:(UIGestureRecognizer *)gestureRecognizer
+{
+    CGPoint devicePoint = [(AVCaptureVideoPreviewLayer *)self.previewView.layer captureDevicePointOfInterestForPoint:[gestureRecognizer locationInView:gestureRecognizer.view]];
+    [self focusWithMode:AVCaptureFocusModeAutoFocus exposeWithMode:AVCaptureExposureModeAutoExpose atDevicePoint:devicePoint monitorSubjectAreaChange:YES];
 }
 
-- (void)recordButtonTapped:(UIButton *)sender {
-    //NSLog(@"Record button tapped");
-    [self toggleRecording];
-}
+#pragma mark File Output Recording Delegate
 
-- (void)toggleRecording {
-    static BOOL currentlyRecording = NO;
-    if (!currentlyRecording) {
-        // Start recording
-        //NSLog(@"Start recording");
+- (void)captureOutput:(AVCaptureFileOutput *)captureOutput didStartRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
+{
+    // Enable the Record button to let the user stop the recording.
+    dispatch_async( dispatch_get_main_queue(), ^{
+        self.recordButton.enabled = YES;
         // Animate start -> stop button change
         [self.view layoutIfNeeded];
         self.recordButtonHeightConstraint.constant = 28;
@@ -430,12 +472,67 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
         animation.duration = kRecordButtonAnimationDuration - 0.03;
         [self.recordButton.layer setCornerRadius:4];
         [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
-        
-        currentlyRecording = YES;
-        
-    } else {
-        // Stop recording
-        //NSLog(@"Stop recording");
+    });
+}
+
+- (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)error
+{
+    // Note that currentBackgroundRecordingID is used to end the background task associated with this recording.
+    // This allows a new recording to be started, associated with a new UIBackgroundTaskIdentifier, once the movie file output's isRecording property
+    // is back to NO — which happens sometime after this method returns.
+    // Note: Since we use a unique file path for each recording, a new recording will not overwrite a recording currently being saved.
+    UIBackgroundTaskIdentifier currentBackgroundRecordingID = self.backgroundRecordingID;
+    self.backgroundRecordingID = UIBackgroundTaskInvalid;
+    
+    dispatch_block_t cleanup = ^{
+        [[NSFileManager defaultManager] removeItemAtURL:outputFileURL error:nil];
+        if ( currentBackgroundRecordingID != UIBackgroundTaskInvalid ) {
+            [[UIApplication sharedApplication] endBackgroundTask:currentBackgroundRecordingID];
+        }
+    };
+    
+    BOOL success = YES;
+    
+    if ( error ) {
+        NSLog( @"Movie file finishing error: %@", error );
+        success = [error.userInfo[AVErrorRecordingSuccessfullyFinishedKey] boolValue];
+    }
+    if ( success ) {
+        // Check authorization status.
+        [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
+            if ( status == PHAuthorizationStatusAuthorized ) {
+                // Save the movie file to the photo library and cleanup.
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    // In iOS 9 and later, it's possible to move the file into the photo library without duplicating the file data.
+                    // This avoids using double the disk space during save, which can make a difference on devices with limited free disk space.
+                    if ( [PHAssetResourceCreationOptions class] ) {
+                        PHAssetResourceCreationOptions *options = [[PHAssetResourceCreationOptions alloc] init];
+                        options.shouldMoveFile = YES;
+                        PHAssetCreationRequest *changeRequest = [PHAssetCreationRequest creationRequestForAsset];
+                        [changeRequest addResourceWithType:PHAssetResourceTypeVideo fileURL:outputFileURL options:options];
+                    }
+                    else {
+                        [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:outputFileURL];
+                    }
+                } completionHandler:^( BOOL success, NSError *error ) {
+                    if ( ! success ) {
+                        NSLog( @"Could not save movie to photo library: %@", error );
+                    }
+                    cleanup();
+                }];
+            }
+            else {
+                cleanup();
+            }
+        }];
+    }
+    else {
+        cleanup();
+    }
+    
+    // Enable the Camera and Record buttons to let the user switch camera and start another recording.
+    dispatch_async( dispatch_get_main_queue(), ^{
+        self.recordButton.enabled = YES;
         // Animate stop -> start button change
         [self.view layoutIfNeeded];
         self.recordButtonHeightConstraint.constant = 50;
@@ -458,9 +555,67 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
             [self.recordButton.layer setCornerRadius:25];
         });
         [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
-        
-        currentlyRecording = NO;
+    });
+}
+
+#pragma mark Device Configuration
+
+- (void)focusWithMode:(AVCaptureFocusMode)focusMode exposeWithMode:(AVCaptureExposureMode)exposureMode atDevicePoint:(CGPoint)point monitorSubjectAreaChange:(BOOL)monitorSubjectAreaChange
+{
+    dispatch_async( self.sessionQueue, ^{
+        AVCaptureDevice *device = self.videoDeviceInput.device;
+        NSError *error = nil;
+        if ( [device lockForConfiguration:&error] ) {
+            // Setting (focus/exposure)PointOfInterest alone does not initiate a (focus/exposure) operation.
+            // Call -set(Focus/Exposure)Mode: to apply the new point of interest.
+            if ( device.isFocusPointOfInterestSupported && [device isFocusModeSupported:focusMode] ) {
+                device.focusPointOfInterest = point;
+                device.focusMode = focusMode;
+            }
+            
+            if ( device.isExposurePointOfInterestSupported && [device isExposureModeSupported:exposureMode] ) {
+                device.exposurePointOfInterest = point;
+                device.exposureMode = exposureMode;
+            }
+            
+            device.subjectAreaChangeMonitoringEnabled = monitorSubjectAreaChange;
+            [device unlockForConfiguration];
+        }
+        else {
+            NSLog( @"Could not lock device for configuration: %@", error );
+        }
+    } );
+}
+
++ (AVCaptureDevice *)deviceWithMediaType:(NSString *)mediaType preferringPosition:(AVCaptureDevicePosition)position
+{
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:mediaType];
+    AVCaptureDevice *captureDevice = devices.firstObject;
+    
+    for ( AVCaptureDevice *device in devices ) {
+        if ( device.position == position ) {
+            captureDevice = device;
+            break;
+        }
     }
+    
+    return captureDevice;
+}
+
+
+
+
+- (BOOL)prefersStatusBarHidden {
+    return YES;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)backButtonTapped:(UIButton *)sender {
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)loadView {
@@ -468,6 +623,17 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     self.view = view;
     
     view.backgroundColor = [UIColor blackColor];
+    
+    // AAPLPreviewView
+    AAPLPreviewView *previewView = [[AAPLPreviewView alloc] init];
+    previewView.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:previewView];
+    self.previewView = previewView;
+    // Autolayout for the previewView
+    [previewView.topAnchor constraintEqualToAnchor:view.topAnchor].active = YES;
+    [previewView.bottomAnchor constraintEqualToAnchor:view.bottomAnchor].active = YES;
+    [previewView.leftAnchor constraintEqualToAnchor:view.leftAnchor].active = YES;
+    [previewView.rightAnchor constraintEqualToAnchor:view.rightAnchor].active = YES;
     
     // Top view
     UIView *topView = [[UIView alloc] init];
@@ -512,7 +678,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     recordButton.translatesAutoresizingMaskIntoConstraints = NO;
     [bottomView addSubview:recordButton];
     self.recordButton = recordButton;
-    [recordButton addTarget:self action:@selector(recordButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [recordButton addTarget:self action:@selector(toggleMovieRecording:) forControlEvents:UIControlEventTouchUpInside];
     // Appearance
     recordButton.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
     recordButton.layer.cornerRadius = 25.0f; // make it a circle!
