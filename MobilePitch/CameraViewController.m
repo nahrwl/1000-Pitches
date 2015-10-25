@@ -66,6 +66,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 // Timing
 @property (strong, nonatomic) NSDate *startDate;
+@property (weak, nonatomic) NSTimer *timer;
 
 // Methods
 - (void)backButtonTapped:(UIButton *)sender;
@@ -646,7 +647,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
         
         // Begin the timer
-        [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(timerAction) userInfo:nil repeats:YES];
+        self.timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(timerAction) userInfo:nil repeats:YES];
         self.startDate = [NSDate date];
         self.timerLabel.text = @"00:00";
     });
@@ -732,6 +733,10 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
             [self.recordButton.layer setCornerRadius:25];
         });
         [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
+        
+        //Disable timer
+        [self.timer invalidate];
+        [self setStatusViewRecordingStatus:RecordingStatusNotRecording animated:YES];
     });
 }
 
