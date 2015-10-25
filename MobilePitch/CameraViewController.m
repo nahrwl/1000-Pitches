@@ -16,6 +16,7 @@
 
 #define kStatusViewAnimationDuration 1.0f
 #define kRecordButtonAnimationDuration 0.2f
+#define kBackButtonAnimationDuration 0.2f
 
 static void * SessionRunningContext = &SessionRunningContext;
 
@@ -51,6 +52,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 @property (weak, nonatomic) UIButton            *recordButton;
 @property (weak, nonatomic) NSLayoutConstraint  *recordButtonHeightConstraint;
 @property (weak, nonatomic) NSLayoutConstraint  *recordButtonWidthConstraint;
+@property (weak, nonatomic) UIButton            *backButton;
 
 // Session management
 @property (nonatomic) dispatch_queue_t sessionQueue;
@@ -660,6 +662,15 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         self.timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(timerAction) userInfo:nil repeats:YES];
         self.startDate = [NSDate date];
         self.timerLabel.text = @"00:00";
+        
+        //Disable the back button
+        self.backButton.enabled = NO;
+        [UIView animateWithDuration:kBackButtonAnimationDuration animations:^{
+            self.backButton.alpha = 0.0;
+        }completion:^(BOOL finished) {
+            self.backButton.hidden = YES;
+        }];
+        
     });
 }
 
@@ -747,6 +758,14 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         //Disable timer
         [self.timer invalidate];
         [self setStatusViewRecordingStatus:RecordingStatusNotRecording animated:YES];
+        
+        //Reveal back button
+        self.backButton.enabled = YES;
+        self.backButton.alpha = 0.0;
+        self.backButton.hidden = NO;
+        [UIView animateWithDuration:kBackButtonAnimationDuration animations:^{
+            self.backButton.alpha = 1.0;
+        }];
     });
 }
 
@@ -919,6 +938,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     backButton.translatesAutoresizingMaskIntoConstraints = NO;
     [bottomView addSubview:backButton];
     [backButton addTarget:self action:@selector(backButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    self.backButton = backButton;
     // Appearance
     [backButton setImage:[UIImage imageNamed:@"left arrow"] forState:UIControlStateNormal];
     
