@@ -27,7 +27,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    NSLog(@"Width of titleLabel is: %f",self.titleLabel.frame.size.width);
+    //NSLog(@"Width of titleLabel is: %f",self.titleLabel.frame.size.width);
 }
 
 - (void)didReceiveMemoryWarning {

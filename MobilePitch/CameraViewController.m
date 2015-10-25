@@ -28,13 +28,19 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 @interface CameraViewController () <AVCaptureFileOutputRecordingDelegate, AccessRequestViewControllerDelegate>
 
 // Views
-@property (weak, nonatomic) AAPLPreviewView *previewView;
-@property (weak, nonatomic) UILabel *timerLabel;
-@property (weak, nonatomic) UILabel *cameraUnavailableLabel;
-@property (weak, nonatomic) UIButton *resumeButton;
-@property (weak, nonatomic) UIButton *recordButton;
-@property (weak, nonatomic) NSLayoutConstraint *recordButtonHeightConstraint;
-@property (weak, nonatomic) NSLayoutConstraint *recordButtonWidthConstraint;
+@property (weak, nonatomic) AAPLPreviewView     *previewView;
+@property (weak, nonatomic) UILabel             *timerLabel;
+@property (weak, nonatomic) UILabel             *statusLabel;
+@property (weak, nonatomic) UIView              *statusView;
+@property (weak, nonatomic) UILabel             *cameraUnavailableLabel;
+@property (weak, nonatomic) UIView              *permissionsErrorView;
+@property (weak, nonatomic) UILabel             *permissionsTitleLabel;
+@property (weak, nonatomic) UILabel             *permissionsDescriptionLabel;
+@property (weak, nonatomic) UIButton            *permissionsButton;
+@property (weak, nonatomic) UIButton            *resumeButton;
+@property (weak, nonatomic) UIButton            *recordButton;
+@property (weak, nonatomic) NSLayoutConstraint  *recordButtonHeightConstraint;
+@property (weak, nonatomic) NSLayoutConstraint  *recordButtonWidthConstraint;
 
 // Session management
 @property (nonatomic) dispatch_queue_t sessionQueue;
@@ -251,33 +257,16 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
             case CamSetupResultCameraNotAuthorized:
             {
                 dispatch_async( dispatch_get_main_queue(), ^{
-                    NSString *message = NSLocalizedString( @"AVCam doesn't have permission to use the camera, please change privacy settings", @"Alert message when the user has denied access to the camera" );
-                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AVCam" message:message preferredStyle:UIAlertControllerStyleAlert];
-                    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"OK", @"Alert OK button" ) style:UIAlertActionStyleCancel handler:nil];
-                    [alertController addAction:cancelAction];
-                    // Provide quick access to Settings.
-                    UIAlertAction *settingsAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"Settings", @"Alert button to open Settings" ) style:UIAlertActionStyleDefault handler:^( UIAlertAction *action ) {
-                        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
-                    }];
-                    [alertController addAction:settingsAction];
-                    [self presentViewController:alertController animated:YES completion:nil];
+                    [self togglePermissionsErrorViewForHardware:@"camera"];
                 } );
                 break;
             }
             case CamSetupResultMicrophoneNotAuthorized:
             {
                 dispatch_async( dispatch_get_main_queue(), ^{
-                    NSString *message = NSLocalizedString( @"AVCam doesn't have permission to use the microphone, please change privacy settings", @"Alert message when the user has denied access to the camera" );
-                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AVCam" message:message preferredStyle:UIAlertControllerStyleAlert];
-                    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"OK", @"Alert OK button" ) style:UIAlertActionStyleCancel handler:nil];
-                    [alertController addAction:cancelAction];
-                    // Provide quick access to Settings.
-                    UIAlertAction *settingsAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"Settings", @"Alert button to open Settings" ) style:UIAlertActionStyleDefault handler:^( UIAlertAction *action ) {
-                        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
-                    }];
-                    [alertController addAction:settingsAction];
-                    [self presentViewController:alertController animated:YES completion:nil];
+                    [self togglePermissionsErrorViewForHardware:@"microphone"];
                 } );
+                break;
             }
             case CamSetupResultSessionConfigurationFailed:
             {
@@ -296,8 +285,6 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    
-    
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -522,6 +509,10 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (void)settingsButtonTapped:(UIButton *)sender {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+}
+
 #pragma mark File Output Recording Delegate
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didStartRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
@@ -690,6 +681,28 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 }
 
 #pragma mark View Setup
+
+- (void)togglePermissionsErrorViewForHardware:(NSString *)hardware {
+    if (self.permissionsErrorView) {
+        if ([[hardware lowercaseString] isEqualToString:@"camera"])
+        {
+            self.permissionsTitleLabel.text = @"Camera Access Denied";
+            self.permissionsDescriptionLabel.text = @"1000 Pitches doesn't have permission to use the camera.\nPlease change your privacy settings.";
+        }
+        else if ([[hardware lowercaseString] isEqualToString:@"microphone"])
+        {
+            self.permissionsTitleLabel.text = @"Microphone Access Denied";
+            self.permissionsDescriptionLabel.text = @"1000 Pitches doesn't have permission to use the microphone.\nPlease change your privacy settings.";
+        }
+        else
+        {
+            //error
+        }
+        self.permissionsErrorView.hidden = NO;
+    } else {
+        self.permissionsErrorView.hidden = YES;
+    }
+}
 
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
@@ -871,6 +884,70 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[resumeTopLayoutGuide][resumeButton][resumeBottomLayoutGuide]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(resumeTopLayoutGuide, resumeButton, resumeBottomLayoutGuide)]];
     [view addConstraint:[NSLayoutConstraint constraintWithItem:resumeButton attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
     
+    // --
+    // PERMISSIONS ERROR VIEW EVERYTHING
+    UIView *permissionsView = [[UIView alloc] init];
+    permissionsView.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:permissionsView];
+    [view bringSubviewToFront:permissionsView];
+    self.permissionsErrorView = permissionsView;
+    permissionsView.hidden = YES;
+    permissionsView.userInteractionEnabled = YES;
+    
+    // Permissions title label
+    UILabel *permissionsTitleLabel = [[UILabel alloc] init];
+    permissionsTitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [permissionsView addSubview:permissionsTitleLabel];
+    self.permissionsTitleLabel = permissionsTitleLabel;
+    // Appearance
+    permissionsTitleLabel.text = @"Camera Access Denied";
+    permissionsTitleLabel.font = [UIFont systemFontOfSize:24.0f weight:UIFontWeightSemibold];
+    permissionsTitleLabel.textColor = [UIColor whiteColor];
+    permissionsTitleLabel.textAlignment = NSTextAlignmentCenter;
+    
+    // Permissions description label
+    UILabel *permissionsDescriptionLabel = [[UILabel alloc] init];
+    permissionsDescriptionLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [permissionsView addSubview:permissionsDescriptionLabel];
+    self.permissionsDescriptionLabel = permissionsDescriptionLabel;
+    // Appearance
+    permissionsDescriptionLabel.text = @"1000 Pitches doesn't have permission to use the camera.\nPlease change your privacy settings.";
+    permissionsDescriptionLabel.numberOfLines = 0;
+    permissionsDescriptionLabel.font = [UIFont systemFontOfSize:18.0f weight:UIFontWeightLight];
+    permissionsDescriptionLabel.textColor = [UIColor whiteColor];
+    permissionsDescriptionLabel.textAlignment = NSTextAlignmentCenter;
+    
+    // Permissions settings button
+    UIButton *permissionsButton = [[UIButton alloc] init];
+    permissionsButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [permissionsView addSubview:permissionsButton];
+    [permissionsView bringSubviewToFront:permissionsButton];
+    self.permissionsButton = permissionsButton;
+    // Appearance
+    [permissionsButton setTitle:@"Go To Settings" forState:UIControlStateNormal];
+    permissionsButton.titleLabel.font = [UIFont systemFontOfSize:36 weight:UIFontWeightSemibold];
+    [permissionsButton setTitleColor:[UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1] forState:UIControlStateNormal];
+    // Action
+    [permissionsButton addTarget:self action:@selector(settingsButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    
+    // Perms view autolayout
+    UILayoutGuide *permsTopLayoutGuide = [[UILayoutGuide alloc] init];
+    UILayoutGuide *permsBottomLayoutGuide = [[UILayoutGuide alloc] init];
+    [view addLayoutGuide:permsTopLayoutGuide];
+    [view addLayoutGuide:permsBottomLayoutGuide];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:permsTopLayoutGuide attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:permsBottomLayoutGuide attribute:NSLayoutAttributeHeight multiplier:1 constant:0]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:permsTopLayoutGuide attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:topView attribute:NSLayoutAttributeBottom multiplier:1 constant:0]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:permsBottomLayoutGuide attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:bottomView attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[permsTopLayoutGuide][permissionsView][permsBottomLayoutGuide]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(permsTopLayoutGuide, permissionsView, permsBottomLayoutGuide)]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:permissionsView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[permissionsView]|" options:NSLayoutFormatAlignAllTop metrics:nil views:NSDictionaryOfVariableBindings(permissionsView)]];
+    
+    NSArray *permsVConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[permissionsTitleLabel]-14-[permissionsDescriptionLabel]-50-[permissionsButton]|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(permissionsTitleLabel,permissionsDescriptionLabel,permissionsButton)];
+    [permissionsView addConstraints:permsVConstraints];
+    
+    [permissionsView addConstraint:[NSLayoutConstraint constraintWithItem:permissionsTitleLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:permissionsView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    [permissionsDescriptionLabel addConstraint:[NSLayoutConstraint constraintWithItem:permissionsDescriptionLabel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:300]];
     
 }
 
