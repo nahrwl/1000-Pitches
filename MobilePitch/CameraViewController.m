@@ -13,6 +13,7 @@
 #import "CameraViewController.h"
 #import "AccessRequestViewController.h"
 #import "AAPLPreviewView.h"
+#import "FinishedRecordingViewController.h"
 
 #define kStatusViewAnimationDuration 1.0f
 #define kRecordButtonAnimationDuration 0.2f
@@ -766,6 +767,28 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         [UIView animateWithDuration:kBackButtonAnimationDuration animations:^{
             self.backButton.alpha = 1.0;
         }];
+        
+        // Format the duration
+        CMTime duration = captureOutput.recordedDuration;
+        NSTimeInterval timeInterval = duration.value/duration.timescale;
+        NSDate *timerDate = [NSDate dateWithTimeIntervalSince1970:timeInterval];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"mm:ss"];
+        [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0.0]];
+        NSString *timeString = [dateFormatter stringFromDate:timerDate];
+        
+        // Finally, activate the finished screen
+        FinishedRecordingViewController *frvc = [[FinishedRecordingViewController alloc] init];
+        frvc.finalTime = timeString;
+        frvc.modalPresentationStyle = UIModalPresentationOverFullScreen;
+        
+        dispatch_time_t waitTime = dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC);
+        dispatch_after(waitTime, dispatch_get_main_queue(), ^(void){
+            //code to be executed on the main queue after delay
+            [self presentViewController:frvc animated:YES completion:nil];
+        });
+
+        
     });
 }
 

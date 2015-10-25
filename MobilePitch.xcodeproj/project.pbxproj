@@ -17,6 +17,7 @@
 		D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4451BDC0441008284D4 /* CameraViewController.m */; };
 		D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */; };
 		D89DD44C1BDC5226008284D4 /* AAPLPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */; };
+		D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,8 @@
 		D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccessRequestViewController.m; sourceTree = "<group>"; };
 		D89DD44A1BDC5226008284D4 /* AAPLPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AAPLPreviewView.h; sourceTree = "<group>"; };
 		D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AAPLPreviewView.m; sourceTree = "<group>"; };
+		D89DD44D1BDCDC22008284D4 /* FinishedRecordingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FinishedRecordingViewController.h; sourceTree = "<group>"; };
+		D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FinishedRecordingViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +121,8 @@
 				D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */,
 				D89DD4471BDC38B4008284D4 /* AccessRequestViewController.h */,
 				D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */,
+				D89DD44D1BDCDC22008284D4 /* FinishedRecordingViewController.h */,
+				D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */,
 				D89DD41A1BDB15CD008284D4 /* Assets.xcassets */,
 				D89DD41C1BDB15CD008284D4 /* LaunchScreen.storyboard */,
 				D89DD41F1BDB15CD008284D4 /* Info.plist */,
@@ -282,6 +287,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D89DD4101BDB15CD008284D4 /* AppDelegate.m in Sources */,
+				D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */,
 				D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */,
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
@@ -506,6 +512,7 @@
 				D89DD43A1BDB15CD008284D4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D89DD43B1BDB15CD008284D4 /* Build configuration list for PBXNativeTarget "MobilePitchTests" */ = {
 			isa = XCConfigurationList;
@@ -514,6 +521,7 @@
 				D89DD43D1BDB15CD008284D4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D89DD43E1BDB15CD008284D4 /* Build configuration list for PBXNativeTarget "MobilePitchUITests" */ = {
 			isa = XCConfigurationList;
@@ -522,6 +530,7 @@
 				D89DD4401BDB15CD008284D4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
