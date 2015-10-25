@@ -900,6 +900,10 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     [backButton setImage:[UIImage imageNamed:@"left arrow"] forState:UIControlStateNormal];
     
     // Bottom view AUTOLAYOUT
+    [bottomView addConstraint:[NSLayoutConstraint constraintWithItem:backButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f]];
+    [bottomView addConstraint:[NSLayoutConstraint constraintWithItem:backButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f]];
+    
+    
     [recordButton.centerXAnchor constraintEqualToAnchor:bottomView.centerXAnchor].active = YES;
     [recordButton.centerYAnchor constraintEqualToAnchor:bottomView.centerYAnchor].active = YES;
     
@@ -907,7 +911,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     [recordButtonDecal.centerYAnchor constraintEqualToAnchor:bottomView.centerYAnchor].active = YES;
     
     [backButton.centerYAnchor constraintEqualToAnchor:bottomView.centerYAnchor].active = YES;
-    [bottomView addConstraint:[NSLayoutConstraint constraintWithItem:backButton attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:bottomView attribute:NSLayoutAttributeLeading multiplier:1 constant:26]];
+    [bottomView addConstraint:[NSLayoutConstraint constraintWithItem:backButton attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:bottomView attribute:NSLayoutAttributeLeading multiplier:1 constant:7]];
     
     // Notification view
     UIView *notificationView = [[UIView alloc] init];
