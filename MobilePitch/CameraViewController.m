@@ -427,7 +427,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         animation.fromValue = @(self.recordButton.layer.cornerRadius);
         animation.toValue = @(4);
-        animation.duration = kRecordButtonAnimationDuration - 0.05;
+        animation.duration = kRecordButtonAnimationDuration - 0.03;
         [self.recordButton.layer setCornerRadius:4];
         [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
         
@@ -592,6 +592,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     unavailableLabel.text = @"Camera Unavailable";
     unavailableLabel.font = [UIFont systemFontOfSize:18 weight:UIFontWeightSemibold];
     unavailableLabel.textColor = [UIColor whiteColor];
+    unavailableLabel.hidden = YES;
     
     // AUTOLAYOUT
     NSDictionary *views = NSDictionaryOfVariableBindings(topView,notificationView,bottomView);
