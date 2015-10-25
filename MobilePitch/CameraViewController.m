@@ -14,6 +14,7 @@
 #import "AccessRequestViewController.h"
 #import "AAPLPreviewView.h"
 
+#define kStatusViewAnimationDuration 1.0f
 #define kRecordButtonAnimationDuration 0.2f
 
 static void * SessionRunningContext = &SessionRunningContext;
@@ -23,6 +24,15 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     CamSetupResultCameraNotAuthorized,
     CamSetupResultMicrophoneNotAuthorized, //implicit that if the camera is not authorized, then the microphone isn't either
     CamSetupResultSessionConfigurationFailed
+};
+
+typedef NS_ENUM(NSInteger, RecordingStatus) {
+    RecordingStatusNotRecording,
+    RecordingStatusTooShort,
+    RecordingStatusNominal,
+    RecordingStatusTooLong,
+    RecordingStatusPaused,
+    RecordingStatusError
 };
 
 @interface CameraViewController () <AVCaptureFileOutputRecordingDelegate, AccessRequestViewControllerDelegate>
@@ -52,6 +62,10 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 @property (nonatomic) CamSetupResult setupResult;
 @property (nonatomic, getter=isSessionRunning) BOOL sessionRunning;
 @property (nonatomic) UIBackgroundTaskIdentifier backgroundRecordingID;
+@property (nonatomic) RecordingStatus recordingStatus;
+
+// Timing
+@property (strong, nonatomic) NSDate *startDate;
 
 // Methods
 - (void)backButtonTapped:(UIButton *)sender;
@@ -59,6 +73,8 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 @end
 
 @implementation CameraViewController
+
+#pragma mark View Lifecycle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -513,6 +529,99 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
 }
 
+#pragma mark Timing
+- (void)timerAction {
+    NSDate *currentDate = [NSDate date];
+    NSTimeInterval timeInterval = [currentDate timeIntervalSinceDate:self.startDate];
+    NSDate *timerDate = [NSDate dateWithTimeIntervalSince1970:timeInterval];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"mm:ss"];
+    [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0.0]];
+    NSString *timeString = [dateFormatter stringFromDate:timerDate];
+    self.timerLabel.text = timeString;
+    
+    if (timeInterval > 180) {
+        if (self.recordingStatus != RecordingStatusTooLong) {
+            [self setStatusViewRecordingStatus:RecordingStatusTooLong animated:YES];
+        }
+    } else if (timeInterval > 30) {
+        if (self.recordingStatus != RecordingStatusNominal) {
+            [self setStatusViewRecordingStatus:RecordingStatusNominal animated:YES];
+        }
+    } else if (timeInterval > 0) {
+        if (self.recordingStatus != RecordingStatusTooShort) {
+            [self setStatusViewRecordingStatus:RecordingStatusTooShort animated:YES];
+        }
+    }
+}
+
+- (void)setStatusViewRecordingStatus:(RecordingStatus)status animated:(BOOL)animated {
+    
+    self.recordingStatus = status;
+    
+    void (^updateStatus)() = ^ {
+        NSString *textString;
+        switch (status) {
+            case RecordingStatusNotRecording:
+                self.statusView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
+                textString = @"TAP TO BEGIN";
+                break;
+                
+            case RecordingStatusTooShort:
+                self.statusView.backgroundColor = [UIColor colorWithRed:0.718 green:0 blue:0 alpha:0.6];
+                textString = @"TOO SHORT";
+                break;
+                
+            case RecordingStatusNominal:
+                self.statusView.backgroundColor = [UIColor colorWithRed:0.00392 green:0.588 blue:0.0471 alpha:0.6];
+                textString = @"GOOD LENGTH";
+                break;
+                
+            case RecordingStatusTooLong:
+                self.statusView.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:0.6];
+                textString = @"WRAP IT UP";
+                break;
+                
+            case RecordingStatusPaused:
+                self.statusView.backgroundColor = [UIColor colorWithRed:0.718 green:0 blue:0 alpha:0.6];
+                textString = @"RECORDING IS PAUSED";
+                break;
+                
+            default:
+                self.statusView.backgroundColor = [UIColor colorWithRed:0.718 green:0 blue:0 alpha:0.0];
+                textString = @"";
+                break;
+        }
+        self.statusLabel.textAlignment = NSTextAlignmentCenter;
+        NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:textString];
+        [attributedString addAttribute:NSKernAttributeName
+                                 value:@(1.0f)
+                                 range:NSMakeRange(0, attributedString.length)];
+        [attributedString addAttribute:NSFontAttributeName
+                                 value:[UIFont systemFontOfSize:12.0f weight:UIFontWeightRegular]
+                                 range:NSMakeRange(0, attributedString.length)];
+        [attributedString addAttribute:NSForegroundColorAttributeName
+                                 value:[UIColor whiteColor]
+                                 range:NSMakeRange(0, attributedString.length)];
+        [self.statusLabel setAttributedText:attributedString];
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:kStatusViewAnimationDuration / 2.0 animations:^{
+            self.statusView.alpha = 0;
+        } completion:^(BOOL finished) {
+            // Fade in
+            [UIView animateWithDuration:kStatusViewAnimationDuration / 2.0 animations:^{
+                updateStatus();
+                self.statusView.alpha = 1.0;
+            }];
+        }];
+        
+    } else {
+        updateStatus();
+    }
+}
+
 #pragma mark File Output Recording Delegate
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didStartRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
@@ -535,6 +644,11 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
         animation.duration = kRecordButtonAnimationDuration - 0.03;
         [self.recordButton.layer setCornerRadius:4];
         [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
+        
+        // Begin the timer
+        [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(timerAction) userInfo:nil repeats:YES];
+        self.startDate = [NSDate date];
+        self.timerLabel.text = @"00:00";
     });
 }
 
@@ -683,7 +797,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 #pragma mark View Setup
 
 - (void)togglePermissionsErrorViewForHardware:(NSString *)hardware {
-    if (self.permissionsErrorView) {
+    if (self.permissionsErrorView.hidden) {
         if ([[hardware lowercaseString] isEqualToString:@"camera"])
         {
             self.permissionsTitleLabel.text = @"Camera Access Denied";
@@ -726,7 +840,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     topView.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:topView];
     // Appearance
-    topView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.35];
+    topView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.50];
     topView.opaque = NO;
     
     // Top view timer label
@@ -735,7 +849,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     [topView addSubview:timerLabel];
     self.timerLabel = timerLabel;
     // Appearance
-    timerLabel.font = [UIFont systemFontOfSize:19 weight:UIFontWeightLight];
+    timerLabel.font = [UIFont monospacedDigitSystemFontOfSize:19.0f weight:UIFontWeightLight];
     timerLabel.textColor = [UIColor whiteColor];
     // Content
     timerLabel.text = @"00:00";
@@ -749,7 +863,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     bottomView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:bottomView];
     // Appearance
-    bottomView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.35];
+    bottomView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.50];
     bottomView.opaque = NO;
     
     // Bottom view record button decal
@@ -799,26 +913,17 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     UIView *notificationView = [[UIView alloc] init];
     notificationView.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:notificationView];
+    self.statusView = notificationView;
     // Appearance
-    notificationView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.60];
+    // Appearance is handled below with setStatusViewRecordingStatus:animated:
     
     // Notification label
     UILabel *notificationLabel = [[UILabel alloc] init];
     notificationLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [notificationView addSubview:notificationLabel];
+    self.statusLabel = notificationLabel;
     // Appearance
-    notificationLabel.textAlignment = NSTextAlignmentCenter;
-    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@"TAP TO BEGIN"];
-    [attributedString addAttribute:NSKernAttributeName
-                             value:@(1.0f)
-                             range:NSMakeRange(0, attributedString.length)];
-    [attributedString addAttribute:NSFontAttributeName
-                             value:[UIFont systemFontOfSize:12 weight:UIFontWeightRegular]
-                             range:NSMakeRange(0, attributedString.length)];
-    [attributedString addAttribute:NSForegroundColorAttributeName
-                             value:[UIColor whiteColor]
-                             range:NSMakeRange(0, attributedString.length)];
-    [notificationLabel setAttributedText:attributedString];
+    [self setStatusViewRecordingStatus:RecordingStatusNotRecording animated:NO];
     
     // Notification view AUTOLAYOUT
     [notificationView addConstraint:[NSLayoutConstraint constraintWithItem:notificationLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:notificationView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
