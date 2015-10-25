@@ -274,14 +274,16 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
             case CamSetupResultCameraNotAuthorized:
             {
                 dispatch_async( dispatch_get_main_queue(), ^{
-                    [self togglePermissionsErrorViewForHardware:@"camera"];
+                    self.permissionsErrorView.hidden = NO;
+                    [self setPermissionsErrorViewForHardware:@"camera"];
                 } );
                 break;
             }
             case CamSetupResultMicrophoneNotAuthorized:
             {
                 dispatch_async( dispatch_get_main_queue(), ^{
-                    [self togglePermissionsErrorViewForHardware:@"microphone"];
+                    self.permissionsErrorView.hidden = NO;
+                    [self setPermissionsErrorViewForHardware:@"microphone"];
                 } );
                 break;
             }
@@ -527,7 +529,15 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 }
 
 - (void)settingsButtonTapped:(UIButton *)sender {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    // In case not determined yet
+    if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] == AVAuthorizationStatusNotDetermined || [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] == AVAuthorizationStatusNotDetermined)
+    {
+        self.permissionsErrorView.hidden = YES;
+        [self setup];
+        [self begin];
+    } else {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    }
 }
 
 #pragma mark Timing
@@ -786,6 +796,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 #pragma mark Access Request Delegate
 
+// THIS METHOD MUST SOLELY BE USED AS THE DELEGATE CALLBACK
+// because the dispatch_suspend that happens in viewDidLoad will be
+// intimately matched with the dispatch_resume in this callback.
 - (void)updateAuthorizationStatusForCam:(BOOL)cam andMicrophone:(BOOL)microphone{
     if (cam && microphone) {
         self.setupResult = CamSetupResultSuccess;
@@ -801,25 +814,30 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 #pragma mark View Setup
 
-- (void)togglePermissionsErrorViewForHardware:(NSString *)hardware {
-    if (self.permissionsErrorView.hidden) {
-        if ([[hardware lowercaseString] isEqualToString:@"camera"])
+- (void)setPermissionsErrorViewForHardware:(NSString *)hardware {
+    if ([[hardware lowercaseString] isEqualToString:@"camera"])
+    {
+        self.permissionsTitleLabel.text = @"Camera Access Denied";
+        self.permissionsDescriptionLabel.text = @"1000 Pitches doesn't have permission to use the camera.\nPlease change your privacy settings.";
+        // In case not determined yet
+        if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] == AVAuthorizationStatusNotDetermined)
         {
-            self.permissionsTitleLabel.text = @"Camera Access Denied";
-            self.permissionsDescriptionLabel.text = @"1000 Pitches doesn't have permission to use the camera.\nPlease change your privacy settings.";
+            [self.permissionsButton setTitle:@"Grant Access" forState:UIControlStateNormal];
         }
-        else if ([[hardware lowercaseString] isEqualToString:@"microphone"])
+    }
+    else if ([[hardware lowercaseString] isEqualToString:@"microphone"])
+    {
+        self.permissionsTitleLabel.text = @"Microphone Access Denied";
+        self.permissionsDescriptionLabel.text = @"1000 Pitches doesn't have permission to use the microphone.\nPlease change your privacy settings.";
+        // In case not determined yet
+        if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] == AVAuthorizationStatusNotDetermined)
         {
-            self.permissionsTitleLabel.text = @"Microphone Access Denied";
-            self.permissionsDescriptionLabel.text = @"1000 Pitches doesn't have permission to use the microphone.\nPlease change your privacy settings.";
+            [self.permissionsButton setTitle:@"Grant Access" forState:UIControlStateNormal];
         }
-        else
-        {
-            //error
-        }
-        self.permissionsErrorView.hidden = NO;
-    } else {
-        self.permissionsErrorView.hidden = YES;
+    }
+    else
+    {
+        //error
     }
 }
 

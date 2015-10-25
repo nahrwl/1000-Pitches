@@ -53,6 +53,20 @@
     }];
 }
 
+- (void)cancelButtonTapped {
+    [self dismissViewControllerAnimated:YES completion:^{
+        if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] == AVAuthorizationStatusAuthorized) {
+            if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] == AVAuthorizationStatusAuthorized) {
+                [self.delegate updateAuthorizationStatusForCam:YES andMicrophone:YES];
+            } else {
+                [self.delegate updateAuthorizationStatusForCam:YES andMicrophone:NO];
+            }
+        } else {
+            [self.delegate updateAuthorizationStatusForCam:NO andMicrophone:NO];
+        }
+    }];
+}
+
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
     self.view = view;
@@ -88,9 +102,9 @@
     descriptionLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:descriptionLabel];
     // Description text formatting
-    descriptionLabel.text = @"First, we need access to your camera and microphone to\nrecord your pitch.";
+    descriptionLabel.text = @"1000 Pitches needs access to your camera and microphone to\nrecord your pitch.";
     descriptionLabel.numberOfLines = 0; //undefined number of lines
-    descriptionLabel.textAlignment = NSTextAlignmentNatural;
+    descriptionLabel.textAlignment = NSTextAlignmentCenter;
     descriptionLabel.font = [UIFont systemFontOfSize:18 weight:UIFontWeightLight];
     descriptionLabel.textColor = [UIColor whiteColor];
     
@@ -112,6 +126,7 @@
     [cancelButton setTitle:@"No Thanks" forState:UIControlStateNormal];
     cancelButton.titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightSemibold];
     [cancelButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [cancelButton addTarget:self action:@selector(cancelButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
     // AUTOLAYOUT
     NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, descriptionLabel, button, cancelButton);
