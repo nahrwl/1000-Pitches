@@ -16,6 +16,7 @@
 		D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4421BDB2981008284D4 /* SplashViewController.m */; };
 		D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4451BDC0441008284D4 /* CameraViewController.m */; };
 		D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */; };
+		D89DD44C1BDC5226008284D4 /* AAPLPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,8 @@
 		D89DD4451BDC0441008284D4 /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraViewController.m; sourceTree = "<group>"; };
 		D89DD4471BDC38B4008284D4 /* AccessRequestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessRequestViewController.h; sourceTree = "<group>"; };
 		D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccessRequestViewController.m; sourceTree = "<group>"; };
+		D89DD44A1BDC5226008284D4 /* AAPLPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AAPLPreviewView.h; sourceTree = "<group>"; };
+		D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AAPLPreviewView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +114,8 @@
 				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
 				D89DD4441BDC0441008284D4 /* CameraViewController.h */,
 				D89DD4451BDC0441008284D4 /* CameraViewController.m */,
+				D89DD44A1BDC5226008284D4 /* AAPLPreviewView.h */,
+				D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */,
 				D89DD4471BDC38B4008284D4 /* AccessRequestViewController.h */,
 				D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */,
 				D89DD41A1BDB15CD008284D4 /* Assets.xcassets */,
@@ -281,6 +286,7 @@
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
 				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
+				D89DD44C1BDC5226008284D4 /* AAPLPreviewView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,11 +6,16 @@
 //  Copyright © 2015 Spark Dev Team. All rights reserved.
 //
 
+@import AVFoundation;
+
 #import "AccessRequestViewController.h"
 
 @interface AccessRequestViewController ()
 
 @property (weak, nonatomic) UILabel *titleLabel;
+
+// Actions
+- (void)okButtonTapped;
 
 @end
 
@@ -28,6 +33,12 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)okButtonTapped {
+    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^( BOOL granted ) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }];
 }
 
 - (void)loadView {
