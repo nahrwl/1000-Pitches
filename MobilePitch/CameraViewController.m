@@ -623,6 +623,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     if (animated) {
         [UIView animateWithDuration:kStatusViewAnimationDuration / 2.0 animations:^{
             self.statusView.alpha = 0;
+            self.statusView.backgroundColor = [UIColor clearColor]; // For color interpolation
         } completion:^(BOOL finished) {
             // Fade in
             [UIView animateWithDuration:kStatusViewAnimationDuration / 2.0 animations:^{
