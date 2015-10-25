@@ -37,8 +37,11 @@
 
 - (void)okButtonTapped {
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^( BOOL granted ) {
-        [self dismissViewControllerAnimated:YES completion:nil];
         [self.delegate updateAuthorizationStatus:granted];
+        [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+            NSLog(@"permission : %d", granted);
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }];
     }];
 }
 
