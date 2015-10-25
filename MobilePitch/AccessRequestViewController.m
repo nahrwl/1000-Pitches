@@ -36,12 +36,20 @@
 }
 
 - (void)okButtonTapped {
-    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^( BOOL granted ) {
-        [self.delegate updateAuthorizationStatus:granted];
-        [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-            NSLog(@"permission : %d", granted);
-            [self dismissViewControllerAnimated:YES completion:nil];
-        }];
+    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^( BOOL cam ) {
+        if (cam) {
+            // Move on to Microphone
+            [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL microphone) {
+                [self dismissViewControllerAnimated:YES completion:^{
+                    [self.delegate updateAuthorizationStatusForCam:cam andMicrophone:microphone];;
+                }];
+            }];
+        } else {
+            [self dismissViewControllerAnimated:YES completion:^{
+                [self.delegate updateAuthorizationStatusForCam:cam andMicrophone:NO];
+            }];
+        }
+        
     }];
 }
 

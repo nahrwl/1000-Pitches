@@ -10,7 +10,7 @@
 
 @protocol AccessRequestViewControllerDelegate <NSObject>
 
-- (void)updateAuthorizationStatus:(BOOL)granted;
+- (void)updateAuthorizationStatusForCam:(BOOL)cam andMicrophone:(BOOL)microphone;
 
 @end
 

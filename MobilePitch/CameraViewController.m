@@ -21,6 +21,7 @@ static void * SessionRunningContext = &SessionRunningContext;
 typedef NS_ENUM(NSInteger, CamSetupResult) {
     CamSetupResultSuccess,
     CamSetupResultCameraNotAuthorized,
+    CamSetupResultMicrophoneNotAuthorized, //implicit that if the camera is not authorized, then the microphone isn't either
     CamSetupResultSessionConfigurationFailed
 };
 
@@ -81,6 +82,40 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
         case AVAuthorizationStatusAuthorized:
         {
             // The user has previously granted access to the camera.
+            // Now check for microphone authorization
+            switch ([[AVAudioSession sharedInstance] recordPermission]) {
+                case AVAudioSessionRecordPermissionGranted:
+                {
+                    // We all good baby
+                    break;
+                }
+                    
+                case AVAudioSessionRecordPermissionUndetermined:
+                {
+                    // The user has not yet been presented with the option to grant audio access.
+                    // We suspend the session queue to delay session setup until the access request has completed to avoid
+                    // completing the session dispatch tasks before the user gives permission.
+                    // Video permission has already been granted.
+                    dispatch_suspend( self.sessionQueue ); //IMPORTANT
+                    
+                    AccessRequestViewController *arvc = [[AccessRequestViewController alloc] init];
+                    arvc.delegate = self; //EVEN MORE IMPORTANT YOU DUMBO
+                    arvc.modalPresentationStyle = UIModalPresentationOverFullScreen;
+                    double delayInSeconds = 0.5;
+                    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+                    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                        //code to be executed on the main queue after delay
+                        [self presentViewController:arvc animated:YES completion:nil];
+                    });
+                    self.setupResult = CamSetupResultMicrophoneNotAuthorized;
+                    break;
+                }
+                    
+                default:
+                {
+                    break;
+                }
+            }
             break;
         }
         case AVAuthorizationStatusNotDetermined:
@@ -228,6 +263,21 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
                     [self presentViewController:alertController animated:YES completion:nil];
                 } );
                 break;
+            }
+            case CamSetupResultMicrophoneNotAuthorized:
+            {
+                dispatch_async( dispatch_get_main_queue(), ^{
+                    NSString *message = NSLocalizedString( @"AVCam doesn't have permission to use the microphone, please change privacy settings", @"Alert message when the user has denied access to the camera" );
+                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AVCam" message:message preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"OK", @"Alert OK button" ) style:UIAlertActionStyleCancel handler:nil];
+                    [alertController addAction:cancelAction];
+                    // Provide quick access to Settings.
+                    UIAlertAction *settingsAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"Settings", @"Alert button to open Settings" ) style:UIAlertActionStyleDefault handler:^( UIAlertAction *action ) {
+                        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                    }];
+                    [alertController addAction:settingsAction];
+                    [self presentViewController:alertController animated:YES completion:nil];
+                } );
             }
             case CamSetupResultSessionConfigurationFailed:
             {
@@ -626,11 +676,15 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
 
 #pragma mark Access Request Delegate
 
-- (void)updateAuthorizationStatus:(BOOL)granted {
-    if (granted) {
+- (void)updateAuthorizationStatusForCam:(BOOL)cam andMicrophone:(BOOL)microphone{
+    if (cam && microphone) {
         self.setupResult = CamSetupResultSuccess;
-    } else {
+    } else if (!cam) {
         self.setupResult = CamSetupResultCameraNotAuthorized;
+    } else if (!microphone) {
+        self.setupResult = CamSetupResultMicrophoneNotAuthorized;
+    } else {
+        self.setupResult = CamSetupResultSessionConfigurationFailed;
     }
     dispatch_resume(self.sessionQueue);
 }
