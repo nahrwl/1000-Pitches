@@ -8,6 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol AccessRequestViewControllerDelegate <NSObject>
+
+- (void)updateAuthorizationStatus:(BOOL)granted;
+
+@end
+
 @interface AccessRequestViewController : UIViewController
+
+@property (weak, nonatomic) id<AccessRequestViewControllerDelegate> delegate;
 
 @end

@@ -38,6 +38,7 @@
 - (void)okButtonTapped {
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^( BOOL granted ) {
         [self dismissViewControllerAnimated:YES completion:nil];
+        [self.delegate updateAuthorizationStatus:granted];
     }];
 }
 

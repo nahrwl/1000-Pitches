@@ -24,7 +24,7 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     CamSetupResultSessionConfigurationFailed
 };
 
-@interface CameraViewController () <AVCaptureFileOutputRecordingDelegate>
+@interface CameraViewController () <AVCaptureFileOutputRecordingDelegate, AccessRequestViewControllerDelegate>
 
 // Views
 @property (weak, nonatomic) AAPLPreviewView *previewView;
@@ -68,6 +68,10 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     // Communicate with the session and other session objects on this queue.
     self.sessionQueue = dispatch_queue_create( "session queue", DISPATCH_QUEUE_SERIAL );
     
+    [self setup];
+}
+
+- (void)setup {
     self.setupResult = CamSetupResultSuccess;
     
     // Check video authorization status. Video access is required and audio access is optional.
@@ -85,8 +89,10 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
             // We suspend the session queue to delay session setup until the access request has completed to avoid
             // asking the user for audio access if video access is denied.
             // Note that audio access will be implicitly requested when we create an AVCaptureDeviceInput for audio during session setup.
-            dispatch_suspend( self.sessionQueue );
+            dispatch_suspend( self.sessionQueue ); //IMPORTANT
+            
             AccessRequestViewController *arvc = [[AccessRequestViewController alloc] init];
+            arvc.delegate = self; //EVEN MORE IMPORTANT YOU DUMBO
             arvc.modalPresentationStyle = UIModalPresentationOverFullScreen;
             double delayInSeconds = 0.5;
             dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
@@ -186,13 +192,16 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
         
         [self.session commitConfiguration];
     } );
-    
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     
+    [self begin];
+}
+
+- (void)begin {
     dispatch_async( self.sessionQueue, ^{
         switch ( self.setupResult )
         {
@@ -251,6 +260,15 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     } );
     
     [super viewDidDisappear:animated];
+}
+
+- (BOOL)prefersStatusBarHidden {
+    return YES;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark KVO and Notifications
@@ -450,6 +468,10 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     [self focusWithMode:AVCaptureFocusModeAutoFocus exposeWithMode:AVCaptureExposureModeAutoExpose atDevicePoint:devicePoint monitorSubjectAreaChange:YES];
 }
 
+- (void)backButtonTapped:(UIButton *)sender {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 #pragma mark File Output Recording Delegate
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didStartRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
@@ -602,21 +624,18 @@ typedef NS_ENUM(NSInteger, CamSetupResult) {
     return captureDevice;
 }
 
+#pragma mark Access Request Delegate
 
-
-
-- (BOOL)prefersStatusBarHidden {
-    return YES;
+- (void)updateAuthorizationStatus:(BOOL)granted {
+    if (granted) {
+        self.setupResult = CamSetupResultSuccess;
+    } else {
+        self.setupResult = CamSetupResultCameraNotAuthorized;
+    }
+    dispatch_resume(self.sessionQueue);
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-- (void)backButtonTapped:(UIButton *)sender {
-    [self.navigationController popViewControllerAnimated:YES];
-}
+#pragma mark View Setup
 
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
