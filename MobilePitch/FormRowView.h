@@ -1,5 +1,5 @@
 //
-//  FormTableViewCell.h
+//  FormRowView.h
 //  MobilePitch
 //
 //  Created by Nathan Wallace on 10/25/15.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FormTableViewCell : UITableViewCell
+@interface FormRowView : UIView
 
 @property (weak, nonatomic) UITextField *textField;
 

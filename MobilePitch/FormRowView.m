@@ -1,32 +1,31 @@
 //
-//  FormTableViewCell.m
+//  FormRowView.m
 //  MobilePitch
 //
 //  Created by Nathan Wallace on 10/25/15.
 //  Copyright © 2015 Spark Dev Team. All rights reserved.
 //
 
-#import "FormTableViewCell.h"
+#import "FormRowView.h"
 
-@interface FormTableViewCell ()
+@interface FormRowView ()
 
 @property (weak, nonatomic) UILabel *titleLabel;
 
 @end
 
-@implementation FormTableViewCell
+@implementation FormRowView
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
-    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+- (id)initWithFrame:(CGRect)frame {
+    if (self=[super initWithFrame:frame]) {
         // Configure the cell
-        UIView *contentView = self.contentView;
-        contentView.clipsToBounds = YES;
-        contentView.backgroundColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
+        self.translatesAutoresizingMaskIntoConstraints = NO;
+        self.backgroundColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
         
         // Field title
         UILabel *title = [[UILabel alloc] init];
         title.translatesAutoresizingMaskIntoConstraints = NO;
-        [contentView addSubview:title];
+        [self addSubview:title];
         self.titleLabel = title;
         // Appearance is set in the designated setter
         [self setTitle:@"Test Title" required:YES];
@@ -34,7 +33,8 @@
         // Text field
         UITextField *textField = [[UITextField alloc] init];
         textField.translatesAutoresizingMaskIntoConstraints = NO;
-        [contentView addSubview:textField];
+        [self addSubview:textField];
+        self.textField = textField;
         // Appearance
         textField.font = [UIFont systemFontOfSize:14 weight:UIFontWeightSemibold];
         textField.textColor = [UIColor blackColor];
@@ -45,27 +45,27 @@
         UIView *spacerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 13, 16)];
         [textField setLeftViewMode:UITextFieldViewModeAlways];
         [textField setLeftView:spacerView];
-        
-        
-        // Autolayout
-        NSDictionary *views = NSDictionaryOfVariableBindings(title, textField);
-        
-        NSArray *vConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-8-[title]-4-[textField(46)]->=8-|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views];
-        [contentView addConstraints:vConstraints];
-        
-        [contentView addConstraint:[NSLayoutConstraint constraintWithItem:textField attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeLeft multiplier:1 constant:33]];
-        [contentView addConstraint:[NSLayoutConstraint constraintWithItem:textField attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeRight multiplier:1 constant:-33]];
-        
-        
     }
     return self;
 }
 
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-    [super setSelected:selected animated:animated];
-
-    // Configure the view for the selected state
+- (void)updateConstraints {
+    // Autolayout
+    NSDictionary *views = @{@"titleLabel":self.titleLabel,@"textField":self.textField};
+    
+    NSArray *vConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-8-[titleLabel]-4-[textField(46)]->=8-|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views];
+    [self addConstraints:vConstraints];
+    
+    NSArray *hConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-33-[textField(>=50)]-33-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views];
+    [self addConstraints:hConstraints];
+    
+    //[self addConstraint:[NSLayoutConstraint constraintWithItem:self.textField attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1 constant:33]];
+    //[self addConstraint:[NSLayoutConstraint constraintWithItem:self.textField attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1 constant:-33]];
+    
+    // Now call super. Important!
+    [super updateConstraints];
 }
+
 
 #pragma mark Getters and Setters
 
@@ -96,12 +96,17 @@
                              value:[UIFont systemFontOfSize:14 weight:UIFontWeightSemibold]
                              range:NSMakeRange(0, attributedString.length)];
     [self.titleLabel setAttributedText:attributedString];
-    
-    NSLog(@"title label height: %f",self.titleLabel.frame.size.height);
 }
 
 - (NSString *)title {
     return self.titleLabel.text;
 }
+
+#pragma mark Class methods
+
++ (BOOL)requiresConstraintBasedLayout {
+    return YES;
+}
+
 
 @end

@@ -7,7 +7,7 @@
 //
 
 #import "FormViewController.h"
-#import "FormTableViewCell.h"
+#import "FormRowView.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
@@ -22,7 +22,9 @@ typedef NS_ENUM(NSInteger, FormCellType) {
 
 @interface FormViewController ()
 
-@property (strong, nonatomic) NSArray *formItems;
+// Views
+@property (weak, nonatomic) UIScrollView *scrollView;
+@property (weak, nonatomic) UIStackView *stackView;
 
 @end
 
@@ -33,9 +35,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
-    // Initialize form items
-    [self createFormItems];
     
     // Set nav bar title
     self.navigationItem.title = @"Pitch Submission";
@@ -49,11 +48,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Add background graphics
     self.view.backgroundColor = [UIColor colorWithRed:0.286 green:0.561 blue:0.729 alpha:1];
     
-    // Register table view cell
-    [self.tableView registerClass:[FormTableViewCell class] forCellReuseIdentifier:cellIdentifier];
+    // Populate the Stack View
+    NSArray *formItems = [FormViewController createFormItems];
     
-    // Set separator style
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    for (int i = 0; i < formItems.count; i++) {
+        FormRowView *rowView = [[FormRowView alloc] init];
+        [rowView setTitle:formItems[i][kFormItemTitleKey] required:[(NSNumber *)formItems[i][kFormItemRequiredKey] boolValue]];
+        [self.stackView addArrangedSubview:rowView];
+    }
     
 }
 
@@ -73,42 +75,51 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     return UIStatusBarStyleDefault;
 }
 
-#pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width, self.stackView.frame.size.height);
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.formItems.count;
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    FormTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
+- (void)loadView {
+    UIView *view = [[UIView alloc] init];
+    self.view = view;
     
-    [cell setTitle:@"First Name" required:YES];
+    UIScrollView *scrollView = [[UIScrollView alloc] init];
+    scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:scrollView];
+    self.scrollView = scrollView;
     
-    return cell;
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return UITableViewAutomaticDimension;
-}
-
-- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return 83;
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:NSDictionaryOfVariableBindings(scrollView)]];
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView]|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(scrollView)]];
+    
+    UIStackView *stackView = [[UIStackView alloc] init];
+    stackView.translatesAutoresizingMaskIntoConstraints = NO;
+    stackView.axis = UILayoutConstraintAxisVertical;
+    [scrollView addSubview:stackView];
+    self.stackView = stackView;
+    
+    [stackView.leftAnchor constraintEqualToAnchor:view.leftAnchor].active = YES;
+    [stackView.rightAnchor constraintEqualToAnchor:view.rightAnchor].active = YES;
+    
+    [scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[stackView]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(stackView)]];
+    
+    // Configure the stack view
+    self.stackView.alignment = UIStackViewAlignmentFill;
+    self.stackView.distribution = UIStackViewDistributionFill;
+    
+    NSLog(@"stack view width: %f",self.stackView.frame.size.width);
 }
 
 #pragma mark Actions
 
 - (void)cancelButtonTapped:(id)sender {
-    
+    NSLog(@"stack view width: %f",self.stackView.frame.size.width);
 }
 
 #pragma mark Helpers
 
-- (void)createFormItems {
-    self.formItems = @[
++ (NSArray *)createFormItems {
+    return @[
                        @{kFormItemTitleKey : @"First Name",
                          kFormItemRequiredKey : @(YES),
                          kFormItemInputTypeKey : @(FormCellTypeTextField)},
@@ -146,5 +157,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                          kFormItemInputTypeKey : @(FormCellTypeShortAnswer)}
                        ];
 }
+
+
 
 @end

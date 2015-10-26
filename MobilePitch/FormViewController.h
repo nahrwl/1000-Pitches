@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FormViewController : UITableViewController
+@interface FormViewController : UIViewController
 
 @end
