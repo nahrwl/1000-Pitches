@@ -48,7 +48,7 @@
 - (void)loadView {
     // Setup the view
     UIView *view = [[UIView alloc] init];
-    view.backgroundColor = [UIColor colorWithRed:0.286 green:0.561 blue:0.729 alpha:1];
+    view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
     self.view = view;
     
     // Title text

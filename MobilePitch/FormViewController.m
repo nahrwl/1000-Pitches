@@ -46,7 +46,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
     
     // Add background graphics
-    self.view.backgroundColor = [UIColor colorWithRed:0.286 green:0.561 blue:0.729 alpha:1];
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
     
     // Populate the Stack View
     NSArray *formItems = [FormViewController createFormItems];
