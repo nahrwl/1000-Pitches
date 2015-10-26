@@ -7,6 +7,7 @@
 //
 
 #import "FinishedRecordingViewController.h"
+#import "FormViewController.h"
 
 @interface FinishedRecordingViewController ()
 
@@ -28,6 +29,9 @@
 }
 
 - (void)submitButtonTapped {
+    [self dismissViewControllerAnimated:YES completion:^{
+        [self.delegate.navigationController pushViewController:[[FormViewController alloc] init] animated:YES];
+    }];
     
 }
 

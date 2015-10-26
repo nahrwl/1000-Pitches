@@ -8,8 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol FinishedRecordingViewControllerDelegate <NSObject>
+
+@end
+
 @interface FinishedRecordingViewController : UIViewController
 
 @property (strong, nonatomic) NSString *finalTime;
+@property (weak, nonatomic) UIViewController<FinishedRecordingViewControllerDelegate> *delegate;
 
 @end

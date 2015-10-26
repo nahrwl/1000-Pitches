@@ -37,7 +37,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     RecordingStatusError
 };
 
-@interface CameraViewController () <AVCaptureFileOutputRecordingDelegate, AccessRequestViewControllerDelegate>
+@interface CameraViewController () <AVCaptureFileOutputRecordingDelegate, AccessRequestViewControllerDelegate, FinishedRecordingViewControllerDelegate>
 
 // Views
 @property (weak, nonatomic) AAPLPreviewView     *previewView;
@@ -781,6 +781,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         // Finally, activate the finished screen
         FinishedRecordingViewController *frvc = [[FinishedRecordingViewController alloc] init];
         frvc.finalTime = timeString;
+        frvc.delegate = self;
         frvc.modalPresentationStyle = UIModalPresentationOverFullScreen;
         
         dispatch_time_t waitTime = dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC);
