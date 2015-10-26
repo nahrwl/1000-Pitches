@@ -37,9 +37,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Initialize form items
     [self createFormItems];
     
-    // Make nav bar visible
-    [self.navigationController setNavigationBarHidden:NO];
-    
     // Set nav bar title
     self.navigationItem.title = @"Pitch Submission";
     
@@ -58,6 +55,13 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Set separator style
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    // Make nav bar visible
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
 - (void)didReceiveMemoryWarning {

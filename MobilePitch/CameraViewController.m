@@ -259,6 +259,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 {
     [super viewWillAppear:animated];
     
+    // Hide the navigation bar
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+    
     [self begin];
 }
 
