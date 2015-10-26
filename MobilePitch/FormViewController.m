@@ -54,7 +54,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     for (int i = 0; i < formItems.count; i++) {
         FormRowView *rowView = [[FormRowView alloc] init];
         [rowView setTitle:formItems[i][kFormItemTitleKey] required:[(NSNumber *)formItems[i][kFormItemRequiredKey] boolValue]];
-        [self.stackView addArrangedSubview:rowView];
+        [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
     }
     
 }
@@ -84,10 +84,24 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     UIView *view = [[UIView alloc] init];
     self.view = view;
     
+    // Add background graphics
+    UIImageView *logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"form-logo"]];
+    logo.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:logo];
+    // Autolayout
+    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-115-[logo]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(logo)];
+    [view addConstraints:vLogoConstraints];
+    
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    // Scroll view
     UIScrollView *scrollView = [[UIScrollView alloc] init];
     scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:scrollView];
     self.scrollView = scrollView;
+    // Appearance
+    // Set inset so the 1000 pitches logo is visible
+    scrollView.contentInset = UIEdgeInsetsMake(268, 0, 0, 0);
     
     [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:NSDictionaryOfVariableBindings(scrollView)]];
     [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView]|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(scrollView)]];
@@ -107,10 +121,76 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     self.stackView.alignment = UIStackViewAlignmentFill;
     self.stackView.distribution = UIStackViewDistributionFill;
     
-    NSLog(@"stack view width: %f",self.stackView.frame.size.width);
+    // Add top spacer to stack view
+    UIView *spacerView = [[UIView alloc] init];
+    spacerView.translatesAutoresizingMaskIntoConstraints = NO;
+    [stackView addArrangedSubview:spacerView];
+    // Appearance
+    spacerView.backgroundColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
+    [spacerView addConstraint:[NSLayoutConstraint constraintWithItem:spacerView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:34]];
+    
+    // Add bottom view
+    UIView *bottomView = [[UIView alloc] init];
+    bottomView.translatesAutoresizingMaskIntoConstraints = NO;
+    [stackView addArrangedSubview:bottomView];
+    // Appearance
+    bottomView.backgroundColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
+    
+    // Add button to bottom view
+    // The button and its constraints will give intrinsic height to bottom view
+    UIButton *bottomButton = [[UIButton alloc] init];
+    bottomButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [bottomView addSubview:bottomButton];
+    [bottomButton addTarget:self action:@selector(submitButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    // Appearance
+    bottomButton.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    bottomButton.layer.cornerRadius = 8;
+    // Button titleLabel formatting
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString: @"Submit"];
+    [attributedString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:20 weight:UIFontWeightSemibold]
+                             range:NSMakeRange(0, attributedString.length)];
+    [attributedString addAttribute:NSForegroundColorAttributeName
+                             value:[UIColor whiteColor]
+                             range:NSMakeRange(0, attributedString.length)];
+    [bottomButton setAttributedTitle:attributedString forState:UIControlStateNormal];
+    
+    // Button detail arrow
+    UIImageView *arrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"right arrow"]];
+    arrow.translatesAutoresizingMaskIntoConstraints = NO;
+    [bottomButton addSubview:arrow];
+    
+    // AUTOLAYOUT
+    NSDictionary *views = NSDictionaryOfVariableBindings(bottomButton);
+    
+    // Horizontal
+    NSArray *horizontalButtonLayoutConstraints =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-33-[bottomButton]-33-|"
+                                            options:NSLayoutFormatAlignAllCenterY
+                                            metrics:nil
+                                              views:views];
+    [bottomView addConstraints:horizontalButtonLayoutConstraints];
+    
+    // Vertical
+    NSArray *verticalLayoutConstraints =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-42-[bottomButton(48)]-32-|"
+                                            options:NSLayoutFormatAlignAllCenterX
+                                            metrics:nil
+                                              views:views];
+    [bottomView addConstraints:verticalLayoutConstraints];
+    
+    // Button detail
+    NSArray *arrowHConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[arrow]-13-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:@{@"arrow":arrow}];
+    NSArray *arrowVConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[arrow]-15-|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:@{@"arrow":arrow}];
+    [bottomButton addConstraints:arrowHConstraints];
+    [bottomButton addConstraints:arrowVConstraints];
 }
 
 #pragma mark Actions
+
+- (void)submitButtonTapped:(id)sender {
+    NSLog(@"Submit!");
+}
 
 - (void)cancelButtonTapped:(id)sender {
     NSLog(@"stack view width: %f",self.stackView.frame.size.width);
