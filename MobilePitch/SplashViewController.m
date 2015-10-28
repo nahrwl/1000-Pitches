@@ -45,6 +45,10 @@
     return UIStatusBarStyleLightContent;
 }
 
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    [super traitCollectionDidChange:previousTraitCollection];
+}
+
 - (void)loadView {
     // Setup the view
     UIView *view = [[UIView alloc] init];
@@ -122,8 +126,18 @@
     // Button Action
     [button addTarget:self action:@selector(pitchButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     
+    // Layout guides
+    UILayoutGuide *topLayoutGuide = [[UILayoutGuide alloc] init];
+    UILayoutGuide *bottomLayoutGuide = [[UILayoutGuide alloc] init];
+    [view addLayoutGuide:topLayoutGuide];
+    [view addLayoutGuide:bottomLayoutGuide];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:topLayoutGuide attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:bottomLayoutGuide attribute:NSLayoutAttributeHeight multiplier:1 constant:0]];
+    
     // AUTOLAYOUT
-    NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, logo, headerLabel, listLabel, button);
+    NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, logo, headerLabel, listLabel, button, topLayoutGuide, bottomLayoutGuide);
+    
+    // Aspect ratio for the image
+    [logo addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:logo attribute:NSLayoutAttributeHeight multiplier:2.1441 constant:0]];
     
     // Horizontal
     NSArray *horizontalButtonLayoutConstraints =
@@ -133,11 +147,14 @@
                                               views:views];
     [view addConstraints:horizontalButtonLayoutConstraints];
     
+    // for the image
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=39-[logo]->=38-|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views]];
+    
     //[view addConstraint:[NSLayoutConstraint constraintWithItem:listLabel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:237]];
     
     // Vertical
     NSArray *verticalLayoutConstraints =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-57-[titleLabel]-39-[logo]-55-[headerLabel]-19-[listLabel]->=20@100-[button(48)]-20-|"
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-57@100-[titleLabel]-39-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide][button(48)]-20-|"
                                             options:NSLayoutFormatAlignAllCenterX
                                             metrics:nil
                                               views:views];
