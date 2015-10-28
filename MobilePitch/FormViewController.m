@@ -19,6 +19,8 @@
 #define kFormItemInputTypeKey @"kFormItemInputTypeKey"
 #define kFormItemOptionsKey @"kFormItemOptionsKey"
 
+#define kScrollViewTopInset 268
+
 typedef NS_ENUM(NSInteger, FormCellType) {
     FormCellTypeTextField,
     FormCellTypePicker,
@@ -152,9 +154,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 #pragma mark KVO and Notifications
 
 - (void)addObservers {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillDisplay) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillDisplay:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillUndisplay) name:UIKeyboardWillHideNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidDisplay) name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidDisplay:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidUndisplay) name:UIKeyboardDidHideNotification object:nil];
 }
 
@@ -162,16 +164,13 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
 }
 
-- (void)keyboardWillDisplay {
+- (void)keyboardWillDisplay:(NSNotification*)aNotification {
     // Update the nav bar buttons
     
     // Change the right bar button item to be a Done button
     if (!(self.navigationItem.rightBarButtonItem.action == @selector(dismissInputView))) {
         [self.navigationItem setRightBarButtonItem:nil animated:YES];
     }
-    
-    // Hide the back button
-    [self.navigationItem setHidesBackButton:YES animated:YES];
 }
 
 - (void)keyboardWillUndisplay { // is undisplay a word?
@@ -182,14 +181,46 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
     // Show the back button
     [self.navigationItem setHidesBackButton:NO animated:YES];
+    
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(kScrollViewTopInset, 0, 0, 0);
+    self.scrollView.contentInset = contentInsets;
+    self.scrollView.scrollIndicatorInsets = contentInsets;
 }
 
-- (void)keyboardDidDisplay {
+- (void)keyboardDidDisplay:(NSNotification*)aNotification {
     // Update the nav bar buttons
     
     if (!(self.navigationItem.rightBarButtonItem.action == @selector(dismissInputView))) {
         // Change the right bar button item to be a Done button
         [self.navigationItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissInputView)] animated:YES];
+    }
+    
+    // Hide the back button
+    [self.navigationItem setHidesBackButton:YES animated:YES];
+    
+    NSDictionary* info = [aNotification userInfo];
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(kScrollViewTopInset, 0.0, kbSize.height, 0.0);
+    self.scrollView.contentInset = contentInsets;
+    self.scrollView.scrollIndicatorInsets = contentInsets;
+    
+    // If active text field is hidden by keyboard, scroll it so it's visible
+    // Your app might not need or want this behavior.
+    CGRect aRect = self.view.frame;
+    aRect.size.height -= kbSize.height;
+    
+    // If this is the last item in the form, scroll so the submit button is visible
+    if (self.selectedRow == self.formItems.count - 1) {
+        [self.scrollView scrollRectToVisible:CGRectMake(self.scrollView.contentSize.width - 1,self.scrollView.contentSize.height - 1, 1, 1) animated:YES];
+    } else {
+        UIView *activeField = [self.view viewWithTag:self.selectedRow];
+        if (!CGRectContainsPoint(aRect, activeField.frame.origin) ) {
+            // I don't think this ever gets called
+            // Some magic being is scrolling my views for me
+            // Or I'm just crazy...
+            [self.scrollView scrollRectToVisible:activeField.frame animated:YES];
+        }
     }
 }
 
@@ -201,6 +232,16 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
     // Show the back button
     //[self.navigationItem setHidesBackButton:NO animated:YES];
+}
+
+#pragma mark Text View Delegate
+
+- (void)textViewDidBeginEditing:(UITextView *)textView {
+    // Configure the current editing environment
+    
+    // The text view's row is stored in its tag.
+    // Note this only works because the form is static. Please do not attempt with dynamic table view.
+    self.selectedRow = textView.tag;
 }
 
 #pragma mark Text Field Delegate
@@ -220,6 +261,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Default index is 0
     int index = 0;
     // the if is to prevent a crash if the index does not exist
+    // If there are no options, this will simply send a message to nil!
     if ([self.formItems[self.selectedRow][kFormItemOptionsKey] containsObject:textField.text]) {
         // Xcode, I do not care that this is losing precision. This does not need to be a long, trust me.
         index = (int)[self.formItems[self.selectedRow][kFormItemOptionsKey] indexOfObject:textField.text];
@@ -241,6 +283,15 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         return NO;
     }
     return YES;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    // Find the next text field to edit
+    UIView *nextInputView = [self.view viewWithTag:textField.tag + 1];
+    [nextInputView becomeFirstResponder];
+    
+    // Not sure what default behavior is here, but we don't want it.
+    return NO;
 }
 
 #pragma mark Picker View Data Source
@@ -399,7 +450,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     self.scrollView = scrollView;
     // Appearance
     // Set inset so the 1000 pitches logo is visible
-    scrollView.contentInset = UIEdgeInsetsMake(268, 0, 0, 0);
+    scrollView.contentInset = UIEdgeInsetsMake(kScrollViewTopInset, 0, 0, 0);
     
     [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:NSDictionaryOfVariableBindings(scrollView)]];
     [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[scrollView]|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(scrollView)]];

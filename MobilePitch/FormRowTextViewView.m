@@ -37,4 +37,10 @@
     [super updateConstraints];
 }
 
+#pragma mark First Responder Status
+
+- (BOOL)becomeFirstResponder {
+    return [self.textView becomeFirstResponder];
+}
+
 @end

@@ -40,4 +40,10 @@
     [super updateConstraints];
 }
 
+#pragma mark First Responder Status
+
+- (BOOL)becomeFirstResponder {
+    return [self.textField becomeFirstResponder];
+}
+
 @end

@@ -91,6 +91,13 @@
     return self.titleLabel.text;
 }
 
+#pragma mark First Responder Status
+
+- (BOOL)becomeFirstResponder {
+    // Subclasses will need to override this
+    return NO;
+}
+
 #pragma mark Class methods
 
 + (BOOL)requiresConstraintBasedLayout {
