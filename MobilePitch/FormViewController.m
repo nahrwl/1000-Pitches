@@ -327,6 +327,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 
 - (void)submitButtonTapped:(id)sender {
     NSLog(@"Submit!");
+    [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
 - (void)cancelButtonTapped:(id)sender {
