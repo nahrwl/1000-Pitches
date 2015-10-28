@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "SplashViewController.h"
 #import "FormViewController.h"
+#import "PitchSubmissionController.h"
 
 @interface AppDelegate ()
 
@@ -24,6 +25,8 @@
     
     // Disable edge swiping. Doesn't make sense here, and there's too much risk it could mess something up
     navigationController.interactivePopGestureRecognizer.enabled = NO;
+    
+    [[[PitchSubmissionController alloc] init] submitFormData];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];

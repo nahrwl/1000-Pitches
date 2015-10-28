@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		BBAC7FF9C7B0EC34738291E3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FE2898BB754F2C6C7B52299F /* libPods.a */; };
 		D89503621BE0A61300E0BCF9 /* FormRowTextViewView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */; };
+		D89503651BE18EA400E0BCF9 /* PitchSubmissionController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89503641BE18EA400E0BCF9 /* PitchSubmissionController.m */; };
 		D89DD40D1BDB15CD008284D4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD40C1BDB15CD008284D4 /* main.m */; };
 		D89DD4101BDB15CD008284D4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD40F1BDB15CD008284D4 /* AppDelegate.m */; };
 		D89DD41B1BDB15CD008284D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D89DD41A1BDB15CD008284D4 /* Assets.xcassets */; };
@@ -49,6 +50,8 @@
 		14A2574E4DBDB05D03E38DA9 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		D89503601BE0A61300E0BCF9 /* FormRowTextViewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowTextViewView.h; sourceTree = "<group>"; };
 		D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowTextViewView.m; sourceTree = "<group>"; };
+		D89503631BE18EA400E0BCF9 /* PitchSubmissionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PitchSubmissionController.h; sourceTree = "<group>"; };
+		D89503641BE18EA400E0BCF9 /* PitchSubmissionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PitchSubmissionController.m; sourceTree = "<group>"; };
 		D89DD4081BDB15CD008284D4 /* MobilePitch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobilePitch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D89DD40C1BDB15CD008284D4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		D89DD40E1BDB15CD008284D4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -146,6 +149,8 @@
 			children = (
 				D89DD40E1BDB15CD008284D4 /* AppDelegate.h */,
 				D89DD40F1BDB15CD008284D4 /* AppDelegate.m */,
+				D89503631BE18EA400E0BCF9 /* PitchSubmissionController.h */,
+				D89503641BE18EA400E0BCF9 /* PitchSubmissionController.m */,
 				D89DD4411BDB2981008284D4 /* SplashViewController.h */,
 				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
 				D89DD4441BDC0441008284D4 /* CameraViewController.h */,
@@ -393,6 +398,7 @@
 			files = (
 				D89DD4101BDB15CD008284D4 /* AppDelegate.m in Sources */,
 				D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */,
+				D89503651BE18EA400E0BCF9 /* PitchSubmissionController.m in Sources */,
 				D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */,
 				D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */,
 				D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */,
