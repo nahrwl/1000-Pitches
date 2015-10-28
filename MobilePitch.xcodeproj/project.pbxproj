@@ -20,6 +20,7 @@
 		D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */; };
 		D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4511BDD7A28008284D4 /* FormViewController.m */; };
 		D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4571BDDF1C8008284D4 /* FormRowView.m */; };
+		D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,8 @@
 		D89DD4511BDD7A28008284D4 /* FormViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormViewController.m; sourceTree = "<group>"; };
 		D89DD4561BDDF1C8008284D4 /* FormRowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowView.h; sourceTree = "<group>"; };
 		D89DD4571BDDF1C8008284D4 /* FormRowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowView.m; sourceTree = "<group>"; };
+		D8E105141BE0782A00E1E594 /* NicerLookingPickerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NicerLookingPickerView.h; sourceTree = "<group>"; };
+		D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NicerLookingPickerView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +134,8 @@
 				D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */,
 				D89DD4501BDD7A28008284D4 /* FormViewController.h */,
 				D89DD4511BDD7A28008284D4 /* FormViewController.m */,
+				D8E105141BE0782A00E1E594 /* NicerLookingPickerView.h */,
+				D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */,
 				D89DD4561BDDF1C8008284D4 /* FormRowView.h */,
 				D89DD4571BDDF1C8008284D4 /* FormRowView.m */,
 				D89DD41A1BDB15CD008284D4 /* Assets.xcassets */,
@@ -300,6 +305,7 @@
 				D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */,
 				D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */,
 				D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */,
+				D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */,
 				D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */,
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
