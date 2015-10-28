@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+
+@class SmarterTextField;
+
 @interface FormRowView : UIView
 
-@property (weak, nonatomic) UITextField *textField;
+@property (weak, nonatomic) SmarterTextField *textField;
 
 - (NSString *)title;
 - (void)setTitle:(NSString *)title required:(BOOL)required;

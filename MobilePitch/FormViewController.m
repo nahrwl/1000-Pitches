@@ -9,6 +9,7 @@
 #import "FormViewController.h"
 #import "FormRowView.h"
 #import "NicerLookingPickerView.h"
+#import "SmarterTextField.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
@@ -44,6 +45,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    // Register for notifications and add observers
+    [self addObservers];
+    
     // Set nav bar title
     self.navigationItem.title = @"Pitch Submission";
     
@@ -52,9 +56,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
     // Set tint color
     self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
-    
-    // Add background graphics
-    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
     
     // Create the form items. Technically could be loaded in from a plist or something.
     NSArray *formItems = [FormViewController createFormItems];
@@ -66,13 +67,16 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     pickerView.dataSource = self;
     self.pickerView = pickerView;
     
-    // Create toolbar
-    /*
+    // Create the toolbar
     UIToolbar *toolbar = [[UIToolbar alloc] init];
-    toolbar.barStyle = UIBarStyleBlack;
+    toolbar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    toolbar.barTintColor = [UIColor whiteColor];
+    toolbar.translucent = NO;
+    UIBarButtonItem *previous = [[UIBarButtonItem alloc] initWithTitle:@"Back" style:UIBarButtonItemStylePlain target:self action:@selector(selectPreviousRow)];
+    UIBarButtonItem *next = [[UIBarButtonItem alloc] initWithTitle:@"Next" style:UIBarButtonItemStylePlain target:self action:@selector(selectNextRow)];
     UIBarButtonItem *spacer = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissInputView)];
-    [toolbar setItems:@[spacer, doneButton]];*/
+    [toolbar setItems:@[previous, next, spacer, doneButton]];
     
     // Populate the Stack View
     for (int i = 0; i < formItems.count; i++) {
@@ -89,10 +93,20 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         // Store the row index in the text field's tag... don't judge me
         rowView.textField.tag = i;
         
+        // Configure the toolbar
+        //rowView.textField.inputAccessoryView = toolbar;
+        
         // If the row requires the picker view, configure that now
         if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker) {
+            // Add the picker view as the text field's input view
+            // This replaces the keyboard
             rowView.textField.inputView = pickerView;
-            //rowView.textField.inputAccessoryView = toolbar;
+            
+            // Disable the text field cursor so we don't get the blue input indicator thingy
+            rowView.textField.cursorEnabled = NO;
+            
+            // Set an initial value for the field
+            rowView.textField.text = row[kFormItemOptionsKey][0];
         }
         
     }
@@ -120,6 +134,60 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width, self.stackView.frame.size.height);
 }
 
+#pragma mark KVO and Notifications
+
+- (void)addObservers {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillDisplay) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillUndisplay) name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidDisplay) name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidUndisplay) name:UIKeyboardDidHideNotification object:nil];
+}
+
+- (void)removeObservers {
+    
+}
+
+- (void)keyboardWillDisplay {
+    // Update the nav bar buttons
+    
+    // Change the right bar button item to be a Done button
+    if (!(self.navigationItem.rightBarButtonItem.action == @selector(dismissInputView))) {
+        [self.navigationItem setRightBarButtonItem:nil animated:YES];
+    }
+    
+    // Hide the back button
+    [self.navigationItem setHidesBackButton:YES animated:YES];
+}
+
+- (void)keyboardWillUndisplay { // is undisplay a word?
+    // Update the nav bar buttons
+    
+    // Set right bar button item to be the Clear button
+    [self.navigationItem setRightBarButtonItem:nil animated:YES];
+    
+    // Show the back button
+    [self.navigationItem setHidesBackButton:NO animated:YES];
+}
+
+- (void)keyboardDidDisplay {
+    // Update the nav bar buttons
+    
+    if (!(self.navigationItem.rightBarButtonItem.action == @selector(dismissInputView))) {
+        // Change the right bar button item to be a Done button
+        [self.navigationItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissInputView)] animated:YES];
+    }
+}
+
+- (void)keyboardDidUndisplay { // is undisplay a word?
+    // Update the nav bar buttons
+    
+    // Set right bar button item to be the Clear button
+    [self.navigationItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonTapped:)] animated:YES];
+    
+    // Show the back button
+    //[self.navigationItem setHidesBackButton:NO animated:YES];
+}
+
 #pragma mark Text Field Delegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
@@ -132,8 +200,32 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Tell the picker view to update
     [self.pickerView reloadAllComponents];
     
+    // Find the index of the textField's contents in the array
+    
+    // Default index is 0
+    int index = 0;
+    // the if is to prevent a crash if the index does not exist
+    if ([self.formItems[self.selectedRow][kFormItemOptionsKey] containsObject:textField.text]) {
+        // Xcode, I do not care that this is losing precision. This does not need to be a long, trust me.
+        index = (int)[self.formItems[self.selectedRow][kFormItemOptionsKey] indexOfObject:textField.text];
+    }
+    
     // Now select the first row of the picker view to reset it
-    [self.pickerView selectRow:0 inComponent:0 animated:NO];
+    [self.pickerView selectRow:index inComponent:0 animated:NO];
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    // Disable editing the text field if it uses the picker view for input
+    
+    // Is this efficient? Is there a better way?
+    if ([self.pickerView.inputView isEqual:self.pickerView]) {
+        return NO;
+    }
+    return YES;
 }
 
 #pragma mark Picker View Data Source
@@ -176,6 +268,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 }
 
 - (void)dismissInputView {
+    [self.view endEditing:YES];
+}
+
+- (void)selectNextRow {
+    
+}
+
+- (void)selectPreviousRow {
     
 }
 
@@ -263,6 +363,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
     self.view = view;
+    
+    // Add background pattern
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
     
     // Add background graphics
     UIImageView *logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"form-logo"]];

@@ -7,6 +7,7 @@
 //
 
 #import "FormRowView.h"
+#import "SmarterTextField.h"
 
 @interface FormRowView ()
 
@@ -31,7 +32,7 @@
         [self setTitle:@"Test Title" required:YES];
         
         // Text field
-        UITextField *textField = [[UITextField alloc] init];
+        SmarterTextField *textField = [[SmarterTextField alloc] init];
         textField.translatesAutoresizingMaskIntoConstraints = NO;
         [self addSubview:textField];
         self.textField = textField;
