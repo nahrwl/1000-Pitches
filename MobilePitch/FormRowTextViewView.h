@@ -8,6 +8,8 @@
 
 #import "FormRowView.h"
 
-@interface FromRowTextViewView : FormRowView
+@interface FormRowTextViewView : FormRowView
+
+@property (weak, nonatomic) UITextView *textView;
 
 @end

@@ -8,6 +8,7 @@
 
 #import "FormViewController.h"
 #import "FormRowTextFieldView.h"
+#import "FormRowTextViewView.h"
 #import "NicerLookingPickerView.h"
 #import "SmarterTextField.h"
 
@@ -24,7 +25,7 @@ typedef NS_ENUM(NSInteger, FormCellType) {
     FormCellTypeShortAnswer
 };
 
-@interface FormViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate>
+@interface FormViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UITextViewDelegate>
 
 // Views
 @property (weak, nonatomic) UIScrollView *scrollView;
@@ -81,32 +82,46 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Populate the Stack View
     for (int i = 0; i < formItems.count; i++) {
         NSDictionary *row = formItems[i];
-        FormRowTextFieldView *rowView = [[FormRowTextFieldView alloc] init];
-        [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
-        [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
         
-        // Configure the row
-        
-        // Set the row delegate to self to recieve updates about editing
-        rowView.textField.delegate = self;
-        
-        // Store the row index in the text field's tag... don't judge me
-        rowView.textField.tag = i;
-        
-        // Configure the toolbar
-        //rowView.textField.inputAccessoryView = toolbar;
-        
-        // If the row requires the picker view, configure that now
-        if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker) {
-            // Add the picker view as the text field's input view
-            // This replaces the keyboard
-            rowView.textField.inputView = pickerView;
+        if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypeShortAnswer) {
+            FormRowTextViewView *rowView = [[FormRowTextViewView alloc] init];
+            [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
+            [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
             
-            // Disable the text field cursor so we don't get the blue input indicator thingy
-            rowView.textField.cursorEnabled = NO;
+            // Configure the row
+            rowView.textView.delegate = self;
             
-            // Set an initial value for the field
-            rowView.textField.text = row[kFormItemOptionsKey][0];
+            // Store the row index in the text view's tag... don't judge me
+            rowView.textView.tag = i;
+        } else {
+            
+            FormRowTextFieldView *rowView = [[FormRowTextFieldView alloc] init];
+            [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
+            [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            
+            // Configure the row
+            
+            // Set the row delegate to self to recieve updates about editing
+            rowView.textField.delegate = self;
+            
+            // Store the row index in the text field's tag... don't judge me
+            rowView.textField.tag = i;
+            
+            // Configure the toolbar
+            //rowView.textField.inputAccessoryView = toolbar;
+            
+            // If the row requires the picker view, configure that now
+            if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker) {
+                // Add the picker view as the text field's input view
+                // This replaces the keyboard
+                rowView.textField.inputView = pickerView;
+                
+                // Disable the text field cursor so we don't get the blue input indicator thingy
+                rowView.textField.cursorEnabled = NO;
+                
+                // Set an initial value for the field
+                rowView.textField.text = row[kFormItemOptionsKey][0];
+            }
         }
         
     }
