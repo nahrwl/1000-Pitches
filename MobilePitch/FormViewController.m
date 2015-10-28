@@ -7,7 +7,7 @@
 //
 
 #import "FormViewController.h"
-#import "FormRowView.h"
+#import "FormRowTextFieldView.h"
 #import "NicerLookingPickerView.h"
 #import "SmarterTextField.h"
 
@@ -81,7 +81,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Populate the Stack View
     for (int i = 0; i < formItems.count; i++) {
         NSDictionary *row = formItems[i];
-        FormRowView *rowView = [[FormRowView alloc] init];
+        FormRowTextFieldView *rowView = [[FormRowTextFieldView alloc] init];
         [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
         [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
         
