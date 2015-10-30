@@ -21,8 +21,26 @@
 #define kFormFieldPitchCategoryKey @"pitch_category"];
 #define kFormFieldPitchDescriptionKey @"pitch_short_description"];
 
+@protocol PitchSubmissionControllerDelegate <NSObject>
+
+- (void)processingDidFail;
+- (void)processingDidFinish;
+
+@end
+
 @interface PitchSubmissionController : NSObject
 
-- (void)queueFormSubmissionWithDictionary:(NSDictionary *)formDictionary;
+@property (nonatomic, readonly) NSUInteger currentUniqueIdentifier;
+
+@property (weak, nonatomic) id<PitchSubmissionControllerDelegate> delegate;
+
++ (PitchSubmissionController *)sharedPitchSubmissionController;
+- (void)queueFormSubmissionWithDictionary:(NSDictionary *)formDictionary identifier:(NSUInteger)identifier;
+- (void)queueVideoAtURL:(NSURL *)videoURL identifier:(NSUInteger)identifier;
+- (NSURL *)dequeueVideoForIdentifier:(NSUInteger)identifier;
+- (NSDictionary *)dequeueFormSubmissionForIdentifier:(NSUInteger)identifier;
+- (BOOL)startProcessingQueue;
+
+- (NSUInteger)generateUniqueIdentifier;
 
 @end
