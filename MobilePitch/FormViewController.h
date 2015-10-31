@@ -10,4 +10,6 @@
 
 @interface FormViewController : UIViewController
 
+@property (nonatomic) NSUInteger submissionIdentifier;
+
 @end

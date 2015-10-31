@@ -10,6 +10,8 @@
 
 @protocol FinishedRecordingViewControllerDelegate <NSObject>
 
+- (void)submitVideo;
+
 @end
 
 @interface FinishedRecordingViewController : UIViewController

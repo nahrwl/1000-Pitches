@@ -14,6 +14,8 @@
 #import "AccessRequestViewController.h"
 #import "AAPLPreviewView.h"
 #import "FinishedRecordingViewController.h"
+#import "FormViewController.h"
+#import "PitchSubmissionController.h"
 
 #define kStatusViewAnimationDuration 1.0f
 #define kRecordButtonAnimationDuration 0.2f
@@ -70,6 +72,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 // Timing
 @property (strong, nonatomic) NSDate *startDate;
 @property (weak, nonatomic) NSTimer *timer;
+
+// Submission
+@property (nonatomic) NSUInteger submissionIdentifier;
 
 // Methods
 - (void)backButtonTapped:(UIButton *)sender;
@@ -702,33 +707,12 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         success = [error.userInfo[AVErrorRecordingSuccessfullyFinishedKey] boolValue];
     }
     if ( success ) {
-        // Check authorization status.
-        [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
-            if ( status == PHAuthorizationStatusAuthorized ) {
-                // Save the movie file to the photo library and cleanup.
-                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                    // In iOS 9 and later, it's possible to move the file into the photo library without duplicating the file data.
-                    // This avoids using double the disk space during save, which can make a difference on devices with limited free disk space.
-                    if ( [PHAssetResourceCreationOptions class] ) {
-                        PHAssetResourceCreationOptions *options = [[PHAssetResourceCreationOptions alloc] init];
-                        options.shouldMoveFile = YES;
-                        PHAssetCreationRequest *changeRequest = [PHAssetCreationRequest creationRequestForAsset];
-                        [changeRequest addResourceWithType:PHAssetResourceTypeVideo fileURL:outputFileURL options:options];
-                    }
-                    else {
-                        [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:outputFileURL];
-                    }
-                } completionHandler:^( BOOL success, NSError *error ) {
-                    if ( ! success ) {
-                        NSLog( @"Could not save movie to photo library: %@", error );
-                    }
-                    cleanup();
-                }];
-            }
-            else {
-                cleanup();
-            }
-        }];
+        // Generate identifier
+        PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
+        self.submissionIdentifier = [psc generateUniqueIdentifier];
+        
+        // Queue the video for submission
+        [psc queueVideoAtURL:outputFileURL identifier:self.submissionIdentifier];
     }
     else {
         cleanup();
@@ -857,6 +841,19 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         self.setupResult = CamSetupResultSessionConfigurationFailed;
     }
     dispatch_resume(self.sessionQueue);
+}
+
+#pragma mark Finished Recording View Controller Delegate
+- (void)submitVideo {
+    PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
+    
+    // Begin uploading the video
+    [psc startProcessingQueue];
+    
+    FormViewController *formViewController = [[FormViewController alloc] init];
+    formViewController.submissionIdentifier = self.submissionIdentifier;
+    
+    [self.navigationController pushViewController:formViewController animated:YES];
 }
 
 #pragma mark View Setup

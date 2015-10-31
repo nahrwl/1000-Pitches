@@ -30,7 +30,7 @@
 
 - (void)submitButtonTapped {
     [self dismissViewControllerAnimated:YES completion:^{
-        [self.delegate.navigationController pushViewController:[[FormViewController alloc] init] animated:YES];
+        [self.delegate submitVideo];
     }];
     
 }

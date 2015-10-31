@@ -25,8 +25,8 @@
     
     // Disable edge swiping. Doesn't make sense here, and there's too much risk it could mess something up
     navigationController.interactivePopGestureRecognizer.enabled = NO;
-    
-    PitchSubmissionController *psc = [[PitchSubmissionController alloc] init];
+    /*
+    PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
     NSUInteger identifier = [psc generateUniqueIdentifier];
     [psc queueVideoAtURL:[NSURL URLWithString:@""] identifier:identifier];
     
@@ -46,7 +46,7 @@
     
     [psc queueFormSubmissionWithDictionary:[parameters copy] identifier:identifier];
     
-    [psc startProcessingQueue];
+    //[psc startProcessingQueue];*/
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];
