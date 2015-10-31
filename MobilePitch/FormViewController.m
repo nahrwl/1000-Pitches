@@ -279,7 +279,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Disable editing the text field if it uses the picker view for input
     
     // Is this efficient? Is there a better way?
-    if ([self.pickerView.inputView isEqual:self.pickerView]) {
+    if ([textField.inputView isEqual:self.pickerView]) {
         return NO;
     }
     return YES;

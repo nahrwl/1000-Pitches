@@ -21,32 +21,10 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     // Main navigation controller
-    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:[[SplashViewController alloc] init]];
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:[[FormViewController alloc] init]];
     
     // Disable edge swiping. Doesn't make sense here, and there's too much risk it could mess something up
     navigationController.interactivePopGestureRecognizer.enabled = NO;
-    /*
-    PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
-    NSUInteger identifier = [psc generateUniqueIdentifier];
-    [psc queueVideoAtURL:[NSURL URLWithString:@""] identifier:identifier];
-    
-    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    [parameters setObject:@"Brian" forKey:@"first_name"];
-    [parameters setObject:@"Anglin" forKey:@"last_name"];
-    [parameters setObject:@"banglin@usc.edu" forKey:@"email"];
-    [parameters setObject:@"SparkSC" forKey:@"student_org"];
-    [parameters setObject:@"Engineering" forKey:@"college"];
-    [parameters setObject:@"2018" forKey:@"grad_year"];
-    [parameters setObject:@"Moblie App for Pankcake Delivery" forKey:@"pitch_title"];
-    
-    // Must be one of the following:
-    // Music, Film, Environment, Education, Tech & Hardware, Web & Software, Consumer Products & Small Business, Health, University Improvements, Mobile, Research, Video Games
-    [parameters setObject:@"Music" forKey:@"pitch_category"];
-    [parameters setObject:@"This is just a sort descrpition of how dope this will be" forKey:@"pitch_short_description"];
-    
-    [psc queueFormSubmissionWithDictionary:[parameters copy] identifier:identifier];
-    
-    //[psc startProcessingQueue];*/
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];
