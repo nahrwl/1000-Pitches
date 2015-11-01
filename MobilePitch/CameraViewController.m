@@ -896,6 +896,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     previewView.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:previewView];
     self.previewView = previewView;
+    // Gesture Recognizer for the previewView
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(focusAndExposeTap:)];
+    [previewView addGestureRecognizer:tapGestureRecognizer];
     // Autolayout for the previewView
     [previewView.topAnchor constraintEqualToAnchor:view.topAnchor].active = YES;
     [previewView.bottomAnchor constraintEqualToAnchor:view.bottomAnchor].active = YES;
