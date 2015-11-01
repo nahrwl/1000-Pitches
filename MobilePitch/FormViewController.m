@@ -126,6 +126,11 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                 // Set an initial value for the field
                 rowView.textField.text = row[kFormItemOptionsKey][0];
             }
+            
+            // If the row is the email row, give it the right kind of keyboard
+            if ([row[kFormItemSubmissionKeyKey] isEqualToString:@"email"]) {
+                [rowView.textField setKeyboardType:UIKeyboardTypeEmailAddress];
+            }
         }
         
     }
@@ -246,6 +251,21 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     self.selectedRow = textView.tag - 1000;
 }
 
+- (void)textViewDidEndEditing:(UITextView *)textView {
+    // Trim the textField's contents
+    textView.text = [textView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    // Validate the contents
+    NSUInteger index = textView.tag - 1000;
+    NSDictionary *formRow = self.formItems[index];
+    if ([(NSNumber *)formRow[kFormItemRequiredKey] boolValue] && [textView.text isEqualToString:@""]) {
+        // Error!
+        [self setError:YES forView:textView];
+    } else {
+        [self setError:NO forView:textView];
+    }
+}
+
 #pragma mark Text Field Delegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
@@ -274,7 +294,21 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
+    // Trim the textField's contents
+    textField.text = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
+    // Validate the contents
+    NSUInteger index = textField.tag - 1000;
+    NSDictionary *formRow = self.formItems[index];
+    if ([(NSNumber *)formRow[kFormItemRequiredKey] boolValue] && [textField.text isEqualToString:@""]) {
+        // Error!
+        [self setError:YES forView:textField];
+    } else if ([formRow[kFormItemSubmissionKeyKey] isEqualToString:@"email"] && ![textField.text hasSuffix:@"@usc.edu"]) {
+        // the if expression is just a jank way to check for the email field
+        [self setError:YES forView:textField];
+    } else {
+        [self setError:NO forView:textField];
+    }
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
@@ -284,6 +318,19 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     if ([textField.inputView isEqual:self.pickerView]) {
         return NO;
     }
+    
+    // Insert @usc.edu when the @ key is pressed for the email field
+    NSUInteger index = textField.tag - 1000;
+    NSDictionary *formRow = self.formItems[index];
+    if ([formRow[kFormItemSubmissionKeyKey] isEqualToString:@"email"] && [string isEqualToString:@"@"]) {
+        if ([textField.text containsString:@"@"]) {
+            return NO;
+        } else {
+            textField.text = [textField.text stringByAppendingString:@"@usc.edu"];
+            return NO;
+        }
+    }
+    
     return YES;
 }
 
@@ -332,7 +379,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
     // Extract all the values from the form views and put it in the dictionary
     
-    BOOL error = NO;
+    NSInteger errorIndex = -1;
     
     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
     for (int i = 0; i < self.formItems.count; i++) {
@@ -358,16 +405,23 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         
         if ([(NSNumber *)formItem[kFormItemRequiredKey] boolValue] && [rowValue isEqualToString:@""]) {
             // If the item is required, check that the string is not empty
-            error = YES;
-            break;
+            
+            // errorIndex should be the first field with a problem
+            if (errorIndex == -1) {
+                errorIndex = i;
+            }
+            [self setError:YES forView:[self.view viewWithTag:i + 1000]];
         } else {
             [parameters setObject:rowValue forKey:formItem[kFormItemSubmissionKeyKey]];
         }
     }
     
-    if (error) {
+    if (errorIndex != -1) {
         // Something went wrong - form not filled out properly
         NSLog(@"Form not filled out fully!");
+        
+        // Set the highest field to become the first responder
+        [[self.view viewWithTag:errorIndex + 1000] becomeFirstResponder];
     } else {
         [[PitchSubmissionController sharedPitchSubmissionController] queueFormSubmissionWithDictionary:[parameters copy] identifier:self.submissionIdentifier];
         [[PitchSubmissionController sharedPitchSubmissionController] startProcessingQueue];
@@ -392,6 +446,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 }
 
 #pragma mark Helpers
+
+- (void)setError:(BOOL)error forView:(UIView *)view {
+    if (error) {
+        view.layer.borderColor = [UIColor colorWithRed:0.796 green:0 blue:0 alpha:1].CGColor;
+    } else {
+        view.layer.borderColor = [UIColor colorWithRed:0.886 green:0.886 blue:0.886 alpha:1].CGColor;
+    }
+}
 
 + (NSArray *)createFormItems {
     return @[
