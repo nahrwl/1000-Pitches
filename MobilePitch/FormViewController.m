@@ -111,8 +111,8 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // Store the row index in the text field's tag... don't judge me
             rowView.textField.tag = 1000 + i;
             
-            // Configure the toolbar
-            //rowView.textField.inputAccessoryView = toolbar;
+            // Disable autocorrect
+            rowView.textField.autocorrectionType = UITextAutocorrectionTypeNo;
             
             // If the row requires the picker view, configure that now
             if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker) {
@@ -130,6 +130,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // If the row is the email row, give it the right kind of keyboard
             if ([row[kFormItemSubmissionKeyKey] isEqualToString:@"email"]) {
                 [rowView.textField setKeyboardType:UIKeyboardTypeEmailAddress];
+                rowView.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
             }
         }
         
