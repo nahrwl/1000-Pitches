@@ -11,12 +11,14 @@
 #import "FormRowTextViewView.h"
 #import "NicerLookingPickerView.h"
 #import "SmarterTextField.h"
+#import "PitchSubmissionController.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
 #define kFormItemPlaceholderKey @"kFormItemPlaceholderKey"
 #define kFormItemRequiredKey @"kFormItemRequiredKey"
 #define kFormItemInputTypeKey @"kFormItemInputTypeKey"
+#define kFormItemSubmissionKeyKey @"kFormItemSubmissionKeyKey"
 #define kFormItemOptionsKey @"kFormItemOptionsKey"
 
 #define kScrollViewTopInset 268
@@ -94,7 +96,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             rowView.textView.delegate = self;
             
             // Store the row index in the text view's tag... don't judge me
-            rowView.textView.tag = i;
+            rowView.textView.tag = 1000 + i;
         } else {
             
             FormRowTextFieldView *rowView = [[FormRowTextFieldView alloc] init];
@@ -107,7 +109,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             rowView.textField.delegate = self;
             
             // Store the row index in the text field's tag... don't judge me
-            rowView.textField.tag = i;
+            rowView.textField.tag = 1000 + i;
             
             // Configure the toolbar
             //rowView.textField.inputAccessoryView = toolbar;
@@ -214,7 +216,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     if (self.selectedRow == self.formItems.count - 1) {
         [self.scrollView scrollRectToVisible:CGRectMake(self.scrollView.contentSize.width - 1,self.scrollView.contentSize.height - 1, 1, 1) animated:YES];
     } else {
-        UIView *activeField = [self.view viewWithTag:self.selectedRow];
+        UIView *activeField = [self.view viewWithTag:self.selectedRow + 1000];
         if (!CGRectContainsPoint(aRect, activeField.frame.origin) ) {
             // I don't think this ever gets called
             // Some magic being is scrolling my views for me
@@ -241,7 +243,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
     // The text view's row is stored in its tag.
     // Note this only works because the form is static. Please do not attempt with dynamic table view.
-    self.selectedRow = textView.tag;
+    self.selectedRow = textView.tag - 1000;
 }
 
 #pragma mark Text Field Delegate
@@ -251,7 +253,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
     // The text field's row is stored in its tag.
     // Note this only works because the form is static. Please do not attempt with dynamic table view.
-    self.selectedRow = textField.tag;
+    self.selectedRow = textField.tag - 1000;
     
     // Tell the picker view to update
     [self.pickerView reloadAllComponents];
@@ -319,7 +321,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 }
 
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
-    UITextField *textField = [self.view viewWithTag:self.selectedRow];
+    UITextField *textField = [self.view viewWithTag:self.selectedRow + 1000];
     textField.text = self.formItems[self.selectedRow][kFormItemOptionsKey][row];
 }
 
@@ -327,7 +329,50 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 
 - (void)submitButtonTapped:(id)sender {
     NSLog(@"Submit!");
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    // Extract all the values from the form views and put it in the dictionary
+    
+    BOOL error = NO;
+    
+    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+    for (int i = 0; i < self.formItems.count; i++) {
+        NSDictionary *formItem = self.formItems[i];
+        FormCellType cellType = [(NSNumber *)formItem[kFormItemInputTypeKey] integerValue];
+        NSString *rowValue = @"";
+        switch (cellType) {
+            case FormCellTypePicker:
+            case FormCellTypeTextField: {
+                UITextField *textField = (UITextField *)[self.view viewWithTag:i + 1000];
+                rowValue = textField.text;
+                break;
+            }
+            case FormCellTypeShortAnswer: {
+                UITextView *textView = (UITextView *)[self.view viewWithTag:i + 1000];
+                rowValue = textView.text;
+                break;
+            }
+        }
+        
+        // Trim the string
+        rowValue = [rowValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        
+        if ([(NSNumber *)formItem[kFormItemRequiredKey] boolValue] && [rowValue isEqualToString:@""]) {
+            // If the item is required, check that the string is not empty
+            error = YES;
+            break;
+        } else {
+            [parameters setObject:rowValue forKey:formItem[kFormItemSubmissionKeyKey]];
+        }
+    }
+    
+    if (error) {
+        // Something went wrong - form not filled out properly
+        NSLog(@"Form not filled out fully!");
+    } else {
+        [[PitchSubmissionController sharedPitchSubmissionController] queueFormSubmissionWithDictionary:[parameters copy] identifier:self.submissionIdentifier];
+        [[PitchSubmissionController sharedPitchSubmissionController] startProcessingQueue];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
 }
 
 - (void)cancelButtonTapped:(id)sender {
@@ -353,24 +398,29 @@ static NSString *cellIdentifier = @"kCellIdentifier";
              @{kFormItemTitleKey : @"First Name",
                kFormItemPlaceholderKey : @"Tommy",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"first_name",
                kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
              @{kFormItemTitleKey : @"Last Name",
                kFormItemPlaceholderKey : @"Trojan",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"last_name",
                kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
              @{kFormItemTitleKey : @"USC Email",
                kFormItemPlaceholderKey : @"ttrojan@usc.edu",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"email",
                kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
              @{kFormItemTitleKey : @"Student Organization Name",
                kFormItemRequiredKey : @(NO),
+               kFormItemSubmissionKeyKey : @"student_org",
                kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
              @{kFormItemTitleKey : @"College",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"college",
                kFormItemInputTypeKey : @(FormCellTypePicker),
                kFormItemOptionsKey : @[@"Letters, Arts and Sciences",
                                        @"Accounting",
@@ -394,6 +444,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
              
              @{kFormItemTitleKey : @"Graduation Year",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"grad_year",
                kFormItemInputTypeKey : @(FormCellTypePicker),
                kFormItemOptionsKey : @[@"2019",
                                        @"2018",
@@ -402,10 +453,12 @@ static NSString *cellIdentifier = @"kCellIdentifier";
              
              @{kFormItemTitleKey : @"Pitch Title",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_title",
                kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
              @{kFormItemTitleKey : @"Pitch Category",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_category",
                kFormItemInputTypeKey : @(FormCellTypePicker),
                kFormItemOptionsKey : @[@"Consumer Products & Small Business",
                                        @"Education",
@@ -421,6 +474,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
              
              @{kFormItemTitleKey : @"Short Pitch Description",
                kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_short_description",
                kFormItemInputTypeKey : @(FormCellTypeShortAnswer)}
              ];
 }

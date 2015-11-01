@@ -81,10 +81,13 @@ static NSString *baseURL = @"http://52.4.50.233";
 
 - (void)queueFormSubmissionWithDictionary:(NSDictionary *)formDictionary identifier:(NSUInteger)identifier {
     if (formDictionary) {
-        NSMutableDictionary *existingDictionary = [NSMutableDictionary dictionaryWithDictionary:self.queuedFormSubmissions[@(identifier)]];
+        NSDictionary *rowDictionary = self.queuedFormSubmissions[@(identifier)];
+        NSMutableDictionary *existingDictionary;
         
-        if (!existingDictionary) {
+        if (!rowDictionary) {
             existingDictionary = [NSMutableDictionary dictionary];
+        } else {
+            existingDictionary = [NSMutableDictionary dictionaryWithDictionary:rowDictionary];
         }
         
         [existingDictionary setObject:formDictionary forKey:kDataKey];
@@ -255,7 +258,7 @@ static NSString *baseURL = @"http://52.4.50.233";
     
     NSDictionary *input = formSubmissionDictionary[kDataKey];
     NSString *videoURL = formSubmissionDictionary[kVideoURLKey];
-    
+    // Check here for nil PLEASE
     if (input && videoURL) {
         self.currentFormSubmission = input;
         
@@ -302,6 +305,12 @@ static NSString *baseURL = @"http://52.4.50.233";
         }];
     } else {
         NSLog(@"Inputted form dictionary was nil. Not submitting.");
+        // requeue the failed submission
+        [self queueFormSubmissionWithDictionary:input identifier:identifier];
+        [self queueVideoResponseURL:videoURL forIdentifier:identifier];
+        
+        // return no
+        completion(NO);
     }
 }
 
