@@ -53,8 +53,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 @property (weak, nonatomic) UIButton            *permissionsButton;
 @property (weak, nonatomic) UIButton            *resumeButton;
 @property (weak, nonatomic) UIButton            *recordButton;
-@property (weak, nonatomic) NSLayoutConstraint  *recordButtonHeightConstraint;
-@property (weak, nonatomic) NSLayoutConstraint  *recordButtonWidthConstraint;
+@property (weak, nonatomic) UIView              *fakeRecordButton;
+@property (weak, nonatomic) NSLayoutConstraint  *fakeRecordButtonHeightConstraint;
+@property (weak, nonatomic) NSLayoutConstraint  *fakeRecordButtonWidthConstraint;
 @property (weak, nonatomic) UIButton            *backButton;
 
 // Session management
@@ -528,7 +529,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         }
     } );
 }
-#warning Create this gesture recognizer!
+
 - (IBAction)focusAndExposeTap:(UIGestureRecognizer *)gestureRecognizer
 {
     CGPoint devicePoint = [(AVCaptureVideoPreviewLayer *)self.previewView.layer captureDevicePointOfInterestForPoint:[gestureRecognizer locationInView:gestureRecognizer.view]];
@@ -549,6 +550,16 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     } else {
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
     }
+}
+
+- (void)recordButtonTouchDown {
+    [self.fakeRecordButton setBackgroundColor:[UIColor colorWithRed:0.339 green:0.248 blue:0.0437 alpha:1]];
+}
+
+- (void)recordButtonTouchUp {
+    [UIView animateWithDuration:kRecordButtonAnimationDuration animations:^{
+        [self.fakeRecordButton setBackgroundColor:[UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1]];
+    }];
 }
 
 #pragma mark Timing
@@ -654,19 +665,19 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         self.recordButton.enabled = YES;
         // Animate start -> stop button change
         [self.view layoutIfNeeded];
-        self.recordButtonHeightConstraint.constant = 28;
-        self.recordButtonWidthConstraint.constant = 28;
+        self.fakeRecordButtonHeightConstraint.constant = 28;
+        self.fakeRecordButtonWidthConstraint.constant = 28;
         [UIView animateWithDuration:kRecordButtonAnimationDuration animations:^{
             [self.view layoutIfNeeded];
         }];
         
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
-        animation.fromValue = @(self.recordButton.layer.cornerRadius);
+        animation.fromValue = @(self.fakeRecordButton.layer.cornerRadius);
         animation.toValue = @(4);
         animation.duration = kRecordButtonAnimationDuration - 0.03;
-        [self.recordButton.layer setCornerRadius:4];
-        [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
+        [self.fakeRecordButton.layer setCornerRadius:4];
+        [self.fakeRecordButton.layer addAnimation:animation forKey:@"cornerRadius"];
         
         // Begin the timer
         self.timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(timerAction) userInfo:nil repeats:YES];
@@ -694,7 +705,6 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     self.backgroundRecordingID = UIBackgroundTaskInvalid;
     
     dispatch_block_t cleanup = ^{
-        [[NSFileManager defaultManager] removeItemAtURL:outputFileURL error:nil];
         if ( currentBackgroundRecordingID != UIBackgroundTaskInvalid ) {
             [[UIApplication sharedApplication] endBackgroundTask:currentBackgroundRecordingID];
         }
@@ -705,56 +715,23 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     if ( error ) {
         NSLog( @"Movie file finishing error: %@", error );
         success = [error.userInfo[AVErrorRecordingSuccessfullyFinishedKey] boolValue];
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Recording Error" message:error.userInfo[NSLocalizedRecoverySuggestionErrorKey] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * action) {}];
+        
+        [alertController addAction:defaultAction];
+        [self presentViewController:alertController animated:YES completion:nil];
     }
-    if ( success ) {
+    // This used to be if (success), however I changed it to !error because saving would continue even if
+    // errors such as out of space errors occurred. Not really what I want.
+    if ( !error ) {
         // Generate identifier
         PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
         self.submissionIdentifier = [psc generateUniqueIdentifier];
         
         // Queue the video for submission
         [psc queueVideoAtURL:outputFileURL identifier:self.submissionIdentifier];
-    }
-    else {
-        cleanup();
-    }
-    
-    // Enable the Camera and Record buttons to let the user switch camera and start another recording.
-    dispatch_async( dispatch_get_main_queue(), ^{
-        self.recordButton.enabled = YES;
-        // Animate stop -> start button change
-        [self.view layoutIfNeeded];
-        self.recordButtonHeightConstraint.constant = 50;
-        self.recordButtonWidthConstraint.constant = 50;
-        [UIView animateWithDuration:kRecordButtonAnimationDuration animations:^{
-            [self.view layoutIfNeeded];
-        }];
-        
-        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
-        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
-        animation.fromValue = @(self.recordButton.layer.cornerRadius);
-        animation.toValue = @(25);
-        animation.duration = kRecordButtonAnimationDuration - 0.1;
-        animation.beginTime = CACurrentMediaTime() + 0.05f;
-        
-        double delayInSeconds = 0.06;
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-            //code to be executed on the main queue after delay
-            [self.recordButton.layer setCornerRadius:25];
-        });
-        [self.recordButton.layer addAnimation:animation forKey:@"cornerRadius"];
-        
-        //Disable timer
-        [self.timer invalidate];
-        [self setStatusViewRecordingStatus:RecordingStatusNotRecording animated:YES];
-        
-        //Reveal back button
-        self.backButton.enabled = YES;
-        self.backButton.alpha = 0.0;
-        self.backButton.hidden = NO;
-        [UIView animateWithDuration:kBackButtonAnimationDuration animations:^{
-            self.backButton.alpha = 1.0;
-        }];
         
         // Format the duration
         CMTime duration = captureOutput.recordedDuration;
@@ -776,8 +753,51 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
             //code to be executed on the main queue after delay
             [self presentViewController:frvc animated:YES completion:nil];
         });
-
         
+        cleanup();
+    }
+    else {
+        [[NSFileManager defaultManager] removeItemAtURL:outputFileURL error:nil];
+        cleanup();
+    }
+    
+    // Enable the Camera and Record buttons to let the user switch camera and start another recording.
+    dispatch_async( dispatch_get_main_queue(), ^{
+        self.recordButton.enabled = YES;
+        // Animate stop -> start button change
+        [self.view layoutIfNeeded];
+        self.fakeRecordButtonHeightConstraint.constant = 50;
+        self.fakeRecordButtonWidthConstraint.constant = 50;
+        [UIView animateWithDuration:kRecordButtonAnimationDuration animations:^{
+            [self.view layoutIfNeeded];
+        }];
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+        animation.fromValue = @(self.fakeRecordButton.layer.cornerRadius);
+        animation.toValue = @(25);
+        animation.duration = kRecordButtonAnimationDuration - 0.1;
+        animation.beginTime = CACurrentMediaTime() + 0.05f;
+        
+        double delayInSeconds = 0.06;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            //code to be executed on the main queue after delay
+            [self.fakeRecordButton.layer setCornerRadius:25];
+        });
+        [self.fakeRecordButton.layer addAnimation:animation forKey:@"cornerRadius"];
+        
+        //Disable timer
+        [self.timer invalidate];
+        [self setStatusViewRecordingStatus:RecordingStatusNotRecording animated:YES];
+        
+        //Reveal back button
+        self.backButton.enabled = YES;
+        self.backButton.alpha = 0.0;
+        self.backButton.hidden = NO;
+        [UIView animateWithDuration:kBackButtonAnimationDuration animations:^{
+            self.backButton.alpha = 1.0;
+        }];
     });
 }
 
@@ -936,30 +956,38 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     bottomView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.50];
     bottomView.opaque = NO;
     
-    // Bottom view record button decal
-    UIImageView *recordButtonDecal = [[UIImageView alloc] init];
-    recordButtonDecal.translatesAutoresizingMaskIntoConstraints = NO;
-    [bottomView addSubview:recordButtonDecal];
+    // Bottom view "record button"
+    UIView *fakeRecordButton = [[UIView alloc] init];
+    fakeRecordButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [bottomView addSubview:fakeRecordButton];
+    self.fakeRecordButton = fakeRecordButton;
+    
     // Appearance
-    [recordButtonDecal setImage:[UIImage imageNamed:@"record-button-decal"]];
+    fakeRecordButton.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    fakeRecordButton.layer.cornerRadius = 25.0f; // make it a circle!
+    // Size
+    NSLayoutConstraint *recordButtonHeightConstraint = [NSLayoutConstraint constraintWithItem:fakeRecordButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f];
+    [fakeRecordButton addConstraint:recordButtonHeightConstraint];
+    self.fakeRecordButtonHeightConstraint = recordButtonHeightConstraint;
+    
+    NSLayoutConstraint *recordButtonWidthConstraint = [NSLayoutConstraint constraintWithItem:fakeRecordButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f];
+    [fakeRecordButton addConstraint:recordButtonWidthConstraint];
+    self.fakeRecordButtonWidthConstraint = recordButtonWidthConstraint;
     
     // Bottom view record button
+    // Note this is actually the white ring decal around the "record button"
+    // I use the decal as the button so the hitbox doesn't change even through the animations
     UIButton *recordButton = [[UIButton alloc] init];
     recordButton.translatesAutoresizingMaskIntoConstraints = NO;
     [bottomView addSubview:recordButton];
     self.recordButton = recordButton;
-    [recordButton addTarget:self action:@selector(toggleMovieRecording:) forControlEvents:UIControlEventTouchUpInside];
     // Appearance
-    recordButton.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
-    recordButton.layer.cornerRadius = 25.0f; // make it a circle!
-    // Size
-    NSLayoutConstraint *recordButtonHeightConstraint = [NSLayoutConstraint constraintWithItem:recordButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f];
-    [recordButton addConstraint:recordButtonHeightConstraint];
-    self.recordButtonHeightConstraint = recordButtonHeightConstraint;
-    
-    NSLayoutConstraint *recordButtonWidthConstraint = [NSLayoutConstraint constraintWithItem:recordButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f];
-    [recordButton addConstraint:recordButtonWidthConstraint];
-    self.recordButtonWidthConstraint = recordButtonWidthConstraint;
+    [recordButton addTarget:self action:@selector(toggleMovieRecording:) forControlEvents:UIControlEventTouchUpInside];
+    [recordButton addTarget:self action:@selector(recordButtonTouchDown) forControlEvents:UIControlEventTouchDown];
+    [recordButton addTarget:self action:@selector(recordButtonTouchUp) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchCancel];
+    [recordButton setImage:[UIImage imageNamed:@"record-button-decal"] forState:UIControlStateNormal];
+    recordButton.adjustsImageWhenHighlighted = NO;
+    recordButton.adjustsImageWhenDisabled = NO;
     
     // Bottom view back button
     UIButton *backButton = [[UIButton alloc] init];
@@ -975,11 +1003,11 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     [bottomView addConstraint:[NSLayoutConstraint constraintWithItem:backButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:50.0f]];
     
     
+    [fakeRecordButton.centerXAnchor constraintEqualToAnchor:bottomView.centerXAnchor].active = YES;
+    [fakeRecordButton.centerYAnchor constraintEqualToAnchor:bottomView.centerYAnchor].active = YES;
+    
     [recordButton.centerXAnchor constraintEqualToAnchor:bottomView.centerXAnchor].active = YES;
     [recordButton.centerYAnchor constraintEqualToAnchor:bottomView.centerYAnchor].active = YES;
-    
-    [recordButtonDecal.centerXAnchor constraintEqualToAnchor:bottomView.centerXAnchor].active = YES;
-    [recordButtonDecal.centerYAnchor constraintEqualToAnchor:bottomView.centerYAnchor].active = YES;
     
     [backButton.centerYAnchor constraintEqualToAnchor:bottomView.centerYAnchor].active = YES;
     [bottomView addConstraint:[NSLayoutConstraint constraintWithItem:backButton attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:bottomView attribute:NSLayoutAttributeLeading multiplier:1 constant:7]];
