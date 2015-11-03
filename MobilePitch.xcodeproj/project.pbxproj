@@ -23,6 +23,7 @@
 		D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */; };
 		D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4511BDD7A28008284D4 /* FormViewController.m */; };
 		D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4571BDDF1C8008284D4 /* FormRowView.m */; };
+		D8B5F3721BE5FFA70023C8AE /* PitchSubmissionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D8B5F3711BE5FFA70023C8AE /* PitchSubmissionManager.m */; };
 		D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */; };
 		D8E105191BE0806700E1E594 /* SmarterTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = D8E105181BE0806700E1E594 /* SmarterTextField.m */; };
 		D8F0528D1BE09C5300C2D31C /* FormRowTextFieldView.m in Sources */ = {isa = PBXBuildFile; fileRef = D8F0528C1BE09C5300C2D31C /* FormRowTextFieldView.m */; };
@@ -79,6 +80,8 @@
 		D89DD4511BDD7A28008284D4 /* FormViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormViewController.m; sourceTree = "<group>"; };
 		D89DD4561BDDF1C8008284D4 /* FormRowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowView.h; sourceTree = "<group>"; };
 		D89DD4571BDDF1C8008284D4 /* FormRowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowView.m; sourceTree = "<group>"; };
+		D8B5F3701BE5FFA70023C8AE /* PitchSubmissionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PitchSubmissionManager.h; sourceTree = "<group>"; };
+		D8B5F3711BE5FFA70023C8AE /* PitchSubmissionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PitchSubmissionManager.m; sourceTree = "<group>"; };
 		D8E105141BE0782A00E1E594 /* NicerLookingPickerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NicerLookingPickerView.h; sourceTree = "<group>"; };
 		D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NicerLookingPickerView.m; sourceTree = "<group>"; };
 		D8E105171BE0806700E1E594 /* SmarterTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SmarterTextField.h; sourceTree = "<group>"; };
@@ -151,6 +154,8 @@
 				D89DD40F1BDB15CD008284D4 /* AppDelegate.m */,
 				D89503631BE18EA400E0BCF9 /* PitchSubmissionController.h */,
 				D89503641BE18EA400E0BCF9 /* PitchSubmissionController.m */,
+				D8B5F3701BE5FFA70023C8AE /* PitchSubmissionManager.h */,
+				D8B5F3711BE5FFA70023C8AE /* PitchSubmissionManager.m */,
 				D89DD4411BDB2981008284D4 /* SplashViewController.h */,
 				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
 				D89DD4441BDC0441008284D4 /* CameraViewController.h */,
@@ -408,6 +413,7 @@
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
 				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
+				D8B5F3721BE5FFA70023C8AE /* PitchSubmissionManager.m in Sources */,
 				D8E105191BE0806700E1E594 /* SmarterTextField.m in Sources */,
 				D89DD44C1BDC5226008284D4 /* AAPLPreviewView.m in Sources */,
 			);
