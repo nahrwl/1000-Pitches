@@ -47,6 +47,8 @@
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
     [super traitCollectionDidChange:previousTraitCollection];
+    
+    
 }
 
 - (void)loadView {
@@ -147,18 +149,28 @@
                                               views:views];
     [view addConstraints:horizontalButtonLayoutConstraints];
     
-    // for the image
+    // for the image LOGO
     [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=39-[logo]->=38-|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views]];
     
     //[view addConstraint:[NSLayoutConstraint constraintWithItem:listLabel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:237]];
     
     // Vertical
     NSArray *verticalLayoutConstraints =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-57@100-[titleLabel]-39-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide][button(48)]-20-|"
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide][button(48)]-20-|"
                                             options:NSLayoutFormatAlignAllCenterX
                                             metrics:nil
                                               views:views];
     [view addConstraints:verticalLayoutConstraints];
+    
+    // Enforce a margin between the listLabel and the button
+    NSLayoutConstraint *listLabelToButtonMargin = [NSLayoutConstraint constraintWithItem:listLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationLessThanOrEqual toItem:button attribute:NSLayoutAttributeTop multiplier:1 constant:-20];
+    listLabelToButtonMargin.priority = 500;
+    [view addConstraint:listLabelToButtonMargin];
+    
+    // Enforce a margin between the title and the logo
+    NSLayoutConstraint *titleToTopMargin = [NSLayoutConstraint constraintWithItem:titleLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:view attribute:NSLayoutAttributeTop multiplier:1 constant:30];
+    titleToTopMargin.priority = 1000;
+    [view addConstraint:titleToTopMargin];
     
     // Button detail
     NSArray *arrowHConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[arrow]-13-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:@{@"arrow":arrow}];
