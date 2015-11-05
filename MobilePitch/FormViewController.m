@@ -56,9 +56,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Set nav bar title
     self.navigationItem.title = @"Pitch Submission";
     
-    // Set right bar button item
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonTapped:)];
-    
     // Set tint color
     self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
     
@@ -428,10 +425,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         [[PitchSubmissionController sharedPitchSubmissionController] startProcessingQueue];
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
-}
-
-- (void)cancelButtonTapped:(id)sender {
-    NSLog(@"stack view width: %f",self.stackView.frame.size.width);
 }
 
 - (void)dismissInputView {
