@@ -13,6 +13,7 @@
 @interface AccessRequestViewController ()
 
 @property (weak, nonatomic) UILabel *titleLabel;
+@property (weak, nonatomic) UIActivityIndicatorView *activityIndicator;
 
 // Actions
 - (void)okButtonTapped;
@@ -36,6 +37,7 @@
 }
 
 - (void)okButtonTapped {
+    [self.activityIndicator startAnimating];
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^( BOOL cam ) {
         if (cam) {
             // Move on to Microphone
@@ -128,6 +130,14 @@
     [cancelButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [cancelButton addTarget:self action:@selector(cancelButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
+    // Activity indicator
+    UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    indicator.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:indicator];
+    self.activityIndicator = indicator;
+    // Appearance
+    indicator.hidesWhenStopped = YES;
+    
     // AUTOLAYOUT
     NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, descriptionLabel, button, cancelButton);
     
@@ -144,6 +154,17 @@
     //[view addConstraint:[NSLayoutConstraint constraintWithItem:descriptionLabel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:titleLabel attribute:NSLayoutAttributeWidth multiplier:1 constant:0]];
     
     [titleLabel.centerXAnchor constraintEqualToAnchor:view.centerXAnchor].active = YES;
+    
+    // Activity Indicator
+    
+    // Layout guides
+    UILayoutGuide *topLayoutGuide = [[UILayoutGuide alloc] init];
+    UILayoutGuide *bottomLayoutGuide = [[UILayoutGuide alloc] init];
+    [view addLayoutGuide:topLayoutGuide];
+    [view addLayoutGuide:bottomLayoutGuide];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:topLayoutGuide attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:bottomLayoutGuide attribute:NSLayoutAttributeHeight multiplier:1 constant:0]];
+    
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[button][topLayoutGuide][indicator][bottomLayoutGuide][cancelButton]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(button, topLayoutGuide, indicator, bottomLayoutGuide, cancelButton)]];
     
     // Add center button margin constraints for compact devices?
     
