@@ -95,6 +95,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // Create the AVCaptureSession.
     self.session = [[AVCaptureSession alloc] init];
     
+    // Configure the session's presets
+    self.session.sessionPreset = AVCaptureSessionPreset640x480;
+    
     // Setup the preview view.
     self.previewView.session = self.session;
     
@@ -931,10 +934,10 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(focusAndExposeTap:)];
     [previewView addGestureRecognizer:tapGestureRecognizer];
     // Autolayout for the previewView
-    [previewView.topAnchor constraintEqualToAnchor:view.topAnchor].active = YES;
-    [previewView.bottomAnchor constraintEqualToAnchor:view.bottomAnchor].active = YES;
-    [previewView.leftAnchor constraintEqualToAnchor:view.leftAnchor].active = YES;
-    [previewView.rightAnchor constraintEqualToAnchor:view.rightAnchor].active = YES;
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[previewView]|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(previewView)]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:previewView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    // Aspect ratio for the image
+    [previewView addConstraint:[NSLayoutConstraint constraintWithItem:previewView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:previewView attribute:NSLayoutAttributeHeight multiplier:1.3333 constant:0]];
     
     // Top view
     UIView *topView = [[UIView alloc] init];
