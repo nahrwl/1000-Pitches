@@ -12,6 +12,7 @@
 #import "NicerLookingPickerView.h"
 #import "SmarterTextField.h"
 #import "PitchSubmissionController.h"
+#import "ShadowView.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
@@ -232,9 +233,8 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 - (void)keyboardDidUndisplay { // is undisplay a word?
     // Update the nav bar buttons
     
-    // Set right bar button item to be the Clear button
-    [self.navigationItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonTapped:)] animated:YES];
-    
+    // Set right bar button item to be nothing
+    [self.navigationItem setRightBarButtonItem:nil];
     // Show the back button
     //[self.navigationItem setHidesBackButton:NO animated:YES];
 }
@@ -581,6 +581,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     self.stackView.alignment = UIStackViewAlignmentFill;
     self.stackView.distribution = UIStackViewDistributionFill;
     
+    // Add top top spacer to stack view
+    ShadowView *shadowView = [[ShadowView alloc] init];
+    shadowView.translatesAutoresizingMaskIntoConstraints = NO;
+    [stackView addArrangedSubview:shadowView];
+    // Appearance
+    
+    [shadowView addConstraint:[NSLayoutConstraint constraintWithItem:shadowView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:10]];
+    
     // Add top spacer to stack view
     UIView *spacerView = [[UIView alloc] init];
     spacerView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -588,6 +596,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Appearance
     spacerView.backgroundColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
     [spacerView addConstraint:[NSLayoutConstraint constraintWithItem:spacerView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:34]];
+    
+    // Configure drop shadow
+    UIBezierPath *shadowPath = [UIBezierPath bezierPathWithRect:spacerView.bounds];
+    spacerView.layer.masksToBounds = NO;
+    spacerView.layer.shadowColor = [UIColor blackColor].CGColor;
+    spacerView.layer.shadowOffset = CGSizeMake(0.0f, -4.0f);
+    spacerView.layer.shadowOpacity = 0.8f;
+    spacerView.layer.shadowPath = shadowPath.CGPath;
     
     // Add bottom view
     UIView *bottomView = [[UIView alloc] init];
