@@ -143,7 +143,7 @@
     
     // Horizontal
     NSArray *horizontalButtonLayoutConstraints =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-20-[button]-20-|"
+    [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-32-[button]-32-|"
                                             options:NSLayoutFormatAlignAllCenterY
                                             metrics:nil
                                               views:views];
@@ -156,7 +156,7 @@
     
     // Vertical
     NSArray *verticalLayoutConstraints =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide][button(48)]-20-|"
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide][button(48)]-32-|"
                                             options:NSLayoutFormatAlignAllCenterX
                                             metrics:nil
                                               views:views];

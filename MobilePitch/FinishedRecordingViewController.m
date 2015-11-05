@@ -26,27 +26,12 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    // Make nav bar visible
-    [self.navigationController setNavigationBarHidden:NO animated:YES];
-    self.navigationController.navigationBar.backgroundColor = [UIColor clearColor];
-    
-    // Set nav bar title
-    self.navigationItem.title = @"Pitch Complete";
-    
-    // Set right bar button item
-    self.navigationController.navigationBar.backItem.title = @"Try Again";
-    
-    // Set tint color
-    self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
-    
-    // Set title color
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
-    
-    // Set background color
-    [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
-                             forBarMetrics:UIBarMetricsDefault];
-    self.navigationController.navigationBar.shadowImage = [UIImage new];
-    self.navigationController.navigationBar.translucent = YES;
+    // Make nav bar hidden
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (BOOL)prefersStatusBarHidden {
+    return YES;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -80,6 +65,22 @@
         self.view.backgroundColor = [UIColor blackColor];
     //}
     
+    // Cancel button
+    UIButton *cancelButton = [[UIButton alloc] init];
+    cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:cancelButton];
+    [cancelButton addTarget:self action:@selector(cancelButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    // Appearance
+    [cancelButton setTitle:@"Try Again" forState:UIControlStateNormal];
+    cancelButton.titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightSemibold];
+    [cancelButton setTitleColor:[UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1] forState:UIControlStateNormal];
+    cancelButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+    
+    // Cancel button back arrow decal
+    UIImageView *backArrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tryagain-back"]];
+    backArrow.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:backArrow];
+    
     // Total time label
     UILabel *totalTimeLabel = [[UILabel alloc] init];
     totalTimeLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -97,52 +98,72 @@
     self.timeLabel = timeLabel;
     // Appearance
     timeLabel.text = @"00:00";
-    timeLabel.font = [UIFont monospacedDigitSystemFontOfSize:56 weight:UIFontWeightSemibold];
+    timeLabel.font = [UIFont monospacedDigitSystemFontOfSize:72 weight:UIFontWeightSemibold];
     timeLabel.textColor = [UIColor whiteColor];
     timeLabel.textAlignment = NSTextAlignmentCenter;
     
-    // Submit button
-    UIButton *submitButton = [[UIButton alloc] init];
-    submitButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [view addSubview:submitButton];
-    [submitButton addTarget:self action:@selector(submitButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-    // Appearance
-    [submitButton setTitle:@"Submit" forState:UIControlStateNormal];
-    submitButton.titleLabel.font = [UIFont systemFontOfSize:48 weight:UIFontWeightSemibold];
-    [submitButton setTitleColor:[UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1] forState:UIControlStateNormal];
-    submitButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+    // Continue Button
+    UIButton *button = [[UIButton alloc] init];
+    button.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:button];
+    // Button formatting
+    button.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    button.layer.cornerRadius = 8;
+    // Button titleLabel formatting
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString: @"Continue"];
+    [attributedString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:21 weight:UIFontWeightBold]
+                             range:NSMakeRange(0, attributedString.length)];
+    [attributedString addAttribute:NSForegroundColorAttributeName
+                             value:[UIColor whiteColor]
+                             range:NSMakeRange(0, attributedString.length)];
+    [button setAttributedTitle:attributedString forState:UIControlStateNormal];
     
-    // Quip label
-    UILabel *quipLabel = [[UILabel alloc] init];
-    quipLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [view addSubview:quipLabel];
-    // Appearance
-    quipLabel.text = @"Great Job! You killed it.";
-    quipLabel.font = [UIFont systemFontOfSize:18 weight:UIFontWeightLight];
-    quipLabel.textColor = [UIColor whiteColor];
-    quipLabel.textAlignment = NSTextAlignmentCenter;
+    // Button detail arrow
+    UIImageView *arrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"right arrow"]];
+    arrow.translatesAutoresizingMaskIntoConstraints = NO;
+    [button addSubview:arrow];
     
-    // Cancel button
-    UIButton *cancelButton = [[UIButton alloc] init];
-    cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [view addSubview:cancelButton];
-    [cancelButton addTarget:self action:@selector(cancelButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-    // Appearance
-    [cancelButton setTitle:@"Try Again" forState:UIControlStateNormal];
-    cancelButton.titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightSemibold];
-    [cancelButton setTitleColor:[UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1] forState:UIControlStateNormal];
-    cancelButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+    // Button Action
+    [button addTarget:self action:@selector(submitButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    
+    
     
     
     // AUTOLAYOUT
-    NSDictionary *views = NSDictionaryOfVariableBindings(totalTimeLabel, timeLabel, submitButton, quipLabel, cancelButton);
+    NSDictionary *views = NSDictionaryOfVariableBindings(totalTimeLabel, timeLabel, button, cancelButton);
     
-    NSArray *verticalConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-62-[totalTimeLabel]-11-[timeLabel]->=50-[submitButton]-11-[quipLabel]->=50-[cancelButton]-36-|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views];
-    [view addConstraints:verticalConstraints];
+    // Button detail
+    NSArray *arrowHConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[arrow]-13-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:@{@"arrow":arrow}];
+    NSArray *arrowVConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[arrow]-15-|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:@{@"arrow":arrow}];
+    [button addConstraints:arrowHConstraints];
+    [button addConstraints:arrowVConstraints];
     
-    [totalTimeLabel.centerXAnchor constraintEqualToAnchor:view.centerXAnchor].active = YES;
+    // Try again detail arrow
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:backArrow attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:cancelButton attribute:NSLayoutAttributeLeft multiplier:1 constant:-10]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:backArrow attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:cancelButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
     
-    [submitButton.centerYAnchor constraintEqualToAnchor:view.centerYAnchor].active = YES;
+    // Horizontal
+    NSArray *horizontalButtonLayoutConstraints =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-32-[button]-32-|"
+                                            options:NSLayoutFormatAlignAllCenterY
+                                            metrics:nil
+                                              views:views];
+    [view addConstraints:horizontalButtonLayoutConstraints];
+    
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:cancelButton attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:totalTimeLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    // Vertical
+    
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-44-[cancelButton]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views]];
+    [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[button]-32-|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views]];
+    
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:timeLabel attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:timeLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:totalTimeLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:timeLabel attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
     
 }
 
