@@ -23,26 +23,49 @@
     self.timeLabel.text = self.finalTime;
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    // Make nav bar visible
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
+    self.navigationController.navigationBar.backgroundColor = [UIColor clearColor];
+    
+    // Set nav bar title
+    self.navigationItem.title = @"Pitch Complete";
+    
+    // Set right bar button item
+    self.navigationController.navigationBar.backItem.title = @"Try Again";
+    
+    // Set tint color
+    self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    
+    // Set title color
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+    
+    // Set background color
+    [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
+                             forBarMetrics:UIBarMetricsDefault];
+    self.navigationController.navigationBar.shadowImage = [UIImage new];
+    self.navigationController.navigationBar.translucent = YES;
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
 - (void)submitButtonTapped {
-    [self dismissViewControllerAnimated:YES completion:^{
-        [self.delegate submitVideo];
-    }];
-    
+    [self.delegate submitVideo];
 }
 
 - (void)cancelButtonTapped {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self.delegate tryAgain];
 }
 
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
     self.view = view;
-    
+    /*
     if (!UIAccessibilityIsReduceTransparencyEnabled()) {
         self.view.backgroundColor = [UIColor clearColor];
         
@@ -53,9 +76,9 @@
         
         [self.view addSubview:blurEffectView];
     }
-    else {
+    else {*/
         self.view.backgroundColor = [UIColor blackColor];
-    }
+    //}
     
     // Total time label
     UILabel *totalTimeLabel = [[UILabel alloc] init];

@@ -751,7 +751,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         dispatch_time_t waitTime = dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC);
         dispatch_after(waitTime, dispatch_get_main_queue(), ^(void){
             //code to be executed on the main queue after delay
-            [self presentViewController:frvc animated:YES completion:nil];
+            [self.navigationController pushViewController:frvc animated:YES];
         });
         
         cleanup();
@@ -874,6 +874,17 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     formViewController.submissionIdentifier = self.submissionIdentifier;
     
     [self.navigationController pushViewController:formViewController animated:YES];
+}
+
+- (void)tryAgain {
+    [self.navigationController popToViewController:self animated:YES];
+    
+    PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
+    
+    // Remove the video recording from the queue
+    // Remove the video file
+    // If the video is already being submitted, nothing will be removed.
+    [[NSFileManager defaultManager] removeItemAtURL:[psc dequeueVideoForIdentifier:self.submissionIdentifier] error:nil];
 }
 
 #pragma mark View Setup

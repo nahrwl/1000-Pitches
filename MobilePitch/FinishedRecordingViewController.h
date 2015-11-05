@@ -11,6 +11,7 @@
 @protocol FinishedRecordingViewControllerDelegate <NSObject>
 
 - (void)submitVideo;
+- (void)tryAgain;
 
 @end
 
