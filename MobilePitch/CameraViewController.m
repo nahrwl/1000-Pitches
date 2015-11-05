@@ -303,7 +303,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
             {
                 dispatch_async( dispatch_get_main_queue(), ^{
                     NSString *message = NSLocalizedString( @"Unable to capture media", @"Alert message when something goes wrong during capture session configuration" );
-                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AVCam" message:message preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"1000 Pitches" message:message preferredStyle:UIAlertControllerStyleAlert];
                     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"OK", @"Alert OK button" ) style:UIAlertActionStyleCancel handler:nil];
                     [alertController addAction:cancelAction];
                     [self presentViewController:alertController animated:YES completion:nil];
@@ -483,7 +483,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         if ( ! self.session.isRunning ) {
             dispatch_async( dispatch_get_main_queue(), ^{
                 NSString *message = NSLocalizedString( @"Unable to resume", @"Alert message when unable to resume the session running" );
-                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AVCam" message:message preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"1000 Pitches" message:message preferredStyle:UIAlertControllerStyleAlert];
                 UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString( @"OK", @"Alert OK button" ) style:UIAlertActionStyleCancel handler:nil];
                 [alertController addAction:cancelAction];
                 [self presentViewController:alertController animated:YES completion:nil];
