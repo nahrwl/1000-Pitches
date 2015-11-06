@@ -8,6 +8,7 @@
 
 #import "SplashViewController.h"
 #import "CameraViewController.h"
+#import "SplashView.h"
 
 @interface SplashViewController ()
 
@@ -53,8 +54,7 @@
 
 - (void)loadView {
     // Setup the view
-    UIView *view = [[UIView alloc] init];
-    view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
+    SplashView *view = [[SplashView alloc] init];
     self.view = view;
     
     // Title text
