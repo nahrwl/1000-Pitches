@@ -9,28 +9,38 @@
 #import "PitchSubmissionController.h"
 #import <AFNetworking/AFNetworking.h>
 
+// Dictionary keys
+#define kIdentifierKey @"kIdentifierKey"
 #define kDataKey @"kDataKey"
 #define kVideoURLKey @"kVideoURLKey"
+
+// NSCoding keys
+#define kQueuedFormSubmissionsSerializationKey @"queuedFormSubmissions"
+#define kQueuedVideoSubmissionsSerializationKey @"queuedVideoSubmissions"
+#define kCurrentFormSubmissionSerializationKey @"currentFormSubmission"
+#define kCurrentVideoSubmissionSerializationKey @"currentVideoSubmission"
+#define kCurrentUniqueIdentifierSerializationKey @"currentUniqueIdentifier"
 
 @interface PitchSubmissionController ()
 
 // Enqueued Form Submissions
 @property (nonatomic, readwrite) NSUInteger currentUniqueIdentifier;
 
-// Structure for these two dictionaries is as follows:
-// @{unique identifier : @{kDataKey : NSDictionary form, kVideoURLKey : the returned video URL NSString}}
-@property (strong, nonatomic) NSMutableDictionary *queuedFormSubmissions;
-// @{unique identifier : @{kDataKey : video NSURL}
-@property (strong, nonatomic) NSMutableDictionary *queuedVideoSubmissions;
+// Structure for these two arrays is as follows:
+// @[@{kIdentifierKey : unique identifier, kDataKey : NSDictionary form, kVideoURLKey : the returned video server URL NSString}, etc]
+@property (strong, nonatomic) NSMutableArray *queuedFormSubmissions;
+// @[@{kIdentifierKey : unique identifier, kDataKey : video local NSURL}, etc]
+@property (strong, nonatomic) NSMutableArray *queuedVideoSubmissions;
 
 // These two properties are the current objects that are being uploaded
 // On success, the object is set to nil. On failure, the object should be re-queued for submission
 @property (strong, nonatomic) NSDictionary *currentFormSubmission;
-@property (strong, nonatomic) NSURL *currentVideoSubmission;
+@property (strong, nonatomic) NSDictionary *currentVideoSubmission;
 
 // Private Methods
 - (void)submitFormWithIdentifier:(NSUInteger)identifier completion:(void (^)(BOOL success))completion;
 - (void)submitVideoWithIdentifier:(NSUInteger)identifier completion:(void (^)(NSString *videoURL))completion;
+- (NSUInteger)generateUniqueIdentifier;
 
 @end
 
@@ -55,58 +65,84 @@ static NSString *baseURL = @"http://52.4.50.233";
 // with a private implementation that replaces -init
 // I do not feel the need to enforce singleton status at this point.
 // Just nota bene for the future...
-- (id)init {
+- (instancetype)init {
     if (self = [super init]) {
-        _currentUniqueIdentifier = 0;
-        _queuedFormSubmissions = [NSMutableDictionary dictionary];
-        _queuedVideoSubmissions = [NSMutableDictionary dictionary];
+        _currentUniqueIdentifier = 1; // Must not be 0
+        _queuedFormSubmissions = [NSMutableArray array];
+        _queuedVideoSubmissions = [NSMutableArray array];
     }
     return self;
 }
 
-#pragma mark Pitch Submission
+#pragma mark NSCoding protocol
 
-// A unique key representing the video data / form data pairing
-- (NSUInteger)generateUniqueIdentifier {
-    return self.currentUniqueIdentifier++;
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    if (self = [self init]) {
+        _queuedVideoSubmissions = [coder decodeObjectForKey:kQueuedVideoSubmissionsSerializationKey];
+        _queuedFormSubmissions = [coder decodeObjectForKey:kQueuedFormSubmissionsSerializationKey];
+        
+        _currentVideoSubmission = [coder decodeObjectForKey:kCurrentVideoSubmissionSerializationKey];
+        _currentFormSubmission = [coder decodeObjectForKey:kCurrentFormSubmissionSerializationKey];
+        
+        _currentUniqueIdentifier = [(NSNumber *)[coder decodeObjectForKey:kCurrentUniqueIdentifierSerializationKey] unsignedIntegerValue];
+    }
+    return self;
 }
 
-- (void)queueVideoAtURL:(NSURL *)videoURL identifier:(NSUInteger)identifier {
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:self.queuedVideoSubmissions forKey:kQueuedVideoSubmissionsSerializationKey];
+    [coder encodeObject:self.queuedFormSubmissions forKey:kQueuedFormSubmissionsSerializationKey];
+    
+    [coder encodeObject:self.currentFormSubmission forKey:kCurrentFormSubmissionSerializationKey];
+    [coder encodeObject:self.currentVideoSubmission forKey:kCurrentVideoSubmissionSerializationKey];
+    
+    // Easier for me just to store the NSUInteger as an NSNumber
+    [coder encodeObject:@(self.currentUniqueIdentifier) forKey:kCurrentUniqueIdentifierSerializationKey];
+}
+
+#pragma mark -
+#pragma mark Pitch Submission
+
+- (NSUInteger)queueVideoAtURL:(NSURL *)videoURL {
     if (videoURL) {
-        [self.queuedVideoSubmissions setObject:@{kDataKey : videoURL} forKey:@(identifier)];
-    } else {
-        NSLog(@"Attempted to insert nil into videos submissions queue.");
+        NSUInteger identifier = [self generateUniqueIdentifier];
+        [self.queuedVideoSubmissions addObject:@{kIdentifierKey : @(identifier), kDataKey : videoURL}];
+        return identifier;
     }
+    NSLog(@"Attempted to insert nil into videos submissions queue.");
+    return 0; // Default id means error
 }
 
 - (void)queueFormSubmissionWithDictionary:(NSDictionary *)formDictionary identifier:(NSUInteger)identifier {
     if (formDictionary) {
-        NSDictionary *rowDictionary = self.queuedFormSubmissions[@(identifier)];
-        NSMutableDictionary *existingDictionary;
+        NSUInteger index = [self indexOfObjectWithIdentifier:identifier inArray:self.queuedFormSubmissions];
         
-        if (!rowDictionary) {
-            existingDictionary = [NSMutableDictionary dictionary];
-        } else {
-            existingDictionary = [NSMutableDictionary dictionaryWithDictionary:rowDictionary];
-        }
+        NSMutableDictionary *existingDictionary = index != NSNotFound ? [NSMutableDictionary dictionaryWithDictionary:[self.queuedFormSubmissions objectAtIndex:index]] : [NSMutableDictionary dictionaryWithObject:@(identifier) forKey:kIdentifierKey];
         
         [existingDictionary setObject:formDictionary forKey:kDataKey];
-        [self.queuedFormSubmissions setObject:[existingDictionary copy]
-                                       forKey:@(identifier)];
+        [self.queuedFormSubmissions setObject:existingDictionary atIndexedSubscript:index != NSNotFound ? index : self.queuedFormSubmissions.count];
     } else {
         NSLog(@"Attempted to insert nil into form submissions queue.");
     }
 }
 
 - (NSDictionary *)dequeueFormSubmissionForIdentifier:(NSUInteger)identifier {
-    NSDictionary *form = self.queuedFormSubmissions[@(identifier)];
-    [self.queuedFormSubmissions removeObjectForKey:@(identifier)];
+    NSUInteger index = [self indexOfObjectWithIdentifier:identifier inArray:self.queuedFormSubmissions];
+    if (index == NSNotFound) {
+        return nil;
+    }
+    NSDictionary *form = [self.queuedFormSubmissions objectAtIndex:index];
+    [self.queuedFormSubmissions removeObjectAtIndex:index];
     return form;
 }
 
-- (NSURL *)dequeueVideoForIdentifier:(NSUInteger)identifier {
-    NSURL *video = self.queuedVideoSubmissions[@(identifier)][kDataKey];
-    [self.queuedVideoSubmissions removeObjectForKey:@(identifier)];
+- (NSDictionary *)dequeueVideoForIdentifier:(NSUInteger)identifier {
+    NSUInteger index = [self indexOfObjectWithIdentifier:identifier inArray:self.queuedVideoSubmissions];
+    if (index == NSNotFound) {
+        return nil;
+    }
+    NSDictionary *video = [self.queuedVideoSubmissions objectAtIndex:index];
+    [self.queuedVideoSubmissions removeObjectAtIndex:index];
     return video;
 }
 
@@ -115,10 +151,10 @@ static NSString *baseURL = @"http://52.4.50.233";
     if (!self.currentFormSubmission && !self.currentVideoSubmission) {
         // Search to find the lowest index from the queued videos
         // Always start by uploading a video
-        NSArray *identifiers = [self.queuedVideoSubmissions allKeys];
+        NSArray *identifiers = [self.queuedVideoSubmissions valueForKey:kIdentifierKey];
         
         if (identifiers.count > 0) {
-            NSNumber *lowestIdentifier = @([self lowestQueuedIdentifierInArray:identifiers]);
+            NSNumber *lowestIdentifier = identifiers[0];
             [self submitVideoWithIdentifier:lowestIdentifier.integerValue
                                  completion:^(NSString *videoURL) {
                                      if (videoURL) {
@@ -138,10 +174,10 @@ static NSString *baseURL = @"http://52.4.50.233";
         } else {
             // No videos to process
             // Process remaining forms then
-            NSArray *identifiers = [self.queuedFormSubmissions allKeys];
+            NSArray *identifiers = [self.queuedFormSubmissions valueForKey:kIdentifierKey];
             
             if (identifiers.count > 0) {
-                NSNumber *lowestIdentifier = @([self lowestQueuedIdentifierInArray:identifiers]);
+                NSNumber *lowestIdentifier = identifiers[0];
                 [self submitFormWithIdentifier:lowestIdentifier.integerValue completion:^(BOOL success) {
                     if (success) {
                         [self startProcessingQueue];
@@ -160,37 +196,42 @@ static NSString *baseURL = @"http://52.4.50.233";
 
 #pragma mark Private Implementation
 
-- (int)lowestQueuedIdentifierInArray:(NSArray *)identifiers {
-    int idmin = [(NSNumber *)identifiers[0] intValue];
-    for (int i = 0; i < identifiers.count; i++) {
-        NSNumber *num = identifiers[i];
-        int x = num.intValue;
-        if (x < idmin) idmin = x;
+// A unique key representing the video data / form data pairing
+- (NSUInteger)generateUniqueIdentifier {
+    return self.currentUniqueIdentifier++;
+}
+
+- (NSUInteger)indexOfObjectWithIdentifier:(NSUInteger)identifier inArray:(NSArray *)array {
+    NSArray *identifiersArray = [array valueForKey:kIdentifierKey];
+    return [identifiersArray indexOfObject:@(identifier)];
+}
+
+- (void)queueVideoAtURL:(NSURL *)videoURL identifier:(NSUInteger)identifier {
+    if (videoURL) {
+        [self.queuedVideoSubmissions addObject:@{kIdentifierKey : @(identifier), kDataKey : videoURL}];
     }
-    return idmin;
+    NSLog(@"Attempted to insert nil into videos submissions queue.");
 }
 
 - (void)queueVideoResponseURL:(NSString *)videoURL forIdentifier:(NSUInteger)identifier {
     if (videoURL && ![videoURL isEqualToString:@""]) {
-        NSMutableDictionary *existingDictionary = [NSMutableDictionary dictionaryWithDictionary:self.queuedFormSubmissions[@(identifier)]];
+        NSUInteger index = [self indexOfObjectWithIdentifier:identifier inArray:self.queuedVideoSubmissions];
         
-        if (!existingDictionary) {
-            existingDictionary = [NSMutableDictionary dictionary];
-        }
+        NSMutableDictionary *existingDictionary = index != NSNotFound ? [NSMutableDictionary dictionaryWithDictionary:[self.queuedFormSubmissions objectAtIndex:index]] : [NSMutableDictionary dictionaryWithObject:@(identifier) forKey:kIdentifierKey];
         
         [existingDictionary setObject:videoURL forKey:kVideoURLKey];
-        [self.queuedFormSubmissions setObject:[existingDictionary copy]
-                                       forKey:@(identifier)];
+        [self.queuedFormSubmissions setObject:existingDictionary atIndexedSubscript:index != NSNotFound ? index : self.queuedFormSubmissions.count];
     } else {
         NSLog(@"Attempted to insert nil or empty video URL into form submissions queue.");
     }
 }
 
 - (void)submitVideoWithIdentifier:(NSUInteger)identifier completion:(void (^)(NSString *videoURL))completion {
-    NSURL *fileURL = [self dequeueVideoForIdentifier:identifier];
+    NSDictionary *videoSubmission = [self dequeueVideoForIdentifier:identifier];
+    NSURL *fileURL = videoSubmission[kDataKey];
     
     if (fileURL) {
-        self.currentVideoSubmission = fileURL;
+        self.currentVideoSubmission = videoSubmission;
         
         // Generate a generic AFHTTPRequestSerializer for the headers
         AFHTTPRequestSerializer *requestSerializer = [[AFHTTPRequestSerializer alloc] init];
@@ -260,7 +301,7 @@ static NSString *baseURL = @"http://52.4.50.233";
     NSString *videoURL = formSubmissionDictionary[kVideoURLKey];
     // Check here for nil PLEASE
     if (input && videoURL) {
-        self.currentFormSubmission = input;
+        self.currentFormSubmission = formSubmissionDictionary;
         
         // Modify the inputted dictionary
         NSMutableDictionary *parameters = [[NSMutableDictionary alloc] initWithDictionary:input];
@@ -294,8 +335,7 @@ static NSString *baseURL = @"http://52.4.50.233";
             NSLog(@"Error: %@", [error localizedDescription]);
             
             // requeue the failed submission
-            [self queueFormSubmissionWithDictionary:input identifier:identifier];
-            [self queueVideoResponseURL:videoURL forIdentifier:identifier];
+            [self.queuedFormSubmissions addObject:self.currentFormSubmission];
             
             // reset the current form submission
             self.currentFormSubmission = nil;

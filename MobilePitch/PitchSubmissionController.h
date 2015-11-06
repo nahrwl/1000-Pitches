@@ -16,7 +16,7 @@
 #define kFormFieldCollegeKey @"college"
 #define kFormFieldGradYearKey @"grad_year"
 #define kFormFieldPitchTitleKey @"pitch_title"
-// Must be one of the following:
+// kFormFieldPitchCategoryKey must be one of the following:
 // Music, Film, Environment, Education, Tech & Hardware, Web & Software, Consumer Products & Small Business, Health, University Improvements, Mobile, Research, Video Games
 #define kFormFieldPitchCategoryKey @"pitch_category"];
 #define kFormFieldPitchDescriptionKey @"pitch_short_description"];
@@ -28,7 +28,7 @@
 
 @end
 
-@interface PitchSubmissionController : NSObject
+@interface PitchSubmissionController : NSObject <NSCoding>
 
 @property (nonatomic, readonly) NSUInteger currentUniqueIdentifier;
 
@@ -36,11 +36,9 @@
 
 + (PitchSubmissionController *)sharedPitchSubmissionController;
 - (void)queueFormSubmissionWithDictionary:(NSDictionary *)formDictionary identifier:(NSUInteger)identifier;
-- (void)queueVideoAtURL:(NSURL *)videoURL identifier:(NSUInteger)identifier;
-- (NSURL *)dequeueVideoForIdentifier:(NSUInteger)identifier;
+- (NSUInteger)queueVideoAtURL:(NSURL *)videoURL;
+- (NSDictionary *)dequeueVideoForIdentifier:(NSUInteger)identifier;
 - (NSDictionary *)dequeueFormSubmissionForIdentifier:(NSUInteger)identifier;
 - (BOOL)startProcessingQueue;
-
-- (NSUInteger)generateUniqueIdentifier;
 
 @end

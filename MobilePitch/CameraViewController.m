@@ -729,12 +729,10 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // This used to be if (success), however I changed it to !error because saving would continue even if
     // errors such as out of space errors occurred. Not really what I want.
     if ( !error ) {
-        // Generate identifier
         PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
-        self.submissionIdentifier = [psc generateUniqueIdentifier];
         
-        // Queue the video for submission
-        [psc queueVideoAtURL:outputFileURL identifier:self.submissionIdentifier];
+        // Queue the video for submission and save the returned submission identifier
+        self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];
         
         // Format the duration
         CMTime duration = captureOutput.recordedDuration;
