@@ -885,7 +885,8 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // Remove the video recording from the queue
     // Remove the video file
     // If the video is already being submitted, nothing will be removed.
-    [[NSFileManager defaultManager] removeItemAtURL:[psc dequeueVideoForIdentifier:self.submissionIdentifier] error:nil];
+#warning Jank. Should be using kDataKey constant.
+    [[NSFileManager defaultManager] removeItemAtURL:[psc dequeueVideoForIdentifier:self.submissionIdentifier][@"kDataKey"] error:nil];
 }
 
 #pragma mark View Setup

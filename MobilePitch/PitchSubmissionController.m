@@ -26,6 +26,7 @@
 // Enqueued Form Submissions
 @property (nonatomic, readwrite) NSUInteger currentUniqueIdentifier;
 
+// Don't assume the objects inside the following two queue arrays are mutable!
 // Structure for these two arrays is as follows:
 // @[@{kIdentifierKey : unique identifier, kDataKey : NSDictionary form, kVideoURLKey : the returned video server URL NSString}, etc]
 @property (strong, nonatomic) NSMutableArray *queuedFormSubmissions;
@@ -56,7 +57,14 @@ static NSString *baseURL = @"http://52.4.50.233";
 + (PitchSubmissionController *)sharedPitchSubmissionController {
     static PitchSubmissionController *_pitchSubmissionController;
     if (!_pitchSubmissionController) {
-        _pitchSubmissionController = [[PitchSubmissionController alloc] init];
+        // Put the unarchiver stuff here?
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *documentsDirectory = [paths objectAtIndex:0];
+        NSString *filePath = [documentsDirectory stringByAppendingPathComponent: @"savedPitches.plist"];
+        
+        _pitchSubmissionController = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+        
+        if (!_pitchSubmissionController) _pitchSubmissionController = [[PitchSubmissionController alloc] init];
     }
     return _pitchSubmissionController;
 }
@@ -74,27 +82,45 @@ static NSString *baseURL = @"http://52.4.50.233";
     return self;
 }
 
+#pragma mark Keyed Archiving / Unarchiving
+
+- (void)saveData {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectory stringByAppendingPathComponent: @"savedPitches.plist"];
+    
+    [NSKeyedArchiver archiveRootObject:self toFile:filePath];
+}
+
 #pragma mark NSCoding protocol
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
-    if (self = [self init]) {
-        _queuedVideoSubmissions = [coder decodeObjectForKey:kQueuedVideoSubmissionsSerializationKey];
-        _queuedFormSubmissions = [coder decodeObjectForKey:kQueuedFormSubmissionsSerializationKey];
+    if (self = [super init]) {
+        NSArray *queuedVideoSubmissions = [coder decodeObjectForKey:kQueuedVideoSubmissionsSerializationKey];
+        NSArray *queuedFormSubmissions = [coder decodeObjectForKey:kQueuedFormSubmissionsSerializationKey];
         
-        _currentVideoSubmission = [coder decodeObjectForKey:kCurrentVideoSubmissionSerializationKey];
-        _currentFormSubmission = [coder decodeObjectForKey:kCurrentFormSubmissionSerializationKey];
+        _queuedVideoSubmissions = queuedVideoSubmissions ? [queuedVideoSubmissions mutableCopy] : [NSMutableArray array];
+        _queuedFormSubmissions = queuedFormSubmissions ? [queuedFormSubmissions mutableCopy] : [NSMutableArray array];
         
-        _currentUniqueIdentifier = [(NSNumber *)[coder decodeObjectForKey:kCurrentUniqueIdentifierSerializationKey] unsignedIntegerValue];
+        NSNumber *idNumber = [coder decodeObjectForKey:kCurrentUniqueIdentifierSerializationKey];
+        _currentUniqueIdentifier = idNumber ? idNumber.unsignedIntegerValue : 1;
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
+    if (self.currentFormSubmission) {
+        [self queueFormSubmissionWithDictionary:self.currentFormSubmission[kDataKey] identifier:((NSNumber *)self.currentFormSubmission[kIdentifierKey]).unsignedIntegerValue];
+        self.currentFormSubmission = nil;
+    }
+    
+    if (self.currentVideoSubmission) {
+        [self queueVideoAtURL:self.currentVideoSubmission[kDataKey] identifier:((NSNumber *)self.currentVideoSubmission[kIdentifierKey]).unsignedIntegerValue];
+        self.currentVideoSubmission = nil;
+    }
+    
     [coder encodeObject:self.queuedVideoSubmissions forKey:kQueuedVideoSubmissionsSerializationKey];
     [coder encodeObject:self.queuedFormSubmissions forKey:kQueuedFormSubmissionsSerializationKey];
-    
-    [coder encodeObject:self.currentFormSubmission forKey:kCurrentFormSubmissionSerializationKey];
-    [coder encodeObject:self.currentVideoSubmission forKey:kCurrentVideoSubmissionSerializationKey];
     
     // Easier for me just to store the NSUInteger as an NSNumber
     [coder encodeObject:@(self.currentUniqueIdentifier) forKey:kCurrentUniqueIdentifierSerializationKey];
@@ -178,6 +204,8 @@ static NSString *baseURL = @"http://52.4.50.233";
             
             if (identifiers.count > 0) {
                 NSNumber *lowestIdentifier = identifiers[0];
+                
+                
                 [self submitFormWithIdentifier:lowestIdentifier.integerValue completion:^(BOOL success) {
                     if (success) {
                         [self startProcessingQueue];
@@ -185,6 +213,9 @@ static NSString *baseURL = @"http://52.4.50.233";
                         [self.delegate processingDidFail];
                     }
                 }];
+                
+                
+                
             }
         }
         return YES;

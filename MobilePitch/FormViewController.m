@@ -13,6 +13,7 @@
 #import "SmarterTextField.h"
 #import "PitchSubmissionController.h"
 #import "ShadowView.h"
+#import "SplashView.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
@@ -538,11 +539,8 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 #pragma mark Load View
 
 - (void)loadView {
-    UIView *view = [[UIView alloc] init];
+    SplashView *view = [[SplashView alloc] init];
     self.view = view;
-    
-    // Add background pattern
-    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
     
     // Add background graphics
     UIImageView *logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"form-logo"]];

@@ -41,4 +41,6 @@
 - (NSDictionary *)dequeueFormSubmissionForIdentifier:(NSUInteger)identifier;
 - (BOOL)startProcessingQueue;
 
+- (void)saveData;
+
 @end
