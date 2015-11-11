@@ -14,6 +14,9 @@
 #define kShouldProcessQueueSerializationKey @"shouldProcessQueue"
 #define kCurrentVideoSubmissionSerializationKey @"currentVideoSubmission"
 
+// Temp directory
+#define kTemporaryFilePrefix @"PSMRequest"
+
 static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch.backgroundsession";
 static NSString * baseURL = @"http://52.4.50.233";
 
@@ -89,6 +92,9 @@ static NSString * baseURL = @"http://52.4.50.233";
     
     [self setDataTaskDidReceiveDataBlock:^(NSURLSession * _Nonnull session, NSURLSessionDataTask * _Nonnull dataTask, NSData * _Nonnull data)
     {
+        if (!weakSelf.responseData) {
+            weakSelf.responseData = [[NSMutableData alloc] init];
+        }
         [weakSelf.responseData appendData:data];
     }];
 }
@@ -105,6 +111,16 @@ static NSString * baseURL = @"http://52.4.50.233";
     
     [self setTaskDidCompleteBlock:^(NSURLSession *session, NSURLSessionTask *task, NSError *error) {
         NSLog(@"Upload task completed.");
+        
+        // Clean up temporary files
+        NSFileManager *fm = [NSFileManager defaultManager];
+        NSString *directory = NSTemporaryDirectory();
+        NSError *fileError = nil;
+        for (NSString *file in [fm contentsOfDirectoryAtPath:directory error:&fileError]) {
+            if ([file hasPrefix:kTemporaryFilePrefix]) {
+                [fm removeItemAtPath:[directory stringByAppendingPathComponent:file] error:&fileError];
+            }
+        }
         
         if (error) {
             // handle error here, e.g.,
@@ -224,15 +240,12 @@ static NSString * baseURL = @"http://52.4.50.233";
         // Dequeue and save the video submission
         self.currentVideoSubmission = [self dequeueVideoSubmissionAtIndex:0];
         
-        // Generate the NSURLSessionDataTask for the current video submission
-        NSURLSessionDownloadTask *task = [self uploadTaskForVideoSubmission:self.currentVideoSubmission];
-        
-        // Execute the task
-        //[task resume];
+        // Upload the video submission
+        [self uploadVideoSubmission:self.currentVideoSubmission];
     }
 }
 
-- (NSURLSessionDownloadTask *)uploadTaskForVideoSubmission:(VideoSubmission *)submission {
+- (void)uploadVideoSubmission:(VideoSubmission *)submission {
     NSURL *requestUrl = [NSURL URLWithString:@"/api/upload-video" relativeToURL:self.baseURL];
     
     NSError *errorFormAppend;
@@ -252,33 +265,14 @@ static NSString * baseURL = @"http://52.4.50.233";
                                     }
                                     error:&errorRequest];
     
-    NSString* tmpFilename = [NSString stringWithFormat:@"%f", [NSDate timeIntervalSinceReferenceDate]];
+    NSString* tmpFilename = [NSString stringWithFormat:@"%@%f", kTemporaryFilePrefix, [NSDate timeIntervalSinceReferenceDate]];
     NSURL* tmpFileUrl = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:tmpFilename]];
     NSLog(@"%@",tmpFileUrl.absoluteString);
     
-    NSMutableURLRequest *request = [self.requestSerializer requestWithMultipartFormRequest:temprequest writingStreamContentsToFile:tmpFileUrl completionHandler:^(NSError * _Nullable error) {
-        NSURLSessionUploadTask *task = [self uploadTaskWithRequest:temprequest fromFile:tmpFileUrl progress:nil completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
-            // Cleanup: remove temporary file.
-            [[NSFileManager defaultManager] removeItemAtURL:tmpFileUrl error:nil];
-            
-            // Do something with the result.
-            if (error) {
-                NSLog(@"Error: %@", error);
-            } else {
-                NSLog(@"Success: %@", responseObject);
-            }
-        }];
+    [self.requestSerializer requestWithMultipartFormRequest:temprequest writingStreamContentsToFile:tmpFileUrl completionHandler:^(NSError * _Nullable error) {
+        NSURLSessionUploadTask *task = [self uploadTaskWithRequest:temprequest fromFile:tmpFileUrl progress:nil completionHandler:nil];
         [task resume];
     }];
-    
-    
-    //NSURLSessionDownloadTask *task = [self downloadTaskWithRequest:request progress:nil destination:nil completionHandler:nil];
-    
-    /*NSURLSessionUploadTask *task = [self uploadTaskWithStreamedRequest:request progress:nil completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
-        NSLog(@"RESPONSE OBJECT: %@",responseObject);
-    }];*/
-    
-    return nil;
 }
 
 @end
