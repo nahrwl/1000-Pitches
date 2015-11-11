@@ -17,6 +17,9 @@
 #import "FormViewController.h"
 #import "PitchSubmissionController.h"
 
+#import "PitchSubmissionManager.h"
+#import "VideoSubmission.h"
+
 #define kStatusViewAnimationDuration 1.0f
 #define kRecordButtonAnimationDuration 0.2f
 #define kBackButtonAnimationDuration 0.2f
@@ -730,6 +733,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // errors such as out of space errors occurred. Not really what I want.
     if ( !error ) {
         PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
+        
+#warning testing new submission manager
+        [[PitchSubmissionManager sharedManager] queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:1 forFileURL:outputFileURL]];
         
         // Queue the video for submission and save the returned submission identifier
         self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];

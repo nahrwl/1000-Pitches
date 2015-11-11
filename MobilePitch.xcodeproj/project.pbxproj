@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BBAC7FF9C7B0EC34738291E3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FE2898BB754F2C6C7B52299F /* libPods.a */; };
+		D825A1231BF336D4007BA11D /* PitchSubmissionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */; };
 		D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D850C71C1BEB0D9000896E9C /* ShadowView.m */; };
 		D86994181BECA9F900C2CBF8 /* SplashView.m in Sources */ = {isa = PBXBuildFile; fileRef = D86994171BECA9F900C2CBF8 /* SplashView.m */; };
 		D89503621BE0A61300E0BCF9 /* FormRowTextViewView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */; };
@@ -26,6 +27,7 @@
 		D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4511BDD7A28008284D4 /* FormViewController.m */; };
 		D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4571BDDF1C8008284D4 /* FormRowView.m */; };
 		D8B5F3721BE5FFA70023C8AE /* PitchSubmissionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D8B5F3711BE5FFA70023C8AE /* PitchSubmissionManager.m */; };
+		D8D26C9F1BED96DD004D5DA7 /* VideoSubmission.m in Sources */ = {isa = PBXBuildFile; fileRef = D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */; };
 		D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */; };
 		D8E105191BE0806700E1E594 /* SmarterTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = D8E105181BE0806700E1E594 /* SmarterTextField.m */; };
 		D8F0528D1BE09C5300C2D31C /* FormRowTextFieldView.m in Sources */ = {isa = PBXBuildFile; fileRef = D8F0528C1BE09C5300C2D31C /* FormRowTextFieldView.m */; };
@@ -51,6 +53,7 @@
 /* Begin PBXFileReference section */
 		1286C80E81A9B4B73E64E993 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		14A2574E4DBDB05D03E38DA9 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PitchSubmissionManagerTests.m; sourceTree = "<group>"; };
 		D850C71B1BEB0D9000896E9C /* ShadowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShadowView.h; sourceTree = "<group>"; };
 		D850C71C1BEB0D9000896E9C /* ShadowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShadowView.m; sourceTree = "<group>"; };
 		D86994161BECA9F900C2CBF8 /* SplashView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashView.h; sourceTree = "<group>"; };
@@ -88,6 +91,8 @@
 		D89DD4571BDDF1C8008284D4 /* FormRowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowView.m; sourceTree = "<group>"; };
 		D8B5F3701BE5FFA70023C8AE /* PitchSubmissionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PitchSubmissionManager.h; sourceTree = "<group>"; };
 		D8B5F3711BE5FFA70023C8AE /* PitchSubmissionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PitchSubmissionManager.m; sourceTree = "<group>"; };
+		D8D26C9D1BED96DD004D5DA7 /* VideoSubmission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoSubmission.h; sourceTree = "<group>"; };
+		D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoSubmission.m; sourceTree = "<group>"; };
 		D8E105141BE0782A00E1E594 /* NicerLookingPickerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NicerLookingPickerView.h; sourceTree = "<group>"; };
 		D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NicerLookingPickerView.m; sourceTree = "<group>"; };
 		D8E105171BE0806700E1E594 /* SmarterTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SmarterTextField.h; sourceTree = "<group>"; };
@@ -162,6 +167,8 @@
 				D89503641BE18EA400E0BCF9 /* PitchSubmissionController.m */,
 				D8B5F3701BE5FFA70023C8AE /* PitchSubmissionManager.h */,
 				D8B5F3711BE5FFA70023C8AE /* PitchSubmissionManager.m */,
+				D8D26C9D1BED96DD004D5DA7 /* VideoSubmission.h */,
+				D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */,
 				D89DD4411BDB2981008284D4 /* SplashViewController.h */,
 				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
 				D86994161BECA9F900C2CBF8 /* SplashView.h */,
@@ -217,6 +224,7 @@
 			isa = PBXGroup;
 			children = (
 				D89DD4331BDB15CD008284D4 /* MobilePitchUITests.m */,
+				D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */,
 				D89DD4351BDB15CD008284D4 /* Info.plist */,
 			);
 			path = MobilePitchUITests;
@@ -423,6 +431,7 @@
 				D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */,
 				D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */,
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
+				D8D26C9F1BED96DD004D5DA7 /* VideoSubmission.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
 				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
 				D8B5F3721BE5FFA70023C8AE /* PitchSubmissionManager.m in Sources */,
@@ -444,6 +453,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D825A1231BF336D4007BA11D /* PitchSubmissionManagerTests.m in Sources */,
 				D89DD4341BDB15CD008284D4 /* MobilePitchUITests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

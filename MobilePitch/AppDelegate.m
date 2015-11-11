@@ -10,6 +10,7 @@
 #import "SplashViewController.h"
 #import "FormViewController.h"
 #import "PitchSubmissionController.h"
+#import "PitchSubmissionManager.h"
 
 @interface AppDelegate ()
 
@@ -21,7 +22,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     // Main navigation controller
-    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:[[FormViewController alloc] init]];
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:[[SplashViewController alloc] init]];
     
     // Disable edge swiping. Doesn't make sense here, and there's too much risk it could mess something up
     navigationController.interactivePopGestureRecognizer.enabled = NO;
@@ -53,6 +54,13 @@
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     [[PitchSubmissionController sharedPitchSubmissionController] saveData];
+}
+
+#pragma mark Background Upload
+
+- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)())completionHandler {
+    NSAssert([[PitchSubmissionManager sharedManager].session.configuration.identifier isEqualToString:identifier], @"Identifiers didn't match");
+    [PitchSubmissionManager sharedManager].savedCompletionHandler = completionHandler;
 }
 
 @end

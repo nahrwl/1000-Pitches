@@ -8,9 +8,15 @@
 
 #import <AFNetworking/AFNetworking.h>
 
-@interface PitchSubmissionManager : AFHTTPSessionManager
+@class VideoSubmission;
+
+@interface PitchSubmissionManager : AFHTTPSessionManager <NSCoding>
 
 + (instancetype)sharedManager;
+
+- (void)queueVideoSubmission:(VideoSubmission *)submission;
+- (void)resume;
+- (void)stop;
 
 @property (nonatomic, copy) void (^savedCompletionHandler)(void);
 
