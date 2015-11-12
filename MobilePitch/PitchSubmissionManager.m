@@ -17,6 +17,9 @@
 // Temp directory
 #define kTemporaryFilePrefix @"PSMRequest"
 
+// Serialized singleton file name
+#define kSerializedFileName @"PSMObject"
+
 static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch.backgroundsession";
 static NSString * baseURL = @"http://52.4.50.233";
 
@@ -28,7 +31,7 @@ static NSString * baseURL = @"http://52.4.50.233";
 @property (nonatomic) BOOL shouldProcessQueue;
 
 // Currently uploading status
-- (BOOL)isUploading;
+@property (nonatomic, getter=isUploading) BOOL uploading;
 
 // Current video submission
 @property (strong, nonatomic) VideoSubmission *currentVideoSubmission;
@@ -47,8 +50,17 @@ static NSString * baseURL = @"http://52.4.50.233";
     static id sharedMyManager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedMyManager = [[self alloc] init];
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *documentsDirectory = [paths objectAtIndex:0];
+        NSString *filePath = [documentsDirectory stringByAppendingPathComponent:kSerializedFileName];
+        
+        if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+            sharedMyManager = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+        } else {
+            sharedMyManager = [[self alloc] init];
+        }
     });
+    
     return sharedMyManager;
 }
 
@@ -152,6 +164,9 @@ static NSString * baseURL = @"http://52.4.50.233";
             }
         }
         
+        // Tell self that we are no longer uploading
+        weakSelf.uploading = NO;
+        
         // move on to the next element
         [weakSelf checkUploadStatus];
     }];
@@ -173,17 +188,27 @@ static NSString * baseURL = @"http://52.4.50.233";
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     if (self = [super initWithCoder:aDecoder]) {
-        [aDecoder decodeObjectForKey:kQueuedVideoSubmissionsSerializationKey];
-        [aDecoder decodeBoolForKey:kShouldProcessQueueSerializationKey];
-        
         [self configure];
+        
+        _queuedVideoSubmissions = [[aDecoder decodeObjectForKey:kQueuedVideoSubmissionsSerializationKey] mutableCopy];
+        _shouldProcessQueue = [aDecoder decodeBoolForKey:kShouldProcessQueueSerializationKey];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
+    [super encodeWithCoder:aCoder];
+    
     [aCoder encodeObject:self.queuedVideoSubmissions forKey:kQueuedVideoSubmissionsSerializationKey];
     [aCoder encodeBool:self.shouldProcessQueue forKey:kShouldProcessQueueSerializationKey];
+}
+
+- (void)serializeObjectToDefaultFile {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDirectory stringByAppendingPathComponent:kSerializedFileName];
+    
+    [NSKeyedArchiver archiveRootObject:self toFile:filePath];
 }
 
 #pragma mark Properties
@@ -193,10 +218,6 @@ static NSString * baseURL = @"http://52.4.50.233";
         _queuedVideoSubmissions = [NSMutableArray array];
     }
     return _queuedVideoSubmissions;
-}
-
-- (BOOL)isUploading {
-    return self.tasks.count > 0;
 }
 
 #pragma mark Queue
@@ -271,6 +292,8 @@ static NSString * baseURL = @"http://52.4.50.233";
     
     [self.requestSerializer requestWithMultipartFormRequest:temprequest writingStreamContentsToFile:tmpFileUrl completionHandler:^(NSError * _Nullable error) {
         NSURLSessionUploadTask *task = [self uploadTaskWithRequest:temprequest fromFile:tmpFileUrl progress:nil completionHandler:nil];
+        
+        self.uploading = YES;
         [task resume];
     }];
 }

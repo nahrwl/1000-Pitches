@@ -27,6 +27,9 @@
     // Disable edge swiping. Doesn't make sense here, and there's too much risk it could mess something up
     navigationController.interactivePopGestureRecognizer.enabled = NO;
     
+    // Tell the PitchSubmissionController to begin uploading?
+    [PitchSubmissionManager sharedManager];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];
     [self.window makeKeyAndVisible];
@@ -54,6 +57,7 @@
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     [[PitchSubmissionController sharedPitchSubmissionController] saveData];
+    [[PitchSubmissionManager sharedManager] serializeObjectToDefaultFile];
 }
 
 #pragma mark Background Upload

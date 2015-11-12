@@ -18,6 +18,8 @@
 - (void)resume;
 - (void)stop;
 
+- (void)serializeObjectToDefaultFile;
+
 @property (nonatomic, copy) void (^savedCompletionHandler)(void);
 
 @end
