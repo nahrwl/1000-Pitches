@@ -1,5 +1,5 @@
 //
-//  PitchSubmissionManager.h
+//  VideoSubmissionManager.h
 //  MobilePitch
 //
 //  Created by Nathan Wallace on 11/1/15.
@@ -10,7 +10,7 @@
 
 @class VideoSubmission;
 
-@interface PitchSubmissionManager : AFHTTPSessionManager <NSCoding>
+@interface VideoSubmissionManager : AFHTTPSessionManager <NSCoding>
 
 + (instancetype)sharedManager;
 

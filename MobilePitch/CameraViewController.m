@@ -17,7 +17,7 @@
 #import "FormViewController.h"
 #import "PitchSubmissionController.h"
 
-#import "PitchSubmissionManager.h"
+#import "VideoSubmissionManager.h"
 #import "VideoSubmission.h"
 
 #define kStatusViewAnimationDuration 1.0f
@@ -526,8 +526,11 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
             connection.videoOrientation = previewLayer.connection.videoOrientation;
             
             // Start recording to a temporary file.
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSString *documentsDirectory = [paths objectAtIndex:0];
+            
             NSString *outputFileName = [NSProcessInfo processInfo].globallyUniqueString;
-            NSString *outputFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[outputFileName stringByAppendingPathExtension:@"mov"]];
+            NSString *outputFilePath = [documentsDirectory stringByAppendingPathComponent:[outputFileName stringByAppendingPathExtension:@"mov"]];
             [self.movieFileOutput startRecordingToOutputFileURL:[NSURL fileURLWithPath:outputFilePath] recordingDelegate:self];
         }
         else {
@@ -703,6 +706,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)error
 {
+    NSLog(@"Output URL: %@",outputFileURL);
     // Note that currentBackgroundRecordingID is used to end the background task associated with this recording.
     // This allows a new recording to be started, associated with a new UIBackgroundTaskIdentifier, once the movie file output's isRecording property
     // is back to NO — which happens sometime after this method returns.
@@ -735,7 +739,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
         
 #warning testing new submission manager
-        [[PitchSubmissionManager sharedManager] queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:1 forFileURL:outputFileURL]];
+        [[VideoSubmissionManager sharedManager] queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:1 forFileURL:outputFileURL]];
         
         // Queue the video for submission and save the returned submission identifier
         self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];

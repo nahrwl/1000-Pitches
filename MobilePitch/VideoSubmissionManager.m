@@ -1,12 +1,12 @@
 //
-//  PitchSubmissionManager.m
+//  VideoSubmissionManager.m
 //  MobilePitch
 //
 //  Created by Nathan Wallace on 11/1/15.
 //  Copyright © 2015 Spark Dev Team. All rights reserved.
 //
 
-#import "PitchSubmissionManager.h"
+#import "VideoSubmissionManager.h"
 #import "VideoSubmission.h"
 
 // NSCoding keys
@@ -23,7 +23,7 @@
 static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch.backgroundsession";
 static NSString * baseURL = @"http://52.4.50.233";
 
-@interface PitchSubmissionManager ()
+@interface VideoSubmissionManager ()
 
 @property (strong, nonatomic) NSMutableArray<VideoSubmission *> *queuedVideoSubmissions;
 
@@ -41,7 +41,7 @@ static NSString * baseURL = @"http://52.4.50.233";
 
 @end
 
-@implementation PitchSubmissionManager
+@implementation VideoSubmissionManager
 
 #pragma mark Instance Configuration
 

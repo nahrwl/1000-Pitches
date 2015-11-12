@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "PitchSubmissionManager.h"
+#import "VideoSubmissionManager.h"
 
 @interface PitchSubmissionManagerTests : XCTestCase
 

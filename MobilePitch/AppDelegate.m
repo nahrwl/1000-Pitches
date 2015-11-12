@@ -10,7 +10,7 @@
 #import "SplashViewController.h"
 #import "FormViewController.h"
 #import "PitchSubmissionController.h"
-#import "PitchSubmissionManager.h"
+#import "VideoSubmissionManager.h"
 
 @interface AppDelegate ()
 
@@ -28,7 +28,7 @@
     navigationController.interactivePopGestureRecognizer.enabled = NO;
     
     // Tell the PitchSubmissionController to begin uploading?
-    [PitchSubmissionManager sharedManager];
+    [VideoSubmissionManager sharedManager];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];
@@ -57,14 +57,14 @@
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     [[PitchSubmissionController sharedPitchSubmissionController] saveData];
-    [[PitchSubmissionManager sharedManager] serializeObjectToDefaultFile];
+    [[VideoSubmissionManager sharedManager] serializeObjectToDefaultFile];
 }
 
 #pragma mark Background Upload
 
 - (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)())completionHandler {
-    NSAssert([[PitchSubmissionManager sharedManager].session.configuration.identifier isEqualToString:identifier], @"Identifiers didn't match");
-    [PitchSubmissionManager sharedManager].savedCompletionHandler = completionHandler;
+    NSAssert([[VideoSubmissionManager sharedManager].session.configuration.identifier isEqualToString:identifier], @"Identifiers didn't match");
+    [VideoSubmissionManager sharedManager].savedCompletionHandler = completionHandler;
 }
 
 @end
