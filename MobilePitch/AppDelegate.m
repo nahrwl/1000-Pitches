@@ -28,7 +28,7 @@
     navigationController.interactivePopGestureRecognizer.enabled = NO;
     
     // Tell the PitchSubmissionController to begin uploading?
-    [VideoSubmissionManager sharedManager];
+    //[VideoSubmissionManager sharedManager];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];

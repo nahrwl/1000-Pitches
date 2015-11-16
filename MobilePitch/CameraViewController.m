@@ -739,7 +739,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
         
 #warning testing new submission manager
-        [[VideoSubmissionManager sharedManager] queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:1 forFileURL:outputFileURL]];
+        //[[VideoSubmissionManager sharedManager] queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:1 forFileURL:outputFileURL]];
         
         // Queue the video for submission and save the returned submission identifier
         self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];
@@ -931,7 +931,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
     self.view = view;
-    
+    view.clipsToBounds = YES;
     view.backgroundColor = [UIColor blackColor];
     
     // AAPLPreviewView
@@ -947,6 +947,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     [view addConstraint:[NSLayoutConstraint constraintWithItem:previewView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
     // Aspect ratio for the image
     [previewView addConstraint:[NSLayoutConstraint constraintWithItem:previewView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:previewView attribute:NSLayoutAttributeHeight multiplier:1.3333 constant:0]];
+    //[view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[previewView]|" options:NSLayoutFormatAlignAllTop metrics:nil views:NSDictionaryOfVariableBindings(previewView)]];
     
     // Top view
     UIView *topView = [[UIView alloc] init];
