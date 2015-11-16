@@ -84,6 +84,7 @@ static NSString * baseURL = @"http://52.4.50.233";
 }
 
 - (void)configure {
+    self.attemptsToRecreateUploadTasksForBackgroundSessions = YES;
     _shouldProcessQueue = YES;
     
     if (_currentUniqueIdentifier <= 0) {
@@ -92,8 +93,10 @@ static NSString * baseURL = @"http://52.4.50.233";
     
     [self configureSerializers];
     [self configureServerResponse];
-    [self configureUploadFinished];              // when upload done
-    [self configureBackgroundSessionFinished];   // when entire background session done, call completion handler
+    [self configureUploadFinished];                // when upload done
+    [self configureBackgroundSessionFinished];     // when entire background session done, call completion handler
+    [self configureNetworkReachabilityMonitoring]; // when the network status changes to be available, check submissions
+    [self checkCurrentSubmissionStatus];           // in the event a current submission is set but not submitted, requeue it
 }
 
 - (void)configureSerializers {
@@ -224,6 +227,14 @@ static NSString * baseURL = @"http://52.4.50.233";
     }];
     // Note that this block will not be called unless the
     // reachablility manager is told to start monitoring.
+    [weakSelf.reachabilityManager startMonitoring];
+}
+
+- (void)checkCurrentSubmissionStatus {
+    if (self.tasks.count == 0 && _currentVideoSubmission) {
+        // Any current submission is not being submitted and must be requeued
+        [self queueVideoSubmission:_currentVideoSubmission];
+    }
 }
 
 #pragma mark NSCoding
@@ -236,8 +247,12 @@ static NSString * baseURL = @"http://52.4.50.233";
         _queuedFormSubmissions = [[aDecoder decodeObjectForKey:kQueuedFormSubmissionsSerializationKey] mutableCopy];
         //_shouldProcessQueue = [aDecoder decodeBoolForKey:kShouldProcessQueueSerializationKey];
         
+        _currentVideoSubmission = [aDecoder decodeObjectForKey:kCurrentVideoSubmissionSerializationKey];
+        
         NSNumber *identifierNumber = [aDecoder decodeObjectForKey:kCurrentUniqueIdentifierSerializationKey];
         _currentUniqueIdentifier = identifierNumber ? identifierNumber.unsignedIntegerValue : 1;
+        
+        [self checkUploadStatus]; // begin the upload process if any submissions are outstanding
     }
     return self;
 }
@@ -248,6 +263,7 @@ static NSString * baseURL = @"http://52.4.50.233";
     [aCoder encodeObject:self.queuedVideoSubmissions forKey:kQueuedVideoSubmissionsSerializationKey];
     [aCoder encodeObject:self.queuedFormSubmissions forKey:kQueuedFormSubmissionsSerializationKey];
     //[aCoder encodeBool:self.shouldProcessQueue forKey:kShouldProcessQueueSerializationKey];
+    [aCoder encodeObject:self.currentVideoSubmission forKey:kCurrentVideoSubmissionSerializationKey];
     [aCoder encodeObject:@(self.currentUniqueIdentifier) forKey:kCurrentUniqueIdentifierSerializationKey];
 }
 
@@ -363,7 +379,12 @@ static NSString * baseURL = @"http://52.4.50.233";
 
 - (BOOL)uploadVideoSubmission:(VideoSubmission *)submission {
     NSError *reachableError = nil;
-    [submission.fileURL checkResourceIsReachableAndReturnError:&reachableError];
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSURL *fileURL = [NSURL fileURLWithPath:[documentsDirectory stringByAppendingPathComponent:submission.fileName]];
+    
+    [fileURL checkResourceIsReachableAndReturnError:&reachableError];
     
     if (!reachableError) {
         NSURL *requestUrl = [NSURL URLWithString:@"/api/upload-video" relativeToURL:self.baseURL];
@@ -376,7 +397,7 @@ static NSString * baseURL = @"http://52.4.50.233";
                                             URLString:requestUrl.absoluteString
                                             parameters:nil
                                             constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {\
-                                                [formData appendPartWithFileURL:submission.fileURL
+                                                [formData appendPartWithFileURL:fileURL
                                                                            name:@"file"
                                                                        fileName:@"file"
                                                                        mimeType:@"video/quicktime"
@@ -385,7 +406,7 @@ static NSString * baseURL = @"http://52.4.50.233";
                                             error:&errorRequest];
         if (errorFormAppend) {
             NSLog(@"Error appending file to body: %@",errorFormAppend.localizedDescription);
-            NSLog(@"Video File URL: %@",submission.fileURL);
+            NSLog(@"Video File URL: %@", fileURL);
             
             // Purge the bad request... :(
             return NO;
@@ -447,6 +468,21 @@ static NSString * baseURL = @"http://52.4.50.233";
 // A unique key representing the video data / form data pairing
 - (NSUInteger)generateUniqueIdentifier {
     return self.currentUniqueIdentifier++;
+}
+
+- (void)listAllFilesInDocumentsDirectory {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *documentsURL = [NSURL fileURLWithPath:[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject] isDirectory:YES];
+    NSArray *contents = [fileManager contentsOfDirectoryAtURL:documentsURL
+                                   includingPropertiesForKeys:@[]
+                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                        error:nil];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"pathExtension == 'mov'"];
+    for (NSURL *fileURL in [contents filteredArrayUsingPredicate:predicate]) {
+        // Enumerate each .png file in directory
+        NSLog(@"%@",fileURL.path);
+    }
 }
 
 @end

@@ -22,7 +22,7 @@
 - (instancetype)initWithIdentifier:(NSUInteger)identifer forFileURL:(NSURL *)url {
     if (self = [super init]) {
         _identifier = identifer;
-        _fileURL = url;
+        _fileName = [url lastPathComponent];
         //_formSubmission = [[FormSubmission alloc] initWithIdentifier:identifer];
     }
     return self;
@@ -33,8 +33,8 @@
         NSNumber *identifierNumber = [aDecoder decodeObjectForKey:kIdentifierKey];
         _identifier = identifierNumber ? identifierNumber.unsignedIntegerValue : 0;
         
-        NSURL *fileURL = [aDecoder decodeObjectForKey:kFileURLKey];
-        _fileURL = fileURL ? fileURL : [NSURL URLWithString:@""];
+        NSString *fileURL = [aDecoder decodeObjectForKey:kFileURLKey];
+        _fileName = fileURL ? fileURL : @"";
         
         //FormSubmission *submission = [aDecoder decodeObjectForKey:kFormSubmissionKey];
         //_formSubmission = submission ? submission : [[FormSubmission alloc] initWithIdentifier:_identifier];
@@ -44,7 +44,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     [aCoder encodeObject:@(self.identifier) forKey:kIdentifierKey];
-    [aCoder encodeObject:self.fileURL forKey:kFileURLKey];
+    [aCoder encodeObject:self.fileName forKey:kFileURLKey];
     //[aCoder encodeObject:self.formSubmission forKey:kFormSubmissionKey];
 }
 

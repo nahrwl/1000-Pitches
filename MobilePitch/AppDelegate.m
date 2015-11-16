@@ -27,8 +27,8 @@
     // Disable edge swiping. Doesn't make sense here, and there's too much risk it could mess something up
     navigationController.interactivePopGestureRecognizer.enabled = NO;
     
-    // Tell the PitchSubmissionController to begin uploading?
-    //[VideoSubmissionManager sharedManager];
+    // Create the video submission manager ahead of time
+    [VideoSubmissionManager sharedManager];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];
