@@ -13,8 +13,12 @@
 @interface VideoSubmissionManager : AFHTTPSessionManager <NSCoding>
 
 + (instancetype)sharedManager;
+- (NSUInteger)generateUniqueIdentifier;
 
 - (void)queueVideoSubmission:(VideoSubmission *)submission;
+
+- (void)setFormData:(NSDictionary *)data forIdentifier:(NSUInteger)identifier;
+
 - (void)resume;
 - (void)stop;
 

@@ -739,10 +739,13 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
         
 #warning testing new submission manager
-        //[[VideoSubmissionManager sharedManager] queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:1 forFileURL:outputFileURL]];
+        VideoSubmissionManager *vsm = [VideoSubmissionManager sharedManager];
+        
+        self.submissionIdentifier = [vsm generateUniqueIdentifier];
+        [vsm queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:self.submissionIdentifier forFileURL:outputFileURL]];
         
         // Queue the video for submission and save the returned submission identifier
-        self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];
+        //self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];
         
         // Format the duration
         CMTime duration = captureOutput.recordedDuration;

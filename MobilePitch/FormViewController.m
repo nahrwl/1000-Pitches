@@ -14,6 +14,7 @@
 #import "PitchSubmissionController.h"
 #import "ShadowView.h"
 #import "SplashView.h"
+#import "VideoSubmissionManager.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
@@ -374,7 +375,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 #pragma mark Actions
 
 - (void)submitButtonTapped:(id)sender {
-    NSLog(@"Submit!");
+    NSLog(@"Submit button tapped!");
     
     // Extract all the values from the form views and put it in the dictionary
     
@@ -424,6 +425,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     } else {
         [[PitchSubmissionController sharedPitchSubmissionController] queueFormSubmissionWithDictionary:[parameters copy] identifier:self.submissionIdentifier];
         [[PitchSubmissionController sharedPitchSubmissionController] startProcessingQueue];
+        
+        [[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
+        
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
 }

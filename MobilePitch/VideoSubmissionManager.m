@@ -8,11 +8,14 @@
 
 #import "VideoSubmissionManager.h"
 #import "VideoSubmission.h"
+#import "FormSubmission.h"
 
 // NSCoding keys
 #define kQueuedVideoSubmissionsSerializationKey @"queuedVideoSubmissions"
+#define kQueuedFormSubmissionsSerializationKey @"queuedFormSubmissions"
 #define kShouldProcessQueueSerializationKey @"shouldProcessQueue"
 #define kCurrentVideoSubmissionSerializationKey @"currentVideoSubmission"
+#define kCurrentUniqueIdentifierSerializationKey @"currentUniqueIdentifier"
 
 // Temp directory
 #define kTemporaryFilePrefix @"PSMRequest"
@@ -25,7 +28,10 @@ static NSString * baseURL = @"http://52.4.50.233";
 
 @interface VideoSubmissionManager ()
 
+@property (nonatomic, readwrite) NSUInteger currentUniqueIdentifier;
+
 @property (strong, nonatomic) NSMutableArray<VideoSubmission *> *queuedVideoSubmissions;
+@property (strong, nonatomic) NSMutableArray<FormSubmission *> *queuedFormSubmissions;
 
 // Track if the manager should continue uploading or not
 @property (nonatomic) BOOL shouldProcessQueue;
@@ -38,6 +44,8 @@ static NSString * baseURL = @"http://52.4.50.233";
 
 // Data response containing the video URL on the server
 @property (strong, nonatomic) NSMutableData *responseData;
+
+- (void)setServerURL:(NSString *)url forIdentifier:(NSUInteger)identifier;
 
 @end
 
@@ -76,7 +84,11 @@ static NSString * baseURL = @"http://52.4.50.233";
 }
 
 - (void)configure {
-    self.shouldProcessQueue = YES;
+    _shouldProcessQueue = YES;
+    
+    if (_currentUniqueIdentifier <= 0) {
+        _currentUniqueIdentifier = 1;
+    }
     
     [self configureSerializers];
     [self configureServerResponse];
@@ -142,12 +154,11 @@ static NSString * baseURL = @"http://52.4.50.233";
             // Requeue the current video submission
             if (weakSelf.currentVideoSubmission) {
                 [weakSelf queueVideoSubmission:weakSelf.currentVideoSubmission];
-                weakSelf.currentVideoSubmission = nil;
             }
         }
         
         // handle the response data
-        if (weakSelf.responseData) {
+        else if (weakSelf.responseData) {
             NSError *dataSerializationError = nil;
             NSDictionary *response = [NSJSONSerialization JSONObjectWithData:weakSelf.responseData options:0 error:&dataSerializationError];
             
@@ -156,13 +167,21 @@ static NSString * baseURL = @"http://52.4.50.233";
                 NSLog(@"String contents of data: %@",[[NSString alloc] initWithData:weakSelf.responseData encoding:NSUTF8StringEncoding]);
             }
             
+            // Important, since the data needs to be reset for the next upload
             weakSelf.responseData = nil;
             
             // Handle response
             if (response) {
                 NSLog(@"%@",response);
+                
+                NSString *newURL = response[@"video_url"];
+                if (newURL && ![newURL isEqualToString:@""]) {
+                    [weakSelf setServerURL:newURL forIdentifier:weakSelf.currentVideoSubmission.identifier];
+                }
             }
         }
+        
+        weakSelf.currentVideoSubmission = nil;
         
         // Tell self that we are no longer uploading
         weakSelf.uploading = NO;
@@ -191,7 +210,11 @@ static NSString * baseURL = @"http://52.4.50.233";
         [self configure];
         
         _queuedVideoSubmissions = [[aDecoder decodeObjectForKey:kQueuedVideoSubmissionsSerializationKey] mutableCopy];
+        _queuedFormSubmissions = [[aDecoder decodeObjectForKey:kQueuedFormSubmissionsSerializationKey] mutableCopy];
         _shouldProcessQueue = [aDecoder decodeBoolForKey:kShouldProcessQueueSerializationKey];
+        
+        NSNumber *identifierNumber = [aDecoder decodeObjectForKey:kCurrentUniqueIdentifierSerializationKey];
+        _currentUniqueIdentifier = identifierNumber ? identifierNumber.unsignedIntegerValue : 1;
     }
     return self;
 }
@@ -200,7 +223,9 @@ static NSString * baseURL = @"http://52.4.50.233";
     [super encodeWithCoder:aCoder];
     
     [aCoder encodeObject:self.queuedVideoSubmissions forKey:kQueuedVideoSubmissionsSerializationKey];
+    [aCoder encodeObject:self.queuedFormSubmissions forKey:kQueuedFormSubmissionsSerializationKey];
     [aCoder encodeBool:self.shouldProcessQueue forKey:kShouldProcessQueueSerializationKey];
+    [aCoder encodeObject:@(self.currentUniqueIdentifier) forKey:kCurrentUniqueIdentifierSerializationKey];
 }
 
 - (void)serializeObjectToDefaultFile {
@@ -220,6 +245,13 @@ static NSString * baseURL = @"http://52.4.50.233";
     return _queuedVideoSubmissions;
 }
 
+- (NSMutableArray<FormSubmission *> *)queuedFormSubmissions {
+    if (!_queuedFormSubmissions) {
+        _queuedFormSubmissions = [NSMutableArray array];
+    }
+    return _queuedFormSubmissions;
+}
+
 #pragma mark Queue
 
 - (void)queueVideoSubmission:(VideoSubmission *)submission {
@@ -233,6 +265,28 @@ static NSString * baseURL = @"http://52.4.50.233";
     VideoSubmission *submission = [self.queuedVideoSubmissions objectAtIndex:index];
     [self.queuedVideoSubmissions removeObjectAtIndex:index];
     return submission;
+}
+
+- (void)setFormData:(NSDictionary *)data forIdentifier:(NSUInteger)identifier {
+    FormSubmission *submission = [self formSubmissionWithIdentifier:identifier];
+    if (!submission) {
+        submission = [[FormSubmission alloc] initWithIdentifier:identifier];
+        [self.queuedFormSubmissions addObject:submission];
+    }
+    [submission setFormData:data];
+    
+    [self checkFormSubmissionWithIdentifier:identifier];
+}
+
+- (void)setServerURL:(NSString *)url forIdentifier:(NSUInteger)identifier {
+    FormSubmission *submission = [self formSubmissionWithIdentifier:identifier];
+    if (!submission) {
+        submission = [[FormSubmission alloc] initWithIdentifier:identifier];
+        [self.queuedFormSubmissions addObject:submission];
+    }
+    [submission setServerURL:url];
+    
+    [self checkFormSubmissionWithIdentifier:identifier];
 }
 
 #pragma mark Upload
@@ -296,6 +350,38 @@ static NSString * baseURL = @"http://52.4.50.233";
         self.uploading = YES;
         [task resume];
     }];
+}
+
+- (void)checkFormSubmissionWithIdentifier:(NSUInteger)identifier {
+    NSLog(@"Checking for submission: %lu",(unsigned long)identifier);
+    FormSubmission *submission = [self formSubmissionWithIdentifier:identifier];
+    if (submission && [submission isComplete]) {
+        // It's ready to go, submit it.
+        [submission submitWithCompletion:^(BOOL success) {
+            // Remove the submission
+            [self.queuedFormSubmissions removeObject:submission];
+            if (!success) {
+                // Add the submission to the end of the array if submission did not succeed
+                [self.queuedFormSubmissions addObject:submission];
+            }
+        }];
+    }
+}
+
+#pragma mark Helpers
+
+- (FormSubmission *)formSubmissionWithIdentifier:(NSUInteger)identifier {
+    NSIndexSet *indexSet = [self.queuedFormSubmissions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+        FormSubmission *submission = (FormSubmission *)obj;
+        return submission.identifier == identifier;
+    }];
+    NSUInteger index = indexSet.firstIndex;
+    return index != NSNotFound ? self.queuedFormSubmissions[index] : nil;
+}
+
+// A unique key representing the video data / form data pairing
+- (NSUInteger)generateUniqueIdentifier {
+    return self.currentUniqueIdentifier++;
 }
 
 @end

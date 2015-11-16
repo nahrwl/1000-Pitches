@@ -18,8 +18,8 @@
 #define kFormFieldPitchTitleKey @"pitch_title"
 // kFormFieldPitchCategoryKey must be one of the following:
 // Music, Film, Environment, Education, Tech & Hardware, Web & Software, Consumer Products & Small Business, Health, University Improvements, Mobile, Research, Video Games
-#define kFormFieldPitchCategoryKey @"pitch_category"];
-#define kFormFieldPitchDescriptionKey @"pitch_short_description"];
+#define kFormFieldPitchCategoryKey @"pitch_category";
+#define kFormFieldPitchDescriptionKey @"pitch_short_description";
 
 @protocol PitchSubmissionControllerDelegate <NSObject>
 

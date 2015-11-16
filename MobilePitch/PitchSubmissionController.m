@@ -174,7 +174,7 @@ static NSString *baseURL = @"http://52.4.50.233";
 
 - (BOOL)startProcessingQueue {
     // If there's nothing already processing
-    if (!self.currentFormSubmission && !self.currentVideoSubmission) {
+    /*if (!self.currentFormSubmission && !self.currentVideoSubmission) {
         // Search to find the lowest index from the queued videos
         // Always start by uploading a video
         NSArray *identifiers = [self.queuedVideoSubmissions valueForKey:kIdentifierKey];
@@ -222,7 +222,8 @@ static NSString *baseURL = @"http://52.4.50.233";
     } else {
         // Something's processing, come back later
         return NO;
-    }
+    }*/
+    return YES;
 }
 
 #pragma mark Private Implementation

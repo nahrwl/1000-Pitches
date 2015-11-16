@@ -8,10 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+@class FormSubmission;
+
 @interface VideoSubmission : NSObject <NSCoding>
 
 @property (nonatomic) NSUInteger identifier;
 @property (strong, nonatomic) NSURL *fileURL;
+//@property (strong, nonatomic) FormSubmission *formSubmission;
 
 - (instancetype)initWithIdentifier:(NSUInteger)identifer forFileURL:(NSURL *)url;
 

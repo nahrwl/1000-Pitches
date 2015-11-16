@@ -7,9 +7,11 @@
 //
 
 #import "VideoSubmission.h"
+#import "FormSubmission.h"
 
 #define kIdentifierKey @"kIdentifierKey"
 #define kFileURLKey @"kFileURLKey"
+#define kFormSubmissionKey @"kFormSubmissionKey"
 
 @implementation VideoSubmission
 
@@ -21,6 +23,7 @@
     if (self = [super init]) {
         _identifier = identifer;
         _fileURL = url;
+        //_formSubmission = [[FormSubmission alloc] initWithIdentifier:identifer];
     }
     return self;
 }
@@ -32,6 +35,9 @@
         
         NSURL *fileURL = [aDecoder decodeObjectForKey:kFileURLKey];
         _fileURL = fileURL ? fileURL : [NSURL URLWithString:@""];
+        
+        //FormSubmission *submission = [aDecoder decodeObjectForKey:kFormSubmissionKey];
+        //_formSubmission = submission ? submission : [[FormSubmission alloc] initWithIdentifier:_identifier];
     }
     return self;
 }
@@ -39,6 +45,7 @@
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     [aCoder encodeObject:@(self.identifier) forKey:kIdentifierKey];
     [aCoder encodeObject:self.fileURL forKey:kFileURLKey];
+    //[aCoder encodeObject:self.formSubmission forKey:kFormSubmissionKey];
 }
 
 @end

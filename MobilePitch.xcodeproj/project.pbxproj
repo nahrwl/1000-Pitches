@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BBAC7FF9C7B0EC34738291E3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FE2898BB754F2C6C7B52299F /* libPods.a */; };
+		D802B9A81BF96E8F0013CC0E /* FormSubmission.m in Sources */ = {isa = PBXBuildFile; fileRef = D802B9A71BF96E8F0013CC0E /* FormSubmission.m */; };
 		D825A1231BF336D4007BA11D /* PitchSubmissionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */; };
 		D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D850C71C1BEB0D9000896E9C /* ShadowView.m */; };
 		D86994181BECA9F900C2CBF8 /* SplashView.m in Sources */ = {isa = PBXBuildFile; fileRef = D86994171BECA9F900C2CBF8 /* SplashView.m */; };
@@ -53,6 +54,8 @@
 /* Begin PBXFileReference section */
 		1286C80E81A9B4B73E64E993 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		14A2574E4DBDB05D03E38DA9 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		D802B9A61BF96E8F0013CC0E /* FormSubmission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormSubmission.h; sourceTree = "<group>"; };
+		D802B9A71BF96E8F0013CC0E /* FormSubmission.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormSubmission.m; sourceTree = "<group>"; };
 		D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PitchSubmissionManagerTests.m; sourceTree = "<group>"; };
 		D850C71B1BEB0D9000896E9C /* ShadowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShadowView.h; sourceTree = "<group>"; };
 		D850C71C1BEB0D9000896E9C /* ShadowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShadowView.m; sourceTree = "<group>"; };
@@ -169,6 +172,8 @@
 				D8B5F3711BE5FFA70023C8AE /* VideoSubmissionManager.m */,
 				D8D26C9D1BED96DD004D5DA7 /* VideoSubmission.h */,
 				D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */,
+				D802B9A61BF96E8F0013CC0E /* FormSubmission.h */,
+				D802B9A71BF96E8F0013CC0E /* FormSubmission.m */,
 				D89DD4411BDB2981008284D4 /* SplashViewController.h */,
 				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
 				D86994161BECA9F900C2CBF8 /* SplashView.h */,
@@ -426,6 +431,7 @@
 				D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */,
 				D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */,
 				D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */,
+				D802B9A81BF96E8F0013CC0E /* FormSubmission.m in Sources */,
 				D8F0528D1BE09C5300C2D31C /* FormRowTextFieldView.m in Sources */,
 				D89503621BE0A61300E0BCF9 /* FormRowTextViewView.m in Sources */,
 				D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */,
