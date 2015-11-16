@@ -14,6 +14,8 @@
 @property (strong, nonatomic) NSDictionary *formData;
 @property (strong, nonatomic) NSString *serverURL;
 
+@property (nonatomic, readonly) BOOL uploading;
+
 - (instancetype)initWithIdentifier:(NSUInteger)identifier;
 
 - (BOOL)isComplete;

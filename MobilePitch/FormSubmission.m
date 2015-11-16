@@ -16,11 +16,18 @@
 
 static NSString *baseURL = @"http://52.4.50.233";
 
+@interface FormSubmission ()
+
+@property (nonatomic) BOOL uploading;
+
+@end
+
 @implementation FormSubmission
 
 - (instancetype)initWithIdentifier:(NSUInteger)identifier {
     if (self = [super init]) {
         _identifier = identifier;
+        _uploading = NO;
     }
     return self;
 }
@@ -56,7 +63,9 @@ static NSString *baseURL = @"http://52.4.50.233";
 #pragma mark Submission
 
 - (void)submitWithCompletion:(void (^)(BOOL))completion {
-    if ([self isComplete]) {
+    if ([self isComplete] && !self.uploading) {
+        self.uploading = YES;
+        
         NSDictionary *input = self.formData;
         NSString *videoURL = self.serverURL;
         
@@ -79,6 +88,8 @@ static NSString *baseURL = @"http://52.4.50.233";
             NSLog(@"JSON: %@", responseObject);
             //here is place for code executed in success case
             
+            self.uploading = NO;
+            
             // return yes
             completion(YES);
             
@@ -88,11 +99,15 @@ static NSString *baseURL = @"http://52.4.50.233";
             
             NSLog(@"Error: %@", [error localizedDescription]);
             
+            self.uploading = NO;
+            
             // return no
             completion(NO);
         }];
+    } else if (self.uploading) {
+        NSLog(@"FormSubmission with id %lu is already uploading.",self.identifier);
     } else {
-        NSLog(@"Inputted form dictionary was nil. Not submitting.");
+        NSLog(@"FormSubmission with id %lu is not complete. Not submitting.",(unsigned long)self.identifier);
         
         // return no
         completion(NO);

@@ -155,6 +155,15 @@ static NSString * baseURL = @"http://52.4.50.233";
             if (weakSelf.currentVideoSubmission) {
                 [weakSelf queueVideoSubmission:weakSelf.currentVideoSubmission];
             }
+            
+            // Diagnose error here and take appropriate steps
+            
+            // Check the internet connection
+            if (!weakSelf.reachabilityManager.reachable) {
+                [weakSelf stop];
+                [weakSelf.reachabilityManager startMonitoring];
+            }
+            
         }
         
         // handle the response data
@@ -203,6 +212,20 @@ static NSString * baseURL = @"http://52.4.50.233";
     }];
 }
 
+- (void)configureNetworkReachabilityMonitoring
+{
+    typeof(self) __weak weakSelf = self;
+    
+    [self.reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        if (status == AFNetworkReachabilityStatusReachableViaWiFi || status == AFNetworkReachabilityStatusReachableViaWWAN) {
+            // Network is reachable
+            [weakSelf resume];
+        }
+    }];
+    // Note that this block will not be called unless the
+    // reachablility manager is told to start monitoring.
+}
+
 #pragma mark NSCoding
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -211,7 +234,7 @@ static NSString * baseURL = @"http://52.4.50.233";
         
         _queuedVideoSubmissions = [[aDecoder decodeObjectForKey:kQueuedVideoSubmissionsSerializationKey] mutableCopy];
         _queuedFormSubmissions = [[aDecoder decodeObjectForKey:kQueuedFormSubmissionsSerializationKey] mutableCopy];
-        _shouldProcessQueue = [aDecoder decodeBoolForKey:kShouldProcessQueueSerializationKey];
+        //_shouldProcessQueue = [aDecoder decodeBoolForKey:kShouldProcessQueueSerializationKey];
         
         NSNumber *identifierNumber = [aDecoder decodeObjectForKey:kCurrentUniqueIdentifierSerializationKey];
         _currentUniqueIdentifier = identifierNumber ? identifierNumber.unsignedIntegerValue : 1;
@@ -224,7 +247,7 @@ static NSString * baseURL = @"http://52.4.50.233";
     
     [aCoder encodeObject:self.queuedVideoSubmissions forKey:kQueuedVideoSubmissionsSerializationKey];
     [aCoder encodeObject:self.queuedFormSubmissions forKey:kQueuedFormSubmissionsSerializationKey];
-    [aCoder encodeBool:self.shouldProcessQueue forKey:kShouldProcessQueueSerializationKey];
+    //[aCoder encodeBool:self.shouldProcessQueue forKey:kShouldProcessQueueSerializationKey];
     [aCoder encodeObject:@(self.currentUniqueIdentifier) forKey:kCurrentUniqueIdentifierSerializationKey];
 }
 
@@ -301,6 +324,16 @@ static NSString * baseURL = @"http://52.4.50.233";
 }
 
 - (void)checkUploadStatus {
+    // First, upload outstanding form submissions
+    NSIndexSet *indexSet = [self.queuedFormSubmissions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+        FormSubmission *submission = (FormSubmission *)obj;
+        return submission.isComplete && !submission.uploading;
+    }];
+    [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+        [self submitFormSubmission:self.queuedFormSubmissions[idx]];
+    }];
+    
+    // Now check the videos queue
     if (self.shouldProcessQueue && !self.isUploading) {
         // Process the next video!
         [self backgroundUploadNextVideo];
@@ -316,45 +349,72 @@ static NSString * baseURL = @"http://52.4.50.233";
         self.currentVideoSubmission = [self dequeueVideoSubmissionAtIndex:0];
         
         // Upload the video submission
-        [self uploadVideoSubmission:self.currentVideoSubmission];
+        BOOL success = [self uploadVideoSubmission:self.currentVideoSubmission];
+        if (!success) {
+            NSUInteger submissionIndex = [self indexOfFormSubmissionWithIdentifier:self.currentVideoSubmission.identifier];
+            if (submissionIndex != NSNotFound) {
+                [self.queuedFormSubmissions removeObjectAtIndex:submissionIndex];
+            }
+            self.currentVideoSubmission = nil;
+            [self checkUploadStatus];
+        }
     }
 }
 
-- (void)uploadVideoSubmission:(VideoSubmission *)submission {
-    NSURL *requestUrl = [NSURL URLWithString:@"/api/upload-video" relativeToURL:self.baseURL];
+- (BOOL)uploadVideoSubmission:(VideoSubmission *)submission {
+    NSError *reachableError = nil;
+    [submission.fileURL checkResourceIsReachableAndReturnError:&reachableError];
     
-    NSError *errorFormAppend;
-    NSError *errorRequest;
-    
-    NSMutableURLRequest *temprequest = [self.requestSerializer
-                                    multipartFormRequestWithMethod:@"POST"
-                                    URLString:requestUrl.absoluteString
-                                    parameters:nil
-                                    constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
-                                        NSError *error = errorFormAppend;
-                                        [formData appendPartWithFileURL:submission.fileURL
-                                                                   name:@"file"
-                                                               fileName:@"file"
-                                                               mimeType:@"video/quicktime"
-                                                                  error:&error];
-                                    }
-                                    error:&errorRequest];
-    
-    NSString* tmpFilename = [NSString stringWithFormat:@"%@%f", kTemporaryFilePrefix, [NSDate timeIntervalSinceReferenceDate]];
-    NSURL* tmpFileUrl = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:tmpFilename]];
-    NSLog(@"%@",tmpFileUrl.absoluteString);
-    
-    [self.requestSerializer requestWithMultipartFormRequest:temprequest writingStreamContentsToFile:tmpFileUrl completionHandler:^(NSError * _Nullable error) {
-        NSURLSessionUploadTask *task = [self uploadTaskWithRequest:temprequest fromFile:tmpFileUrl progress:nil completionHandler:nil];
+    if (!reachableError) {
+        NSURL *requestUrl = [NSURL URLWithString:@"/api/upload-video" relativeToURL:self.baseURL];
         
-        self.uploading = YES;
-        [task resume];
-    }];
+        __block NSError *errorFormAppend;
+        NSError *errorRequest;
+        
+        NSMutableURLRequest *temprequest = [self.requestSerializer
+                                            multipartFormRequestWithMethod:@"POST"
+                                            URLString:requestUrl.absoluteString
+                                            parameters:nil
+                                            constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {\
+                                                [formData appendPartWithFileURL:submission.fileURL
+                                                                           name:@"file"
+                                                                       fileName:@"file"
+                                                                       mimeType:@"video/quicktime"
+                                                                          error:&errorFormAppend];
+                                            }
+                                            error:&errorRequest];
+        if (errorFormAppend) {
+            NSLog(@"Error appending file to body: %@",errorFormAppend.localizedDescription);
+            NSLog(@"Video File URL: %@",submission.fileURL);
+            
+            // Purge the bad request... :(
+            return NO;
+        }
+        
+        NSString* tmpFilename = [NSString stringWithFormat:@"%@%f", kTemporaryFilePrefix, [NSDate timeIntervalSinceReferenceDate]];
+        NSURL* tmpFileUrl = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:tmpFilename]];
+        //NSLog(@"%@",tmpFileUrl.absoluteString);
+        
+        [self.requestSerializer requestWithMultipartFormRequest:temprequest writingStreamContentsToFile:tmpFileUrl completionHandler:^(NSError * _Nullable error) {
+            self.uploading = YES;
+            NSURLSessionUploadTask *task = [self uploadTaskWithRequest:temprequest fromFile:tmpFileUrl progress:nil completionHandler:nil];
+            
+            [task resume];
+        }];
+        return YES;
+    } else {
+        NSLog(@"File not reachable: %@",reachableError.localizedDescription);
+    }
+    return NO;
 }
 
 - (void)checkFormSubmissionWithIdentifier:(NSUInteger)identifier {
     NSLog(@"Checking for submission: %lu",(unsigned long)identifier);
     FormSubmission *submission = [self formSubmissionWithIdentifier:identifier];
+    [self submitFormSubmission:submission];
+}
+
+- (void)submitFormSubmission:(FormSubmission *)submission {
     if (submission && [submission isComplete]) {
         // It's ready to go, submit it.
         [submission submitWithCompletion:^(BOOL success) {
@@ -371,12 +431,17 @@ static NSString * baseURL = @"http://52.4.50.233";
 #pragma mark Helpers
 
 - (FormSubmission *)formSubmissionWithIdentifier:(NSUInteger)identifier {
+    NSUInteger index = [self indexOfFormSubmissionWithIdentifier:identifier];
+    return index != NSNotFound ? self.queuedFormSubmissions[index] : nil;
+}
+
+- (NSUInteger)indexOfFormSubmissionWithIdentifier:(NSUInteger)identifier {
     NSIndexSet *indexSet = [self.queuedFormSubmissions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
         FormSubmission *submission = (FormSubmission *)obj;
         return submission.identifier == identifier;
     }];
     NSUInteger index = indexSet.firstIndex;
-    return index != NSNotFound ? self.queuedFormSubmissions[index] : nil;
+    return index;
 }
 
 // A unique key representing the video data / form data pairing
