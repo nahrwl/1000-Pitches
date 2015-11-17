@@ -163,41 +163,10 @@
 			children = (
 				D89DD40E1BDB15CD008284D4 /* AppDelegate.h */,
 				D89DD40F1BDB15CD008284D4 /* AppDelegate.m */,
-				D8B5F3701BE5FFA70023C8AE /* VideoSubmissionManager.h */,
-				D8B5F3711BE5FFA70023C8AE /* VideoSubmissionManager.m */,
-				D8D26C9D1BED96DD004D5DA7 /* VideoSubmission.h */,
-				D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */,
-				D802B9A61BF96E8F0013CC0E /* FormSubmission.h */,
-				D802B9A71BF96E8F0013CC0E /* FormSubmission.m */,
-				D89DD4411BDB2981008284D4 /* SplashViewController.h */,
-				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
-				D86994161BECA9F900C2CBF8 /* SplashView.h */,
-				D86994171BECA9F900C2CBF8 /* SplashView.m */,
-				D89DD4441BDC0441008284D4 /* CameraViewController.h */,
-				D89DD4451BDC0441008284D4 /* CameraViewController.m */,
-				D89DD44A1BDC5226008284D4 /* AAPLPreviewView.h */,
-				D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */,
-				D89DD4471BDC38B4008284D4 /* AccessRequestViewController.h */,
-				D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */,
-				D89DD44D1BDCDC22008284D4 /* FinishedRecordingViewController.h */,
-				D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */,
-				D89DD4501BDD7A28008284D4 /* FormViewController.h */,
-				D89DD4511BDD7A28008284D4 /* FormViewController.m */,
-				D850C71B1BEB0D9000896E9C /* ShadowView.h */,
-				D850C71C1BEB0D9000896E9C /* ShadowView.m */,
-				D8E105141BE0782A00E1E594 /* NicerLookingPickerView.h */,
-				D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */,
-				D8E105171BE0806700E1E594 /* SmarterTextField.h */,
-				D8E105181BE0806700E1E594 /* SmarterTextField.m */,
-				D89DD4561BDDF1C8008284D4 /* FormRowView.h */,
-				D89DD4571BDDF1C8008284D4 /* FormRowView.m */,
-				D8F0528B1BE09C5300C2D31C /* FormRowTextFieldView.h */,
-				D8F0528C1BE09C5300C2D31C /* FormRowTextFieldView.m */,
-				D89503601BE0A61300E0BCF9 /* FormRowTextViewView.h */,
-				D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */,
-				D89DD41A1BDB15CD008284D4 /* Assets.xcassets */,
-				D89DD41C1BDB15CD008284D4 /* LaunchScreen.storyboard */,
-				D89DD41F1BDB15CD008284D4 /* Info.plist */,
+				D8A45B371BFAD7BF00C7754C /* Model */,
+				D8A45B3D1BFAD82E00C7754C /* View Controllers */,
+				D8A45B3E1BFAD84900C7754C /* Views */,
+				D8A45B3F1BFAD85E00C7754C /* Assets */,
 				D89DD40B1BDB15CD008284D4 /* Supporting Files */,
 			);
 			path = MobilePitch;
@@ -206,6 +175,7 @@
 		D89DD40B1BDB15CD008284D4 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				D89DD41F1BDB15CD008284D4 /* Info.plist */,
 				D89DD40C1BDB15CD008284D4 /* main.m */,
 			);
 			name = "Supporting Files";
@@ -228,6 +198,116 @@
 				D89DD4351BDB15CD008284D4 /* Info.plist */,
 			);
 			path = MobilePitchUITests;
+			sourceTree = "<group>";
+		};
+		D8A45B371BFAD7BF00C7754C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D8B5F3701BE5FFA70023C8AE /* VideoSubmissionManager.h */,
+				D8B5F3711BE5FFA70023C8AE /* VideoSubmissionManager.m */,
+				D8D26C9D1BED96DD004D5DA7 /* VideoSubmission.h */,
+				D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */,
+				D802B9A61BF96E8F0013CC0E /* FormSubmission.h */,
+				D802B9A71BF96E8F0013CC0E /* FormSubmission.m */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		D8A45B381BFAD7D000C7754C /* Video Recording */ = {
+			isa = PBXGroup;
+			children = (
+				D89DD4441BDC0441008284D4 /* CameraViewController.h */,
+				D89DD4451BDC0441008284D4 /* CameraViewController.m */,
+				D8A45B3C1BFAD82100C7754C /* Views */,
+				D89DD4471BDC38B4008284D4 /* AccessRequestViewController.h */,
+				D89DD4481BDC38B4008284D4 /* AccessRequestViewController.m */,
+				D89DD44D1BDCDC22008284D4 /* FinishedRecordingViewController.h */,
+				D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */,
+			);
+			name = "Video Recording";
+			sourceTree = "<group>";
+		};
+		D8A45B391BFAD80100C7754C /* Form */ = {
+			isa = PBXGroup;
+			children = (
+				D89DD4501BDD7A28008284D4 /* FormViewController.h */,
+				D89DD4511BDD7A28008284D4 /* FormViewController.m */,
+			);
+			name = Form;
+			sourceTree = "<group>";
+		};
+		D8A45B3B1BFAD81300C7754C /* Splash Screen */ = {
+			isa = PBXGroup;
+			children = (
+				D89DD4411BDB2981008284D4 /* SplashViewController.h */,
+				D89DD4421BDB2981008284D4 /* SplashViewController.m */,
+				D86994161BECA9F900C2CBF8 /* SplashView.h */,
+				D86994171BECA9F900C2CBF8 /* SplashView.m */,
+			);
+			name = "Splash Screen";
+			sourceTree = "<group>";
+		};
+		D8A45B3C1BFAD82100C7754C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D89DD44A1BDC5226008284D4 /* AAPLPreviewView.h */,
+				D89DD44B1BDC5226008284D4 /* AAPLPreviewView.m */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		D8A45B3D1BFAD82E00C7754C /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				D8A45B3B1BFAD81300C7754C /* Splash Screen */,
+				D8A45B381BFAD7D000C7754C /* Video Recording */,
+				D8A45B391BFAD80100C7754C /* Form */,
+			);
+			name = "View Controllers";
+			sourceTree = "<group>";
+		};
+		D8A45B3E1BFAD84900C7754C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D8A45B411BFAD88B00C7754C /* UI Element Subclasses */,
+				D8A45B401BFAD86700C7754C /* Form Rows */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		D8A45B3F1BFAD85E00C7754C /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				D89DD41A1BDB15CD008284D4 /* Assets.xcassets */,
+				D89DD41C1BDB15CD008284D4 /* LaunchScreen.storyboard */,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
+		D8A45B401BFAD86700C7754C /* Form Rows */ = {
+			isa = PBXGroup;
+			children = (
+				D89DD4561BDDF1C8008284D4 /* FormRowView.h */,
+				D89DD4571BDDF1C8008284D4 /* FormRowView.m */,
+				D8F0528B1BE09C5300C2D31C /* FormRowTextFieldView.h */,
+				D8F0528C1BE09C5300C2D31C /* FormRowTextFieldView.m */,
+				D89503601BE0A61300E0BCF9 /* FormRowTextViewView.h */,
+				D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */,
+			);
+			name = "Form Rows";
+			sourceTree = "<group>";
+		};
+		D8A45B411BFAD88B00C7754C /* UI Element Subclasses */ = {
+			isa = PBXGroup;
+			children = (
+				D850C71B1BEB0D9000896E9C /* ShadowView.h */,
+				D850C71C1BEB0D9000896E9C /* ShadowView.m */,
+				D8E105141BE0782A00E1E594 /* NicerLookingPickerView.h */,
+				D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */,
+				D8E105171BE0806700E1E594 /* SmarterTextField.h */,
+				D8E105181BE0806700E1E594 /* SmarterTextField.m */,
+			);
+			name = "UI Element Subclasses";
 			sourceTree = "<group>";
 		};
 		E1A3AEBE4CAFFCFB3DD8965B /* Pods */ = {
