@@ -9,7 +9,6 @@
 #import "AppDelegate.h"
 #import "SplashViewController.h"
 #import "FormViewController.h"
-#import "PitchSubmissionController.h"
 #import "VideoSubmissionManager.h"
 
 @interface AppDelegate ()

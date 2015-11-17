@@ -11,7 +11,6 @@
 #import "FormRowTextViewView.h"
 #import "NicerLookingPickerView.h"
 #import "SmarterTextField.h"
-#import "PitchSubmissionController.h"
 #import "ShadowView.h"
 #import "SplashView.h"
 #import "VideoSubmissionManager.h"
@@ -423,9 +422,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         // Set the highest field to become the first responder
         [[self.view viewWithTag:errorIndex + 1000] becomeFirstResponder];
     } else {
-        [[PitchSubmissionController sharedPitchSubmissionController] queueFormSubmissionWithDictionary:[parameters copy] identifier:self.submissionIdentifier];
-        [[PitchSubmissionController sharedPitchSubmissionController] startProcessingQueue];
-        
         [[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
         
         [self.navigationController popToRootViewControllerAnimated:YES];

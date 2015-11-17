@@ -15,7 +15,6 @@
 #import "AAPLPreviewView.h"
 #import "FinishedRecordingViewController.h"
 #import "FormViewController.h"
-#import "PitchSubmissionController.h"
 
 #import "VideoSubmissionManager.h"
 #import "VideoSubmission.h"
@@ -736,9 +735,6 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // This used to be if (success), however I changed it to !error because saving would continue even if
     // errors such as out of space errors occurred. Not really what I want.
     if ( !error ) {
-        PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
-        
-#warning testing new submission manager
         VideoSubmissionManager *vsm = [VideoSubmissionManager sharedManager];
         
         self.submissionIdentifier = [vsm generateUniqueIdentifier];
@@ -879,10 +875,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 #pragma mark Finished Recording View Controller Delegate
 - (void)submitVideo {
-    PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
-    
-    // Begin uploading the video
-    [psc startProcessingQueue];
+#warning Video should actually be submitted here rather than in the end recording delegate method
     
     FormViewController *formViewController = [[FormViewController alloc] init];
     formViewController.submissionIdentifier = self.submissionIdentifier;
@@ -893,13 +886,8 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 - (void)tryAgain {
     [self.navigationController popToViewController:self animated:YES];
     
-    PitchSubmissionController *psc = [PitchSubmissionController sharedPitchSubmissionController];
+#warning Delete the video submission here
     
-    // Remove the video recording from the queue
-    // Remove the video file
-    // If the video is already being submitted, nothing will be removed.
-#warning Jank. Should be using kDataKey constant.
-    [[NSFileManager defaultManager] removeItemAtURL:[psc dequeueVideoForIdentifier:self.submissionIdentifier][@"kDataKey"] error:nil];
 }
 
 #pragma mark View Setup
