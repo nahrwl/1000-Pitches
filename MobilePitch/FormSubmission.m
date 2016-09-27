@@ -14,7 +14,7 @@
 #define kFormDataKey @"kFormDataKey"
 #define kServerURLKey @"kServerURLKey"
 
-static NSString *baseURL = @"http://52.4.50.233";
+static NSString *baseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com";
 
 @interface FormSubmission ()
 

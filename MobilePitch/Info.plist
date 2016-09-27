@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The microphone is needed to record your pitch</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera is needed to record your pitch</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -28,7 +32,7 @@
 		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>52.4.50.233</key>
+			<key>1kp-api-dev.us-west-1.elasticbeanstalk.com</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<true/>
