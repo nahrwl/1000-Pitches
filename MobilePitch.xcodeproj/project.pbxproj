@@ -10,6 +10,7 @@
 		BBAC7FF9C7B0EC34738291E3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FE2898BB754F2C6C7B52299F /* libPods.a */; };
 		D802B9A81BF96E8F0013CC0E /* FormSubmission.m in Sources */ = {isa = PBXBuildFile; fileRef = D802B9A71BF96E8F0013CC0E /* FormSubmission.m */; };
 		D825A1231BF336D4007BA11D /* PitchSubmissionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */; };
+		D83D32361DA4259D00680A9C /* FinishedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D83D32351DA4259D00680A9C /* FinishedViewController.m */; };
 		D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D850C71C1BEB0D9000896E9C /* ShadowView.m */; };
 		D86994181BECA9F900C2CBF8 /* SplashView.m in Sources */ = {isa = PBXBuildFile; fileRef = D86994171BECA9F900C2CBF8 /* SplashView.m */; };
 		D89503621BE0A61300E0BCF9 /* FormRowTextViewView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */; };
@@ -56,6 +57,8 @@
 		D802B9A61BF96E8F0013CC0E /* FormSubmission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormSubmission.h; sourceTree = "<group>"; };
 		D802B9A71BF96E8F0013CC0E /* FormSubmission.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormSubmission.m; sourceTree = "<group>"; };
 		D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PitchSubmissionManagerTests.m; sourceTree = "<group>"; };
+		D83D32341DA4259D00680A9C /* FinishedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FinishedViewController.h; sourceTree = "<group>"; };
+		D83D32351DA4259D00680A9C /* FinishedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FinishedViewController.m; sourceTree = "<group>"; };
 		D850C71B1BEB0D9000896E9C /* ShadowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShadowView.h; sourceTree = "<group>"; };
 		D850C71C1BEB0D9000896E9C /* ShadowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShadowView.m; sourceTree = "<group>"; };
 		D86994161BECA9F900C2CBF8 /* SplashView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashView.h; sourceTree = "<group>"; };
@@ -134,6 +137,15 @@
 				FE2898BB754F2C6C7B52299F /* libPods.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D83D32331DA424C300680A9C /* Finished */ = {
+			isa = PBXGroup;
+			children = (
+				D83D32341DA4259D00680A9C /* FinishedViewController.h */,
+				D83D32351DA4259D00680A9C /* FinishedViewController.m */,
+			);
+			name = Finished;
 			sourceTree = "<group>";
 		};
 		D89DD3FF1BDB15CD008284D4 = {
@@ -259,6 +271,7 @@
 		D8A45B3D1BFAD82E00C7754C /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				D83D32331DA424C300680A9C /* Finished */,
 				D8A45B3B1BFAD81300C7754C /* Splash Screen */,
 				D8A45B381BFAD7D000C7754C /* Video Recording */,
 				D8A45B391BFAD80100C7754C /* Form */,
@@ -518,6 +531,7 @@
 				D8E105191BE0806700E1E594 /* SmarterTextField.m in Sources */,
 				D89DD44C1BDC5226008284D4 /* AAPLPreviewView.m in Sources */,
 				D86994181BECA9F900C2CBF8 /* SplashView.m in Sources */,
+				D83D32361DA4259D00680A9C /* FinishedViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
