@@ -139,7 +139,7 @@
     NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, logo, headerLabel, listLabel, button, topLayoutGuide, bottomLayoutGuide);
     
     // Aspect ratio for the image
-    [logo addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:logo attribute:NSLayoutAttributeHeight multiplier:2.1441 constant:0]];
+    [logo addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:logo attribute:NSLayoutAttributeHeight multiplier:1.7602 constant:0]];
     
     // Horizontal
     NSArray *horizontalButtonLayoutConstraints =

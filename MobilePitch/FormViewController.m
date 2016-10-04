@@ -23,7 +23,7 @@
 #define kFormItemSubmissionKeyKey @"kFormItemSubmissionKeyKey"
 #define kFormItemOptionsKey @"kFormItemOptionsKey"
 
-#define kScrollViewTopInset 268
+#define kScrollViewTopInset 208
 
 typedef NS_ENUM(NSInteger, FormCellType) {
     FormCellTypeTextField,
@@ -60,6 +60,12 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     
     // Set tint color
     self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    
+    // Remove nav bar transparency
+    self.navigationController.navigationBar.translucent = NO;
+    
+    // Change the bar tint color to match the form background
+    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
     
     // Create the form items. Technically could be loaded in from a plist or something.
     NSArray *formItems = [FormViewController createFormItems];
@@ -550,7 +556,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     logo.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:logo];
     // Autolayout
-    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-115-[logo]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(logo)];
+    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-55-[logo]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(logo)];
     [view addConstraints:vLogoConstraints];
     
     [view addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
