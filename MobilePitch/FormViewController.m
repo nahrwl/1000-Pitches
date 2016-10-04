@@ -233,7 +233,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // I don't think this ever gets called
             // Some magic being is scrolling my views for me
             // Or I'm just crazy...
-            [self.scrollView scrollRectToVisible:activeField.frame animated:YES];
+            //[self.scrollView scrollRectToVisible:activeField.frame animated:YES];
         }
     }
 }
