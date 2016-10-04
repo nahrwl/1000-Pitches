@@ -2,27 +2,27 @@
   "images" : [
     {
       "idiom" : "iphone",
-      "filename" : "colorlogo_Logo Copy.png",
+      "filename" : "GLOWLOGOsplash.png",
       "scale" : "1x"
     },
     {
       "idiom" : "iphone",
-      "filename" : "colorlogo_Logo Copy@2x.png",
+      "filename" : "GLOWLOGOsplash@2x.png",
       "scale" : "2x"
     },
     {
       "idiom" : "iphone",
-      "filename" : "colorlogo_Logo Copy@3x.png",
+      "filename" : "GLOWLOGOsplash@3x.png",
       "scale" : "3x"
     },
     {
       "idiom" : "ipad",
-      "filename" : "colorlogo_ipad.png",
+      "filename" : "GLOWLOGOsplash-ipad.png",
       "scale" : "1x"
     },
     {
       "idiom" : "ipad",
-      "filename" : "colorlogo_ipad@2x.png",
+      "filename" : "GLOWLOGOsplash-ipad@2x.png",
       "scale" : "2x"
     }
   ],
