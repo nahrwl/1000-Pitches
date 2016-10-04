@@ -156,7 +156,7 @@
     
     // Vertical
     NSArray *verticalLayoutConstraints =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide][button(48)]-20-|"
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide]-(45@1)-[button(48)]-20-|"
                                             options:NSLayoutFormatAlignAllCenterX
                                             metrics:nil
                                               views:views];

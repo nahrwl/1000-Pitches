@@ -14,6 +14,7 @@
 #import "ShadowView.h"
 #import "SplashView.h"
 #import "VideoSubmissionManager.h"
+#import "FinishedViewController.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
@@ -428,9 +429,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         // Set the highest field to become the first responder
         [[self.view viewWithTag:errorIndex + 1000] becomeFirstResponder];
     } else {
-        [[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
+        //[[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
         
-        [self.navigationController popToRootViewControllerAnimated:YES];
+        [self.navigationController pushViewController:[[FinishedViewController alloc] init] animated:YES];
     }
 }
 
