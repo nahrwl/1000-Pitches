@@ -429,7 +429,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         // Set the highest field to become the first responder
         [[self.view viewWithTag:errorIndex + 1000] becomeFirstResponder];
     } else {
-        //[[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
+        [[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
         
         [self.navigationController pushViewController:[[FinishedViewController alloc] init] animated:YES];
     }

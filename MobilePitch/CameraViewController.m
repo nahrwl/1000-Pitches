@@ -738,7 +738,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
         VideoSubmissionManager *vsm = [VideoSubmissionManager sharedManager];
         
         self.submissionIdentifier = [vsm generateUniqueIdentifier];
-        //[vsm queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:self.submissionIdentifier forFileURL:outputFileURL]];
+        [vsm queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:self.submissionIdentifier forFileURL:outputFileURL]];
         
         // Queue the video for submission and save the returned submission identifier
         //self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];
