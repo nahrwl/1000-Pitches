@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		BBAC7FF9C7B0EC34738291E3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FE2898BB754F2C6C7B52299F /* libPods.a */; };
 		D802B9A81BF96E8F0013CC0E /* FormSubmission.m in Sources */ = {isa = PBXBuildFile; fileRef = D802B9A71BF96E8F0013CC0E /* FormSubmission.m */; };
+		D8089EA01DACB51F00D82584 /* Submission.m in Sources */ = {isa = PBXBuildFile; fileRef = D8089E9F1DACB51F00D82584 /* Submission.m */; };
+		D8089EA31DACB5C300D82584 /* SubmissionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D8089EA21DACB5C300D82584 /* SubmissionManager.m */; };
 		D825A1231BF336D4007BA11D /* PitchSubmissionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */; };
 		D83D32361DA4259D00680A9C /* FinishedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D83D32351DA4259D00680A9C /* FinishedViewController.m */; };
 		D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D850C71C1BEB0D9000896E9C /* ShadowView.m */; };
@@ -56,6 +58,10 @@
 		14A2574E4DBDB05D03E38DA9 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		D802B9A61BF96E8F0013CC0E /* FormSubmission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormSubmission.h; sourceTree = "<group>"; };
 		D802B9A71BF96E8F0013CC0E /* FormSubmission.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormSubmission.m; sourceTree = "<group>"; };
+		D8089E9E1DACB51F00D82584 /* Submission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Submission.h; sourceTree = "<group>"; };
+		D8089E9F1DACB51F00D82584 /* Submission.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Submission.m; sourceTree = "<group>"; };
+		D8089EA11DACB5C300D82584 /* SubmissionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubmissionManager.h; sourceTree = "<group>"; };
+		D8089EA21DACB5C300D82584 /* SubmissionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubmissionManager.m; sourceTree = "<group>"; };
 		D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PitchSubmissionManagerTests.m; sourceTree = "<group>"; };
 		D83D32341DA4259D00680A9C /* FinishedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FinishedViewController.h; sourceTree = "<group>"; };
 		D83D32351DA4259D00680A9C /* FinishedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FinishedViewController.m; sourceTree = "<group>"; };
@@ -221,6 +227,10 @@
 				D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */,
 				D802B9A61BF96E8F0013CC0E /* FormSubmission.h */,
 				D802B9A71BF96E8F0013CC0E /* FormSubmission.m */,
+				D8089E9E1DACB51F00D82584 /* Submission.h */,
+				D8089E9F1DACB51F00D82584 /* Submission.m */,
+				D8089EA11DACB5C300D82584 /* SubmissionManager.h */,
+				D8089EA21DACB5C300D82584 /* SubmissionManager.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -403,7 +413,7 @@
 					D89DD4071BDB15CD008284D4 = {
 						CreatedOnToolsVersion = 7.1;
 						DevelopmentTeam = D633AVN577;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					D89DD4231BDB15CD008284D4 = {
 						CreatedOnToolsVersion = 7.1;
@@ -516,6 +526,7 @@
 			files = (
 				D89DD4101BDB15CD008284D4 /* AppDelegate.m in Sources */,
 				D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */,
+				D8089EA31DACB5C300D82584 /* SubmissionManager.m in Sources */,
 				D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */,
 				D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */,
 				D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */,
@@ -525,6 +536,7 @@
 				D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */,
 				D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */,
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
+				D8089EA01DACB51F00D82584 /* Submission.m in Sources */,
 				D8D26C9F1BED96DD004D5DA7 /* VideoSubmission.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
 				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
@@ -672,15 +684,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				DEVELOPMENT_TEAM = D633AVN577;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = MobilePitch/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.sparksc.MobilePitch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "a8ef6f18-863b-457d-99c0-a34a71fc0d83";
-				PROVISIONING_PROFILE_SPECIFIER = "XC iOS: org.sparksc.MobilePitch";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -690,15 +702,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Nathanael Wallace (D633AVN577)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Nathanael Wallace (D633AVN577)";
-				DEVELOPMENT_TEAM = D633AVN577;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = MobilePitch/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.sparksc.MobilePitch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "a2159bb5-4064-4391-8274-0d748b4e2be0";
-				PROVISIONING_PROFILE_SPECIFIER = 1kpDist1;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

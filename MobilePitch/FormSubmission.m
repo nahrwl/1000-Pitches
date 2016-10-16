@@ -105,7 +105,7 @@ static NSString *baseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com";
             completion(NO);
         }];
     } else if (self.uploading) {
-        NSLog(@"FormSubmission with id %lu is already uploading.",self.identifier);
+        NSLog(@"FormSubmission with id %lu is already uploading.",(unsigned long)self.identifier);
     } else {
         NSLog(@"FormSubmission with id %lu is not complete. Not submitting.",(unsigned long)self.identifier);
         

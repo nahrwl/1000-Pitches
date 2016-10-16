@@ -16,8 +16,8 @@
 #import "FinishedRecordingViewController.h"
 #import "FormViewController.h"
 
-#import "VideoSubmissionManager.h"
-#import "VideoSubmission.h"
+#import "SubmissionManager.h"
+
 
 #define kStatusViewAnimationDuration 1.0f
 #define kRecordButtonAnimationDuration 0.2f
@@ -735,13 +735,8 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // This used to be if (success), however I changed it to !error because saving would continue even if
     // errors such as out of space errors occurred. Not really what I want.
     if ( !error ) {
-        VideoSubmissionManager *vsm = [VideoSubmissionManager sharedManager];
-        
-        self.submissionIdentifier = [vsm generateUniqueIdentifier];
-        [vsm queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:self.submissionIdentifier forFileURL:outputFileURL]];
-        
         // Queue the video for submission and save the returned submission identifier
-        //self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];
+        [[SubmissionManager sharedManager] openSubmissionWithVideo:outputFileURL];
         
         // Format the duration
         CMTime duration = captureOutput.recordedDuration;
@@ -875,19 +870,13 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 #pragma mark Finished Recording View Controller Delegate
 - (void)submitVideo {
-#warning Video should actually be submitted here rather than in the end recording delegate method
-    
     FormViewController *formViewController = [[FormViewController alloc] init];
-    formViewController.submissionIdentifier = self.submissionIdentifier;
     
     [self.navigationController pushViewController:formViewController animated:YES];
 }
 
 - (void)tryAgain {
     [self.navigationController popToViewController:self animated:YES];
-    
-#warning Delete the video submission here
-    
 }
 
 #pragma mark View Setup

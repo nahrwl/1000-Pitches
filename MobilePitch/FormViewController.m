@@ -13,7 +13,7 @@
 #import "SmarterTextField.h"
 #import "ShadowView.h"
 #import "SplashView.h"
-#import "VideoSubmissionManager.h"
+#import "SubmissionManager.h"
 #import "FinishedViewController.h"
 
 // Form item constants
@@ -429,7 +429,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         // Set the highest field to become the first responder
         [[self.view viewWithTag:errorIndex + 1000] becomeFirstResponder];
     } else {
-        [[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
+        [[SubmissionManager sharedManager] submitCurrentSubmissionWithFormData:[parameters copy]];
         
         [self.navigationController pushViewController:[[FinishedViewController alloc] init] animated:YES];
     }
