@@ -17,6 +17,8 @@
 
 static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com";
 
+static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch.backgroundsession";
+
 @interface Submission ()
 
 @property (nonatomic, readwrite) SubmissionUploadState uploadState;
@@ -25,6 +27,11 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
 @property (nonatomic, copy) CallbackBlock successBlock;
 @property (nonatomic, copy) CallbackBlock failureBlock;
 @property (nonatomic, copy) CallbackBlock seriousFailureBlock;
+
+// Background upload
+@property (nonatomic) UIBackgroundTaskIdentifier backgroundTask;
+@property (nonatomic, copy, nonnull) void (^endBackgroundTask)(void);
+- (void)configureBackgroundTaskEnd;
 
 - (void)processVideoUploadResponse:(id)responseData;
 
@@ -45,6 +52,9 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
         _uploadState = SubmissionUploadStateNotUploaded;
         _serverURL = nil;
         _formData = nil;
+        _backgroundTask = UIBackgroundTaskInvalid;
+        
+        [self configureBackgroundTaskEnd];
     }
     return self;
 }
@@ -62,6 +72,10 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
         
         NSDictionary *formData = [aDecoder decodeObjectForKey:kFormDataKey];
         _formData = formData;
+        
+        _backgroundTask = UIBackgroundTaskInvalid;
+        
+        [self configureBackgroundTaskEnd];
     }
     return self;
 }
@@ -71,6 +85,20 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
     [aCoder encodeObject:@(self.uploadState) forKey:kUploadStateKey];
     [aCoder encodeObject:self.serverURL forKey:kServerURLKey];
     [aCoder encodeObject:self.formData forKey:kFormDataKey];
+}
+
+- (void)configureBackgroundTaskEnd
+{
+    typeof(self) __weak weakSelf = self;
+    
+    self.endBackgroundTask = ^void()
+    {
+        if (self.backgroundTask != UIBackgroundTaskInvalid)
+        {
+            [[UIApplication sharedApplication] endBackgroundTask:weakSelf.backgroundTask];
+            weakSelf.backgroundTask = UIBackgroundTaskInvalid;
+        }
+    };
 }
 
 #pragma mark Public API
@@ -106,6 +134,22 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
     }
 }
 
+- (void)resetUploadingState
+{
+    switch (self.uploadState) {
+        case SubmissionUploadStateVideoUploading:
+            self.uploadState = SubmissionUploadStateNotUploaded;
+            break;
+            
+        case SubmissionUploadStateFormUploading:
+            self.uploadState = SubmissionUploadStateVideoUploaded;
+            break;
+            
+        default:
+            break;
+    }
+}
+
 #pragma mark - Private
 
 - (AFHTTPSessionManager *)sessionManager
@@ -138,6 +182,14 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
     }
     else
     {
+        // Begin a temporary background session
+        // Request a little time after the app closes
+        self.backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithName:kBackgroundSessionIdentifier expirationHandler:^
+        {
+            self.failureBlock();
+            self.endBackgroundTask();
+        }];
+        
         NSURL *requestUrl = [NSURL URLWithString:@"/api/upload-video" relativeToURL:[NSURL URLWithString:kBaseURL]];
         
         __block NSError *errorFormAppend;
@@ -161,6 +213,7 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
             
             // Purge the bad request... :(
             self.failureBlock();
+            self.endBackgroundTask();
         } else {
             
             // Update the upload status
@@ -182,10 +235,12 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
                                   NSLog(@"Error: %@", error);
                                   weakSelf.uploadState = SubmissionUploadStateNotUploaded;
                                   self.failureBlock();
+                                  self.endBackgroundTask();
                               } else {
                                   // Set the uploaded state before processing the video response
                                   weakSelf.uploadState = SubmissionUploadStateVideoUploaded;
                                   [weakSelf processVideoUploadResponse:responseObject];
+                                  // The background task will be ended in the form callback blocks
                               }
                           }];
             
@@ -281,7 +336,8 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
                  // Callback
                  self.failureBlock();
              }
-             
+             // Important: End the background task
+             self.endBackgroundTask();
              
          }
               failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error)
@@ -294,6 +350,8 @@ static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com
              
              // Callback
              self.failureBlock();
+             
+             self.endBackgroundTask();
          }];
     }
 }

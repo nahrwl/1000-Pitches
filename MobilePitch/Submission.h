@@ -30,6 +30,7 @@ typedef void (^CallbackBlock)(void);
 - (instancetype _Nullable)initWithCoder:(NSCoder * _Nonnull)aDecoder NS_DESIGNATED_INITIALIZER;
 
 - (void)submit:(CallbackBlock _Nullable)success failure:(CallbackBlock _Nullable)failure corruption:(CallbackBlock _Nullable)seriousFailure;
+- (void)resetUploadingState;
 
 - (bool)formIsValid;
 

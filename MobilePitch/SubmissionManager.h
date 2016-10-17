@@ -16,6 +16,7 @@
 - (void)openSubmissionWithVideo:(NSURL *)fileURL;
 - (void)submitCurrentSubmissionWithFormData:(NSDictionary *)formData;
 - (void)cancelCurrentSubmission;
+- (void)checkUploadStatus;
 
 - (NSArray *)getQueuedSubmissions;
 

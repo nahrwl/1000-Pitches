@@ -16,6 +16,7 @@
 
 // NSCoding keys
 #define kQueuedSubmissionsSerializationKey @"queuedSubmissions"
+#define kUploadingSubmissionKey @"kUploadingSubmissionKey"
 
 // Fix common typo
 #define Ni nil
@@ -68,17 +69,34 @@
     if (self = [super init]) {
         _queuedSubmissions = [[aDecoder decodeObjectForKey:kQueuedSubmissionsSerializationKey] mutableCopy];
         
+        // Handle a saved uploading submission
+        Submission *tempSubmission = [aDecoder decodeObjectForKey:kUploadingSubmissionKey];
+        [tempSubmission resetUploadingState];
+        if (tempSubmission)
+        {
+            if (tempSubmission.uploadState != SubmissionUploadStateUploaded)
+            {
+                // If it's not actually uploaded, requeue it
+                [_queuedSubmissions addObject:tempSubmission];
+            }
+            else
+            {
+                // If it is indeed uploaded, purge it
+                _uploadingSubmission = tempSubmission;
+                [self purgeUploadingSubmission];
+            }
+        }
+        _uploadingSubmission = nil;
+        
         // Begin listening for changes in network connectivity
         [self configureNetworkReachabilityMonitoring];
-        
-        // begin the upload process if any submissions are outstanding
-        [self submitNextQueuedSubmission];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     [aCoder encodeObject:self.queuedSubmissions forKey:kQueuedSubmissionsSerializationKey];
+    [aCoder encodeObject:self.uploadingSubmission forKey:kUploadingSubmissionKey];
 }
 
 - (void)serializeObjectToDefaultFile {
@@ -164,6 +182,11 @@
 - (void)cancelCurrentSubmission
 {
     self.buildingSubmission = nil;
+}
+
+- (void)checkUploadStatus
+{
+    [self submitNextQueuedSubmission];
 }
 
 #pragma mark - Private
