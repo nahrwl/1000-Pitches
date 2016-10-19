@@ -115,7 +115,7 @@
 
 - (NSString *)value
 {
-    return self.textFields[self.selectedRowIndex].text;
+    return self.selectedRow.textField.text;
 }
 
 @end

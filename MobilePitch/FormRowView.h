@@ -14,7 +14,10 @@
 
 - (NSString *)title;
 - (void)setTitle:(NSString *)title required:(BOOL)required;
+- (void)setError:(BOOL)error;
 
 - (NSString *)value;
+
+- (BOOL)needsKeyboard;
 
 @end

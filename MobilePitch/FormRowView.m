@@ -95,6 +95,20 @@
     return @"";
 }
 
+- (BOOL)needsKeyboard
+{
+    return NO;
+}
+
+- (void)setError:(BOOL)error
+{
+    if (error) {
+        self.inputView.layer.borderColor = [UIColor colorWithRed:0.796 green:0 blue:0 alpha:1].CGColor;
+    } else {
+        self.inputView.layer.borderColor = [UIColor colorWithRed:0.886 green:0.886 blue:0.886 alpha:1].CGColor;
+    }
+}
+
 #pragma mark First Responder Status
 
 - (BOOL)becomeFirstResponder {

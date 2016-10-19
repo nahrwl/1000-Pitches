@@ -33,7 +33,7 @@ typedef NS_ENUM(NSInteger, FormCellType) {
     FormCellTypeShortAnswer
 };
 
-@interface FormViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UITextViewDelegate>
+@interface FormViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UITextViewDelegate, FormRowListViewDelegate>
 
 // Views
 @property (weak, nonatomic) UIScrollView *scrollView;
@@ -115,6 +115,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         {
             NSArray *listItems = self.formItems[i][kFormItemOptionsKey];
             FormRowListView *rowView = [[FormRowListView alloc] initWithRows:listItems.count];
+            rowView.delegate = self;
             for (int j = 0; j < rowView.textFields.count; j++)
             {
                 rowView.textFields[j].text = listItems[j];
@@ -279,9 +280,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     NSDictionary *formRow = self.formItems[index];
     if ([(NSNumber *)formRow[kFormItemRequiredKey] boolValue] && [textView.text isEqualToString:@""]) {
         // Error!
-        [self setError:YES forView:textView];
+        [self.formRows[index] setError:YES];
     } else {
-        [self setError:NO forView:textView];
+        [self.formRows[index] setError:NO];
     }
 }
 
@@ -321,12 +322,12 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     NSDictionary *formRow = self.formItems[index];
     if ([(NSNumber *)formRow[kFormItemRequiredKey] boolValue] && [textField.text isEqualToString:@""]) {
         // Error!
-        [self setError:YES forView:textField];
+        [self.formRows[index] setError:YES];
     } else if ([formRow[kFormItemSubmissionKeyKey] isEqualToString:@"email"] && ![textField.text hasSuffix:@"@usc.edu"]) {
         // the if expression is just a jank way to check for the email field
-        [self setError:YES forView:textField];
+        [self.formRows[index] setError:YES];
     } else {
-        [self setError:NO forView:textField];
+        [self.formRows[index] setError:NO];
     }
 }
 
@@ -354,9 +355,24 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    // Find the next text field to edit
-    UIView *nextInputView = [self.view viewWithTag:textField.tag + 1];
-    [nextInputView becomeFirstResponder];
+    NSInteger index = textField.tag - 1000;
+    
+    if (self.formRows[index + 1] && self.formRows[index + 1].needsKeyboard)
+    {
+        // Find the next text field to edit
+        UIView *nextInputView = [self.view viewWithTag:textField.tag + 1];
+        [nextInputView becomeFirstResponder];
+    }
+    else
+    {
+        // Else dismiss the keyboard
+        [self dismissInputView];
+        
+        // Scroll so the list is visible
+        // actually, this scrolls so the PREVIOUS form row is visible
+        // this is probably the jankiest thing in this entire app
+        [self.scrollView scrollRectToVisible:CGRectMake(0, self.formRows[index].frame.origin.y, 1, self.scrollView.frame.size.height) animated:YES];
+    }
     
     // Not sure what default behavior is here, but we don't want it.
     return NO;
@@ -389,6 +405,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
     UITextField *textField = [self.view viewWithTag:self.selectedRow + 1000];
     textField.text = self.formItems[self.selectedRow][kFormItemOptionsKey][row];
+}
+
+#pragma mark Form Row List View Delegate
+
+- (void)rowSelected:(NSInteger)index forView:(FormRowListView *)sender
+{
+    [sender setError:NO];
+    [self dismissInputView];
 }
 
 #pragma mark Actions
@@ -425,14 +449,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         // Trim the string
         rowValue = [rowValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
-        if ([(NSNumber *)formItem[kFormItemRequiredKey] boolValue] && [rowValue isEqualToString:@""]) {
+        if (!rowValue || ([(NSNumber *)formItem[kFormItemRequiredKey] boolValue] && [rowValue isEqualToString:@""])) {
             // If the item is required, check that the string is not empty
             
             // errorIndex should be the first field with a problem
             if (errorIndex == -1) {
                 errorIndex = i;
             }
-            [self setError:YES forView:[self.view viewWithTag:i + 1000]];
+            [self.formRows[i] setError:YES];
         } else {
             [parameters setObject:rowValue forKey:formItem[kFormItemSubmissionKeyKey]];
         }
@@ -464,14 +488,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 }
 
 #pragma mark Helpers
-
-- (void)setError:(BOOL)error forView:(UIView *)view {
-    if (error) {
-        view.layer.borderColor = [UIColor colorWithRed:0.796 green:0 blue:0 alpha:1].CGColor;
-    } else {
-        view.layer.borderColor = [UIColor colorWithRed:0.886 green:0.886 blue:0.886 alpha:1].CGColor;
-    }
-}
 
 + (NSArray *)createFormItems {
     return @[

@@ -37,10 +37,24 @@
     [super updateConstraints];
 }
 
+- (void)setError:(BOOL)error
+{
+    if (error) {
+        self.textView.layer.borderColor = [UIColor colorWithRed:0.796 green:0 blue:0 alpha:1].CGColor;
+    } else {
+        self.textView.layer.borderColor = [UIColor colorWithRed:0.886 green:0.886 blue:0.886 alpha:1].CGColor;
+    }
+}
+
 #pragma mark First Responder Status
 
 - (BOOL)becomeFirstResponder {
     return [self.textView becomeFirstResponder];
+}
+
+- (BOOL)needsKeyboard
+{
+    return YES;
 }
 
 @end
