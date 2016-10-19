@@ -9,14 +9,20 @@
 #import "FormRowListView.h"
 #import "SmarterTextField.h"
 #import "UIView+RoundCorners.h"
+#import "FormRowListViewCell.h"
 
 #define kBorderColor [UIColor colorWithRed:0.886 green:0.886 blue:0.886 alpha:1]
+#define kBackgroundColor [UIColor colorWithRed:0.988 green:0.988 blue:0.988 alpha:1]
 
 @interface FormRowListView ()
 
 @property (strong, nonatomic, readwrite) NSArray<SmarterTextField *> *textFields;
+@property (nonatomic) NSInteger selectedRowIndex;
+@property (weak, nonatomic) FormRowListViewCell *selectedRow;
 
 @property (weak, nonatomic) UIStackView *stackView;
+
+- (void)rowButtonTapped:(UIButton *)sender;
 
 @end
 
@@ -26,6 +32,8 @@
 {
     if (self = [super initWithFrame:CGRectZero])
     {
+        _selectedRowIndex = -1;
+        
         // Create a temporary mutable array
         NSMutableArray *tempTextFieldsArray = [[NSMutableArray alloc] initWithCapacity:rows];
         
@@ -47,7 +55,7 @@
         
         for (int i = 0; i < rows; i++)
         {
-            SmarterTextField *newField = [self createRow];
+            SmarterTextField *newField = [self createRowAtIndex:i];
             [tempTextFieldsArray addObject:newField];
         }
         
@@ -59,19 +67,17 @@
 // A UIButton is the superview of the text field and the checkmark image view
 // This method returns the text field for the purposes of adding it to
 // the text field array
-- (SmarterTextField *)createRow
+- (SmarterTextField *)createRowAtIndex:(int)index
 {
-    // Create the button, which is the text field superview
-    UIButton *superButton = [[UIButton alloc] init];
-    superButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.stackView addArrangedSubview:superButton];
+    // Create the row
+    FormRowListViewCell *cell = [[FormRowListViewCell alloc] init];
+    cell.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.stackView addArrangedSubview:cell];
+    cell.button.tag = index + 2000;
+    [cell.button addTarget:self action:@selector(rowButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     
-    // Format the button view
-    superButton.backgroundColor = [UIColor colorWithRed:0.988 green:0.988 blue:0.988 alpha:1];
-    
-    // Button superview
-    [self.stackView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[button(46)]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:@{@"button":superButton}]];
-    [self.stackView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[button]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:@{@"button" : superButton}]];
+    [self.stackView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[cell(46)]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:@{@"cell":cell}]];
+    [self.stackView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[cell]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:@{@"cell" : cell}]];
     
     // Create the row separator
     UIView *rowSeparator = [[UIView alloc] init];
@@ -82,29 +88,34 @@
     [self.stackView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[rowSeparator(1)]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:@{@"rowSeparator":rowSeparator}]];
     [self.stackView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[rowSeparator]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:@{@"rowSeparator" : rowSeparator}]];
     
+    return cell.textField;
+}
+
+- (void)rowButtonTapped:(UIButton *)sender
+{
+    NSInteger index = sender.tag - 2000;
+    [self.delegate rowSelected:index forView:self];
     
-    // Create a row
-    // Text field
-    SmarterTextField *textField = [[SmarterTextField alloc] init];
-    textField.translatesAutoresizingMaskIntoConstraints = NO;
-    [superButton addSubview:textField];
+    // Update the view
+    FormRowListViewCell *cell = (FormRowListViewCell *)sender.superview;
     
-    // Appearance
-    textField.font = [UIFont systemFontOfSize:14 weight:UIFontWeightSemibold];
-    textField.textColor = [UIColor colorWithRed:0.231 green:0.231 blue:0.231 alpha:1];
+    // Deselect the old view
+    if (self.selectedRow)
+    {
+        [self.selectedRow setSelected:NO];
+    }
     
-    UIView *spacerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 13, 16)];
-    [textField setLeftViewMode:UITextFieldViewModeAlways];
-    [textField setLeftView:spacerView];
+    // Select the new view
+    [cell setSelected:YES];
     
-    textField.cursorEnabled = NO;
-    textField.userInteractionEnabled = NO;
-    
-    // Button subviews autolayout
-    [superButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[textField]|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:@{@"textField" : textField}]];
-    [superButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[textField]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:@{@"textField" : textField}]];
-    
-    return textField;
+    // Update the selected row property
+    self.selectedRowIndex = index;
+    self.selectedRow = cell;
+}
+
+- (NSString *)value
+{
+    return self.textFields[self.selectedRowIndex].text;
 }
 
 @end

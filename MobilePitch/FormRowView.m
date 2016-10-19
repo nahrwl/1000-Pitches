@@ -91,6 +91,10 @@
     return self.titleLabel.text;
 }
 
+- (NSString *)value {
+    return @"";
+}
+
 #pragma mark First Responder Status
 
 - (BOOL)becomeFirstResponder {

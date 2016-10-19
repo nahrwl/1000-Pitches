@@ -15,4 +15,6 @@
 - (NSString *)title;
 - (void)setTitle:(NSString *)title required:(BOOL)required;
 
+- (NSString *)value;
+
 @end

@@ -39,6 +39,7 @@ typedef NS_ENUM(NSInteger, FormCellType) {
 @property (weak, nonatomic) UIScrollView *scrollView;
 @property (weak, nonatomic) UIStackView *stackView;
 @property (weak, nonatomic) UIPickerView *pickerView;
+@property (strong, nonatomic) NSArray<FormRowView *> *formRows;
 
 // Editing
 @property (strong, nonatomic) NSArray *formItems;
@@ -90,6 +91,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissInputView)];
     [toolbar setItems:@[previous, next, spacer, doneButton]];
     
+    // Create a temporary array for the views
+    NSMutableArray *tempRows = [NSMutableArray arrayWithCapacity:formItems.count];
+    
     // Populate the Stack View
     for (int i = 0; i < formItems.count; i++) {
         NSDictionary *row = formItems[i];
@@ -99,6 +103,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             FormRowTextViewView *rowView = [[FormRowTextViewView alloc] init];
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            [tempRows addObject:rowView];
             
             // Configure the row
             rowView.textView.delegate = self;
@@ -114,6 +119,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             {
                 rowView.textFields[j].text = listItems[j];
             }
+            [tempRows addObject:rowView];
             
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
@@ -126,6 +132,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             FormRowTextFieldView *rowView = [[FormRowTextFieldView alloc] init];
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            [tempRows addObject:rowView];
             
             // Configure the row
             
@@ -144,6 +151,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                 rowView.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
             }
         }
+        
+        // Finally, set the property to the immutable tempRows array
+        self.formRows = [tempRows copy];
     }
 }
 
@@ -396,7 +406,10 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         FormCellType cellType = [(NSNumber *)formItem[kFormItemInputTypeKey] integerValue];
         NSString *rowValue = @"";
         switch (cellType) {
-            case FormCellTypePicker:
+            case FormCellTypePicker: {
+                rowValue = self.formRows[i].value;
+                break;
+            }
             case FormCellTypeTextField: {
                 UITextField *textField = (UITextField *)[self.view viewWithTag:i + 1000];
                 rowValue = textField.text;

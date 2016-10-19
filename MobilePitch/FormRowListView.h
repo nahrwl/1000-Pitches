@@ -9,10 +9,20 @@
 #import "FormRowView.h"
 
 @class SmarterTextField;
+@class FormRowListView;
+
+
+@protocol FormRowListViewDelegate <NSObject>
+
+- (void)rowSelected:(NSInteger)index forView:(FormRowListView *)sender;
+
+@end
+
 
 @interface FormRowListView : FormRowView
 
 @property (strong, nonatomic, readonly) NSArray<SmarterTextField *> *textFields;
+@property (weak, nonatomic) id<FormRowListViewDelegate> delegate;
 
 - (instancetype)initWithRows:(NSUInteger)rows;
 
