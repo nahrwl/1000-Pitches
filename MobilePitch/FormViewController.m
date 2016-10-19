@@ -590,11 +590,36 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     UIImageView *logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"form-logo"]];
     logo.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:logo];
+    
+    UILabel *easterEgg = [[UILabel alloc] init];
+    easterEgg.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:easterEgg];
+    
+    easterEgg.text = @"MADE WITH 💛 BY SPARK SC";
+    easterEgg.numberOfLines = 1;
+    easterEgg.textAlignment = NSTextAlignmentCenter;
+    
+    NSMutableAttributedString *easterString = [[NSMutableAttributedString alloc] initWithString:@"MADE WITH 💛 BY SPARK SC"];
+    [easterString addAttribute:NSForegroundColorAttributeName
+                             value:[UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1]
+                             range:NSMakeRange(0, easterString.length)];
+    [easterString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:12 weight:UIFontWeightBold]
+                             range:NSMakeRange(0, 9)];
+    [easterString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:16 weight:UIFontWeightBold]
+                             range:NSMakeRange(9, 3)];
+    [easterString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:12 weight:UIFontWeightBold]
+                             range:NSMakeRange(13, easterString.length-13)];
+    [easterEgg setAttributedText:easterString];
+    
     // Autolayout
-    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-30-[logo]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(logo)];
+    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-30-[logo]-50-[easterEgg]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(logo, easterEgg)];
     [view addConstraints:vLogoConstraints];
     
     [view addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:easterEgg attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
     
     // Scroll view
     UIScrollView *scrollView = [[UIScrollView alloc] init];
