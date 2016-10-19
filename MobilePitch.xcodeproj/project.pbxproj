@@ -29,6 +29,9 @@
 		D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD44E1BDCDC22008284D4 /* FinishedRecordingViewController.m */; };
 		D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4511BDD7A28008284D4 /* FormViewController.m */; };
 		D89DD4581BDDF1C8008284D4 /* FormRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD4571BDDF1C8008284D4 /* FormRowView.m */; };
+		D89F19751DB5525E00322488 /* FormRowListView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89F19741DB5525E00322488 /* FormRowListView.m */; };
+		D89F19791DB58BC200322488 /* UIView+RoundCorners.m in Sources */ = {isa = PBXBuildFile; fileRef = D89F19781DB58BC200322488 /* UIView+RoundCorners.m */; };
+		D89F197C1DB5972C00322488 /* FormRowListViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D89F197B1DB5972C00322488 /* FormRowListViewCell.m */; };
 		D8B5F3721BE5FFA70023C8AE /* VideoSubmissionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D8B5F3711BE5FFA70023C8AE /* VideoSubmissionManager.m */; };
 		D8D26C9F1BED96DD004D5DA7 /* VideoSubmission.m in Sources */ = {isa = PBXBuildFile; fileRef = D8D26C9E1BED96DD004D5DA7 /* VideoSubmission.m */; };
 		D8E105161BE0782A00E1E594 /* NicerLookingPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = D8E105151BE0782A00E1E594 /* NicerLookingPickerView.m */; };
@@ -98,6 +101,12 @@
 		D89DD4511BDD7A28008284D4 /* FormViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormViewController.m; sourceTree = "<group>"; };
 		D89DD4561BDDF1C8008284D4 /* FormRowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowView.h; sourceTree = "<group>"; };
 		D89DD4571BDDF1C8008284D4 /* FormRowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowView.m; sourceTree = "<group>"; };
+		D89F19731DB5525E00322488 /* FormRowListView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowListView.h; sourceTree = "<group>"; };
+		D89F19741DB5525E00322488 /* FormRowListView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowListView.m; sourceTree = "<group>"; };
+		D89F19771DB58BC200322488 /* UIView+RoundCorners.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+RoundCorners.h"; sourceTree = "<group>"; };
+		D89F19781DB58BC200322488 /* UIView+RoundCorners.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+RoundCorners.m"; sourceTree = "<group>"; };
+		D89F197A1DB5972C00322488 /* FormRowListViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowListViewCell.h; sourceTree = "<group>"; };
+		D89F197B1DB5972C00322488 /* FormRowListViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowListViewCell.m; sourceTree = "<group>"; };
 		D8B5F3701BE5FFA70023C8AE /* VideoSubmissionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoSubmissionManager.h; sourceTree = "<group>"; };
 		D8B5F3711BE5FFA70023C8AE /* VideoSubmissionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoSubmissionManager.m; sourceTree = "<group>"; };
 		D8D26C9D1BED96DD004D5DA7 /* VideoSubmission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoSubmission.h; sourceTree = "<group>"; };
@@ -218,6 +227,15 @@
 			path = MobilePitchUITests;
 			sourceTree = "<group>";
 		};
+		D89F19761DB58B9D00322488 /* UIKit Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D89F19771DB58BC200322488 /* UIView+RoundCorners.h */,
+				D89F19781DB58BC200322488 /* UIView+RoundCorners.m */,
+			);
+			name = "UIKit Extensions";
+			sourceTree = "<group>";
+		};
 		D8A45B371BFAD7BF00C7754C /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -292,6 +310,7 @@
 		D8A45B3E1BFAD84900C7754C /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D89F19761DB58B9D00322488 /* UIKit Extensions */,
 				D8A45B411BFAD88B00C7754C /* UI Element Subclasses */,
 				D8A45B401BFAD86700C7754C /* Form Rows */,
 			);
@@ -312,6 +331,10 @@
 			children = (
 				D89DD4561BDDF1C8008284D4 /* FormRowView.h */,
 				D89DD4571BDDF1C8008284D4 /* FormRowView.m */,
+				D89F19731DB5525E00322488 /* FormRowListView.h */,
+				D89F19741DB5525E00322488 /* FormRowListView.m */,
+				D89F197A1DB5972C00322488 /* FormRowListViewCell.h */,
+				D89F197B1DB5972C00322488 /* FormRowListViewCell.m */,
 				D8F0528B1BE09C5300C2D31C /* FormRowTextFieldView.h */,
 				D8F0528C1BE09C5300C2D31C /* FormRowTextFieldView.m */,
 				D89503601BE0A61300E0BCF9 /* FormRowTextViewView.h */,
@@ -525,6 +548,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D89DD4101BDB15CD008284D4 /* AppDelegate.m in Sources */,
+				D89F19751DB5525E00322488 /* FormRowListView.m in Sources */,
 				D89DD44F1BDCDC22008284D4 /* FinishedRecordingViewController.m in Sources */,
 				D8089EA31DACB5C300D82584 /* SubmissionManager.m in Sources */,
 				D89DD4521BDD7A28008284D4 /* FormViewController.m in Sources */,
@@ -537,10 +561,12 @@
 				D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */,
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
 				D8089EA01DACB51F00D82584 /* Submission.m in Sources */,
+				D89F19791DB58BC200322488 /* UIView+RoundCorners.m in Sources */,
 				D8D26C9F1BED96DD004D5DA7 /* VideoSubmission.m in Sources */,
 				D89DD40D1BDB15CD008284D4 /* main.m in Sources */,
 				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
 				D8B5F3721BE5FFA70023C8AE /* VideoSubmissionManager.m in Sources */,
+				D89F197C1DB5972C00322488 /* FormRowListViewCell.m in Sources */,
 				D8E105191BE0806700E1E594 /* SmarterTextField.m in Sources */,
 				D89DD44C1BDC5226008284D4 /* AAPLPreviewView.m in Sources */,
 				D86994181BECA9F900C2CBF8 /* SplashView.m in Sources */,

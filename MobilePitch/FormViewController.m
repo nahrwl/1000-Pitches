@@ -9,6 +9,7 @@
 #import "FormViewController.h"
 #import "FormRowTextFieldView.h"
 #import "FormRowTextViewView.h"
+#import "FormRowListView.h"
 #import "NicerLookingPickerView.h"
 #import "SmarterTextField.h"
 #import "ShadowView.h"
@@ -93,7 +94,8 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     for (int i = 0; i < formItems.count; i++) {
         NSDictionary *row = formItems[i];
         
-        if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypeShortAnswer) {
+        if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypeShortAnswer)
+        {
             FormRowTextViewView *rowView = [[FormRowTextViewView alloc] init];
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
@@ -103,8 +105,24 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             
             // Store the row index in the text view's tag... don't judge me
             rowView.textView.tag = 1000 + i;
-        } else {
+        }
+        else if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker)
+        {
+            NSArray *listItems = self.formItems[i][kFormItemOptionsKey];
+            FormRowListView *rowView = [[FormRowListView alloc] initWithRows:listItems.count];
+            for (int j = 0; j < rowView.textFields.count; j++)
+            {
+                rowView.textFields[j].text = listItems[j];
+            }
             
+            [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
+            [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            
+            // Store the row index in the text field's tag... don't judge me
+            rowView.textFields[0].tag = 1000 + i;
+        }
+        else
+        {
             FormRowTextFieldView *rowView = [[FormRowTextFieldView alloc] init];
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
@@ -120,28 +138,13 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // Disable autocorrect
             rowView.textField.autocorrectionType = UITextAutocorrectionTypeNo;
             
-            // If the row requires the picker view, configure that now
-            if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker) {
-                // Add the picker view as the text field's input view
-                // This replaces the keyboard
-                rowView.textField.inputView = pickerView;
-                
-                // Disable the text field cursor so we don't get the blue input indicator thingy
-                rowView.textField.cursorEnabled = NO;
-                
-                // Set an initial value for the field
-                rowView.textField.text = row[kFormItemOptionsKey][0];
-            }
-            
             // If the row is the email row, give it the right kind of keyboard
             if ([row[kFormItemSubmissionKeyKey] isEqualToString:@"email"]) {
                 [rowView.textField setKeyboardType:UIKeyboardTypeEmailAddress];
                 rowView.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
             }
         }
-        
     }
-    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
