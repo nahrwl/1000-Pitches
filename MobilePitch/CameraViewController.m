@@ -600,7 +600,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     
     self.recordingStatus = status;
     
-    void (^updateStatus)() = ^ {
+    void (^updateStatus)(void) = ^ {
         NSString *textString;
         switch (status) {
             case RecordingStatusNotRecording:

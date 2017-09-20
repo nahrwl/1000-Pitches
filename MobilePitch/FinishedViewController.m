@@ -30,6 +30,7 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     // Hide the navigation bar
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
@@ -45,6 +46,8 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
+    [super viewDidAppear:animated];
+    
     [UIView animateWithDuration:kViewAnimationShortDuration
                           delay:kViewAnimationDelayDuration * 3
                         options:UIViewAnimationOptionCurveLinear
