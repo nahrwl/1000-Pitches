@@ -17,6 +17,7 @@
 // NSCoding keys
 #define kQueuedSubmissionsSerializationKey @"queuedSubmissions"
 #define kUploadingSubmissionKey @"kUploadingSubmissionKey"
+#define kCompletedSubmissionsSerializationKey @"completedSubmissions"
 
 // Fix common typo
 #define Ni nil
@@ -34,6 +35,9 @@
 
 // This is a queue of complete, unsubmitted Submissions, if any
 @property (strong, nonatomic) NSMutableArray<Submission *> *queuedSubmissions;
+
+// List of completed Submissions
+@property (strong, nonatomic) NSMutableArray<Submission *> *completedSubmissions;
 
 - (void)submitNextQueuedSubmission;
 - (void)submitUploadingSubmission;
@@ -68,6 +72,7 @@
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     if (self = [super init]) {
         _queuedSubmissions = [[aDecoder decodeObjectForKey:kQueuedSubmissionsSerializationKey] mutableCopy];
+        _completedSubmissions = [[aDecoder decodeObjectForKey:kCompletedSubmissionsSerializationKey] mutableCopy];
         
         // Handle a saved uploading submission
         Submission *tempSubmission = [aDecoder decodeObjectForKey:kUploadingSubmissionKey];
@@ -96,6 +101,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     [aCoder encodeObject:self.queuedSubmissions forKey:kQueuedSubmissionsSerializationKey];
+    [aCoder encodeObject:self.completedSubmissions forKey:kCompletedSubmissionsSerializationKey];
     [aCoder encodeObject:self.uploadingSubmission forKey:kUploadingSubmissionKey];
 }
 
@@ -134,6 +140,14 @@
     return _queuedSubmissions;
 }
 
+- (NSMutableArray<Submission *> *)completedSubmissions
+{
+    if (!_completedSubmissions) {
+        _completedSubmissions = [NSMutableArray array];
+    }
+    return _completedSubmissions;
+}
+
 #pragma mark Submissions
 
 - (NSArray *)getQueuedSubmissions
@@ -150,6 +164,11 @@
         [tempArray insertObject:self.buildingSubmission atIndex:0];
     }
     return [tempArray copy];
+}
+
+- (NSArray *)getAllSubmissions
+{
+    return [[self getQueuedSubmissions] arrayByAddingObjectsFromArray:self.completedSubmissions];
 }
 
 - (void)openSubmissionWithVideo:(NSURL *)fileURL
@@ -235,6 +254,9 @@
         self.uploadingSubmission = [self.queuedSubmissions objectAtIndex:0];
         [self.queuedSubmissions removeObjectAtIndex:0];
         
+        // Notify delegate
+        [self.delegate stateDidChange];
+        
         // Submit it
         [self submitUploadingSubmission];
     }
@@ -251,8 +273,14 @@
         NSLog(@"%@",[removeError localizedDescription]);
     }
     
-    // Remove the uploading submission
+    // Add the submission to the completed list
+    [self.completedSubmissions addObject:self.uploadingSubmission];
+    
+    // Clear the uploading submission property
     self.uploadingSubmission = nil;
+    
+    // Notify delegate
+    [self.delegate stateDidChange];
 }
 
 #pragma mark Helpers
@@ -264,6 +292,5 @@
     NSURL *fileURL = [NSURL fileURLWithPath:[documentsDirectory stringByAppendingPathComponent:file]];
     return fileURL;
 }
-
 
 @end

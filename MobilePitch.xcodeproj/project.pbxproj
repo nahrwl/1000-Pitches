@@ -13,6 +13,9 @@
 		D825A1231BF336D4007BA11D /* PitchSubmissionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D825A1221BF336D4007BA11D /* PitchSubmissionManagerTests.m */; };
 		D83D32361DA4259D00680A9C /* FinishedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D83D32351DA4259D00680A9C /* FinishedViewController.m */; };
 		D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */ = {isa = PBXBuildFile; fileRef = D850C71C1BEB0D9000896E9C /* ShadowView.m */; };
+		D86944721F7330A000E38481 /* UploadStatusTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D86944711F7330A000E38481 /* UploadStatusTableViewController.m */; };
+		D869447A1F7333BA00E38481 /* UploadStatusTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D86944781F7333BA00E38481 /* UploadStatusTableViewCell.m */; };
+		D869447B1F7333BA00E38481 /* UploadStatusTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D86944791F7333BA00E38481 /* UploadStatusTableViewCell.xib */; };
 		D86994181BECA9F900C2CBF8 /* SplashView.m in Sources */ = {isa = PBXBuildFile; fileRef = D86994171BECA9F900C2CBF8 /* SplashView.m */; };
 		D89503621BE0A61300E0BCF9 /* FormRowTextViewView.m in Sources */ = {isa = PBXBuildFile; fileRef = D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */; };
 		D89DD40D1BDB15CD008284D4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D89DD40C1BDB15CD008284D4 /* main.m */; };
@@ -65,6 +68,11 @@
 		D83D32351DA4259D00680A9C /* FinishedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FinishedViewController.m; sourceTree = "<group>"; };
 		D850C71B1BEB0D9000896E9C /* ShadowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShadowView.h; sourceTree = "<group>"; };
 		D850C71C1BEB0D9000896E9C /* ShadowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShadowView.m; sourceTree = "<group>"; };
+		D86944701F7330A000E38481 /* UploadStatusTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UploadStatusTableViewController.h; sourceTree = "<group>"; };
+		D86944711F7330A000E38481 /* UploadStatusTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UploadStatusTableViewController.m; sourceTree = "<group>"; };
+		D86944771F7333BA00E38481 /* UploadStatusTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UploadStatusTableViewCell.h; sourceTree = "<group>"; };
+		D86944781F7333BA00E38481 /* UploadStatusTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UploadStatusTableViewCell.m; sourceTree = "<group>"; };
+		D86944791F7333BA00E38481 /* UploadStatusTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UploadStatusTableViewCell.xib; sourceTree = "<group>"; };
 		D86994161BECA9F900C2CBF8 /* SplashView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashView.h; sourceTree = "<group>"; };
 		D86994171BECA9F900C2CBF8 /* SplashView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SplashView.m; sourceTree = "<group>"; };
 		D89503601BE0A61300E0BCF9 /* FormRowTextViewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowTextViewView.h; sourceTree = "<group>"; };
@@ -152,6 +160,18 @@
 				D83D32351DA4259D00680A9C /* FinishedViewController.m */,
 			);
 			name = Finished;
+			sourceTree = "<group>";
+		};
+		D86944731F7330A500E38481 /* Upload Status */ = {
+			isa = PBXGroup;
+			children = (
+				D86944701F7330A000E38481 /* UploadStatusTableViewController.h */,
+				D86944711F7330A000E38481 /* UploadStatusTableViewController.m */,
+				D86944771F7333BA00E38481 /* UploadStatusTableViewCell.h */,
+				D86944781F7333BA00E38481 /* UploadStatusTableViewCell.m */,
+				D86944791F7333BA00E38481 /* UploadStatusTableViewCell.xib */,
+			);
+			name = "Upload Status";
 			sourceTree = "<group>";
 		};
 		D89DD3FF1BDB15CD008284D4 = {
@@ -284,6 +304,7 @@
 		D8A45B3D1BFAD82E00C7754C /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				D86944731F7330A500E38481 /* Upload Status */,
 				D83D32331DA424C300680A9C /* Finished */,
 				D8A45B3B1BFAD81300C7754C /* Splash Screen */,
 				D8A45B381BFAD7D000C7754C /* Video Recording */,
@@ -458,6 +479,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D869447B1F7333BA00E38481 /* UploadStatusTableViewCell.xib in Resources */,
 				D89DD41E1BDB15CD008284D4 /* LaunchScreen.storyboard in Resources */,
 				D89DD41B1BDB15CD008284D4 /* Assets.xcassets in Resources */,
 			);
@@ -543,6 +565,7 @@
 				D89503621BE0A61300E0BCF9 /* FormRowTextViewView.m in Sources */,
 				D850C71D1BEB0D9000896E9C /* ShadowView.m in Sources */,
 				D89DD4461BDC0441008284D4 /* CameraViewController.m in Sources */,
+				D869447A1F7333BA00E38481 /* UploadStatusTableViewCell.m in Sources */,
 				D89DD4491BDC38B4008284D4 /* AccessRequestViewController.m in Sources */,
 				D8089EA01DACB51F00D82584 /* Submission.m in Sources */,
 				D89F19791DB58BC200322488 /* UIView+RoundCorners.m in Sources */,
@@ -550,6 +573,7 @@
 				D89DD4431BDB2981008284D4 /* SplashViewController.m in Sources */,
 				D89F197C1DB5972C00322488 /* FormRowListViewCell.m in Sources */,
 				D8E105191BE0806700E1E594 /* SmarterTextField.m in Sources */,
+				D86944721F7330A000E38481 /* UploadStatusTableViewController.m in Sources */,
 				D89DD44C1BDC5226008284D4 /* AAPLPreviewView.m in Sources */,
 				D86994181BECA9F900C2CBF8 /* SplashView.m in Sources */,
 				D83D32361DA4259D00680A9C /* FinishedViewController.m in Sources */,

@@ -14,6 +14,7 @@
 #define kFormDataKey @"kFormDataKey"
 #define kServerURLKey @"kServerURLKey"
 #define kUploadStateKey @"kUploadStateKey"
+#define kCreatedDateKey @"kCreatedDateKey"
 
 static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com";
 
@@ -53,6 +54,7 @@ static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch
         _serverURL = nil;
         _formData = nil;
         _backgroundTask = UIBackgroundTaskInvalid;
+        _createdDate = [NSDate date];
         
         [self configureBackgroundTaskEnd];
     }
@@ -73,6 +75,9 @@ static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch
         NSDictionary *formData = [aDecoder decodeObjectForKey:kFormDataKey];
         _formData = formData;
         
+        NSDate *date = [aDecoder decodeObjectForKey:kCreatedDateKey];
+        _createdDate = date ? date : [NSDate date];
+        
         _backgroundTask = UIBackgroundTaskInvalid;
         
         [self configureBackgroundTaskEnd];
@@ -85,6 +90,7 @@ static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch
     [aCoder encodeObject:@(self.uploadState) forKey:kUploadStateKey];
     [aCoder encodeObject:self.serverURL forKey:kServerURLKey];
     [aCoder encodeObject:self.formData forKey:kFormDataKey];
+    [aCoder encodeObject:self.createdDate forKey:kCreatedDateKey];
 }
 
 - (void)configureBackgroundTaskEnd
@@ -176,6 +182,7 @@ static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch
     {
         // Uh oh, it's not reachable
         // Perhaps remove this submission then
+        self.uploadState = SubmissionUploadStateError;
         self.seriousFailureBlock();
         
         NSLog(@"Saved video file does not exist. %@",reachableError.localizedDescription);

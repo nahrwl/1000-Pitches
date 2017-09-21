@@ -14,7 +14,8 @@ typedef NS_ENUM(NSInteger, SubmissionUploadState)
     SubmissionUploadStateVideoUploading,
     SubmissionUploadStateVideoUploaded,
     SubmissionUploadStateFormUploading,
-    SubmissionUploadStateUploaded
+    SubmissionUploadStateUploaded,
+    SubmissionUploadStateError
 };
 
 typedef void (^CallbackBlock)(void);
@@ -25,6 +26,7 @@ typedef void (^CallbackBlock)(void);
 @property (strong, nonatomic, nullable) NSURL *serverURL;
 @property (strong, nonatomic, nullable) NSDictionary *formData;
 @property (nonatomic, readonly)         SubmissionUploadState uploadState;
+@property (strong, nonatomic, readonly, nonnull) NSDate *createdDate;
 
 - (instancetype _Nullable)initWithFile:( NSURL * _Nonnull )fileURL NS_DESIGNATED_INITIALIZER;
 - (instancetype _Nullable)initWithCoder:(NSCoder * _Nonnull)aDecoder NS_DESIGNATED_INITIALIZER;

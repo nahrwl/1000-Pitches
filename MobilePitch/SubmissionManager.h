@@ -8,7 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol SubmissionStatusDelegate
+
+- (void)stateDidChange;
+
+@end
+
 @interface SubmissionManager : NSObject <NSCoding>
+
+@property (weak, nonatomic) id<SubmissionStatusDelegate> delegate;
 
 + (instancetype)sharedManager;
 - (void)serializeObjectToDefaultFile;
@@ -19,6 +27,7 @@
 - (void)checkUploadStatus;
 
 - (NSArray *)getQueuedSubmissions;
+- (NSArray *)getAllSubmissions;
 
 @end
 
