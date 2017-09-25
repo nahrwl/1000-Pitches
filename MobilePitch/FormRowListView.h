@@ -24,6 +24,8 @@
 @property (strong, nonatomic, readonly) NSArray<SmarterTextField *> *textFields;
 @property (weak, nonatomic) id<FormRowListViewDelegate> delegate;
 
+@property (nonatomic) NSInteger selectedRowIndex;
+
 - (instancetype)initWithRows:(NSUInteger)rows;
 
 @end

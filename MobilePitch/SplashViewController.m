@@ -86,7 +86,7 @@
     headerLabel.text = @"It's simple:";
     headerLabel.textAlignment = NSTextAlignmentNatural;
     headerLabel.font = [UIFont systemFontOfSize:36 weight:UIFontWeightSemibold];
-    headerLabel.textColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    headerLabel.textColor = [UIColor colorWithRed:0.482 green:0.349 blue:0 alpha:1];
     
     // List text
     UILabel *listLabel = [[UILabel alloc] init];
@@ -103,15 +103,14 @@
     listLabel.numberOfLines = 3;
     listLabel.textAlignment = NSTextAlignmentNatural;
     listLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightLight];
-    listLabel.textColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
-    listLabel.textColor = [UIColor whiteColor];
+    listLabel.textColor = [UIColor colorWithRed:0.569 green:0.412 blue:0 alpha:1];
     
     // Button
     UIButton *button = [[UIButton alloc] init];
     button.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:button];
     // Button formatting
-    button.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    button.backgroundColor = [UIColor colorWithRed:0.741 green:0.0627 blue:0.878 alpha:1];
     button.layer.cornerRadius = 8;
     // Button titleLabel formatting
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString: @"I HAVE A PITCH"];
@@ -139,9 +138,9 @@
     settingsbutton.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:settingsbutton];
     
-    [settingsbutton setTitle:@"Settings" forState:UIControlStateNormal];
-    [settingsbutton setTitleColor:[UIColor colorWithRed:0.773 green:0.514 blue:0.839 alpha:1] forState:UIControlStateNormal];
-    [settingsbutton setTitleColor:[UIColor colorWithRed:0.594 green:0.437 blue:0.631 alpha:1] forState:UIControlStateHighlighted];
+    [settingsbutton setTitle:@"Status" forState:UIControlStateNormal];
+    [settingsbutton setTitleColor:[UIColor colorWithRed:0.796 green:0.604 blue:0.0863 alpha:1] forState:UIControlStateNormal];
+    [settingsbutton setTitleColor:[UIColor colorWithRed:0.625 green:0.496 blue:0.0757 alpha:1] forState:UIControlStateHighlighted];
     
     // Settings button action
     [settingsbutton addTarget:self action:@selector(settingsButtonTapped:) forControlEvents:UIControlEventTouchUpInside];

@@ -126,7 +126,7 @@
     [view addSubview:button];
     self.button = button;
     // Button formatting
-    button.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    button.backgroundColor = [UIColor colorWithRed:0.741 green:0.0627 blue:0.878 alpha:1];
     button.layer.cornerRadius = 8;
     // Button titleLabel formatting
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString: @"Home"];

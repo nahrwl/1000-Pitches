@@ -194,6 +194,9 @@
     // End building this submission
     self.buildingSubmission = nil;
     
+    // Save the queue to disk
+    [[SubmissionManager sharedManager] serializeObjectToDefaultFile];
+    
     // Check the queue status
     [self submitNextQueuedSubmission];
 }
@@ -281,6 +284,9 @@
     
     // Notify delegate
     [self.delegate stateDidChange];
+    
+    // Save the updated state to disk
+    [[SubmissionManager sharedManager] serializeObjectToDefaultFile];
 }
 
 #pragma mark Helpers

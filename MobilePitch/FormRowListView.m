@@ -17,7 +17,6 @@
 @interface FormRowListView ()
 
 @property (strong, nonatomic, readwrite) NSArray<SmarterTextField *> *textFields;
-@property (nonatomic) NSInteger selectedRowIndex;
 @property (weak, nonatomic) FormRowListViewCell *selectedRow;
 
 @property (weak, nonatomic) UIStackView *stackView;
@@ -64,6 +63,27 @@
     return self;
 }
 
+- (void)setSelectedRowIndex:(NSInteger)selectedRowIndex {
+    NSInteger index = selectedRowIndex;
+    [self.delegate rowSelected:index forView:self];
+    
+    // Update the view
+    FormRowListViewCell *cell = (FormRowListViewCell *)[[self viewWithTag:index + 2000] superview];
+    
+    // Deselect the old view
+    if (self.selectedRow)
+    {
+        [self.selectedRow setSelected:NO];
+    }
+    
+    // Select the new view
+    [cell setSelected:YES];
+    
+    // Update the selected row property
+    _selectedRowIndex = index;
+    self.selectedRow = cell;
+}
+
 // A UIButton is the superview of the text field and the checkmark image view
 // This method returns the text field for the purposes of adding it to
 // the text field array
@@ -93,24 +113,7 @@
 
 - (void)rowButtonTapped:(UIButton *)sender
 {
-    NSInteger index = sender.tag - 2000;
-    [self.delegate rowSelected:index forView:self];
-    
-    // Update the view
-    FormRowListViewCell *cell = (FormRowListViewCell *)sender.superview;
-    
-    // Deselect the old view
-    if (self.selectedRow)
-    {
-        [self.selectedRow setSelected:NO];
-    }
-    
-    // Select the new view
-    [cell setSelected:YES];
-    
-    // Update the selected row property
-    self.selectedRowIndex = index;
-    self.selectedRow = cell;
+    [self setSelectedRowIndex:sender.tag - 2000];
 }
 
 - (NSString *)value

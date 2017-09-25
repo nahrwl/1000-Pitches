@@ -30,7 +30,8 @@
 typedef NS_ENUM(NSInteger, FormCellType) {
     FormCellTypeTextField,
     FormCellTypePicker,
-    FormCellTypeShortAnswer
+    FormCellTypeShortAnswer,
+    FormCellTypeSpace
 };
 
 @interface FormViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UITextViewDelegate, FormRowListViewDelegate>
@@ -111,6 +112,18 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // Store the row index in the text view's tag... don't judge me
             rowView.textView.tag = 1000 + i;
         }
+        else if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypeSpace) {
+            // Add top spacer to stack view
+            UIView *rowView = [[UIView alloc] init];
+            rowView.translatesAutoresizingMaskIntoConstraints = NO;
+            
+            [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            [tempRows addObject:rowView];
+            
+            // Appearance
+            rowView.backgroundColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
+            [rowView addConstraint:[NSLayoutConstraint constraintWithItem:rowView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:44]];
+        }
         else if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker)
         {
             NSArray *listItems = self.formItems[i][kFormItemOptionsKey];
@@ -124,6 +137,10 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            
+            if ([row[kFormItemSubmissionKeyKey] isEqualToString:@"should_post_fb"]) {
+                [rowView setSelectedRowIndex:0];
+            }
             
             // Store the row index in the text field's tag... don't judge me
             rowView.textFields[0].tag = 1000 + i;
@@ -227,7 +244,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     [self.navigationItem setHidesBackButton:YES animated:YES];
     
     NSDictionary* info = [aNotification userInfo];
-    CGSize kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     
     UIEdgeInsets contentInsets = UIEdgeInsetsMake(kScrollViewTopInset, 0.0, kbSize.height, 0.0);
     self.scrollView.contentInset = contentInsets;
@@ -247,7 +264,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // I don't think this ever gets called
             // Some magic being is scrolling my views for me
             // Or I'm just crazy...
-            //[self.scrollView scrollRectToVisible:activeField.frame animated:YES];
+            CGRect scrollToRect = [self.scrollView convertRect:activeField.frame fromView:activeField.superview];
+            scrollToRect.size.height += 10;
+            [self.scrollView scrollRectToVisible:scrollToRect animated:YES];
         }
     }
 }
@@ -339,18 +358,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         return NO;
     }
     
-    // Insert @usc.edu when the @ key is pressed for the email field
-    NSUInteger index = textField.tag - 1000;
-    NSDictionary *formRow = self.formItems[index];
-    if ([formRow[kFormItemSubmissionKeyKey] isEqualToString:@"email"] && [string isEqualToString:@"@"]) {
-        if ([textField.text containsString:@"@"]) {
-            return NO;
-        } else {
-            textField.text = [textField.text stringByAppendingString:@"@usc.edu"];
-            return NO;
-        }
-    }
-    
     return YES;
 }
 
@@ -432,6 +439,13 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         switch (cellType) {
             case FormCellTypePicker: {
                 rowValue = self.formRows[i].value;
+                if ([formItem[kFormItemSubmissionKeyKey] isEqualToString:@"should_post_fb"]) {
+                    if ([rowValue isEqualToString:@"No, do not share my pitch."]) {
+                        rowValue = @"false";
+                    } else {
+                        rowValue = @"true";
+                    }
+                }
                 break;
             }
             case FormCellTypeTextField: {
@@ -444,6 +458,8 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                 rowValue = textView.text;
                 break;
             }
+            case FormCellTypeSpace:
+                break;
         }
         
         // Trim the string
@@ -458,7 +474,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             }
             [self.formRows[i] setError:YES];
         } else {
-            [parameters setObject:rowValue forKey:formItem[kFormItemSubmissionKeyKey]];
+            if (formItem[kFormItemSubmissionKeyKey] != nil) {
+                [parameters setObject:rowValue forKey:formItem[kFormItemSubmissionKeyKey]];
+            }
         }
     }
     
@@ -491,6 +509,27 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 
 + (NSArray *)createFormItems {
     return @[
+             @{kFormItemTitleKey : @"Pitch Title",
+               kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_title",
+               kFormItemInputTypeKey : @(FormCellTypeTextField)},
+             
+             @{kFormItemTitleKey : @"Pitch Category",
+               kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_category",
+               kFormItemInputTypeKey : @(FormCellTypePicker),
+               kFormItemOptionsKey : @[@"Arts, Media & Culture",
+                                       @"Community Impact & Education",
+                                       @"Environment",
+                                       @"Health & Biotech",
+                                       @"Life Hacks & Other",
+                                       @"Politics"]},
+             
+             @{kFormItemTitleKey : @"Short Pitch Description",
+               kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_short_description",
+               kFormItemInputTypeKey : @(FormCellTypeShortAnswer)},
+             @{kFormItemInputTypeKey : @(FormCellTypeSpace)},
              @{kFormItemTitleKey : @"First Name",
                kFormItemPlaceholderKey : @"Tommy",
                kFormItemRequiredKey : @(YES),
@@ -509,10 +548,10 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                kFormItemSubmissionKeyKey : @"email",
                kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
-             @{kFormItemTitleKey : @"Student Organization Name",
-               kFormItemRequiredKey : @(NO),
-               kFormItemSubmissionKeyKey : @"student_org",
-               kFormItemInputTypeKey : @(FormCellTypeTextField)},
+//             @{kFormItemTitleKey : @"Student Organization Name",
+//               kFormItemRequiredKey : @(NO),
+//               kFormItemSubmissionKeyKey : @"student_org",
+//               kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
              @{kFormItemTitleKey : @"College",
                kFormItemRequiredKey : @(YES),
@@ -521,8 +560,8 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                kFormItemOptionsKey : @[@"Letters, Arts and Sciences",
                                        @"Accounting",
                                        @"Architecture",
-                                       @"Business",
                                        @"Arts, Technology, Business",
+                                       @"Business",
                                        @"Cinematic Arts",
                                        @"Communication",
                                        @"Dance",
@@ -543,40 +582,20 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                kFormItemRequiredKey : @(YES),
                kFormItemSubmissionKeyKey : @"grad_year",
                kFormItemInputTypeKey : @(FormCellTypePicker),
-               kFormItemOptionsKey : @[@"2016",
-                                       @"2017",
+               kFormItemOptionsKey : @[@"2017",
                                        @"2018",
                                        @"2019",
                                        @"2020",
                                        @"2021",
-                                       @"2022"]},
-             
-             @{kFormItemTitleKey : @"Pitch Title",
+                                       @"2022",
+                                       @"2023"]},
+             @{kFormItemTitleKey : @"Sharing Online",
                kFormItemRequiredKey : @(YES),
-               kFormItemSubmissionKeyKey : @"pitch_title",
-               kFormItemInputTypeKey : @(FormCellTypeTextField)},
-             
-             @{kFormItemTitleKey : @"Pitch Category",
-               kFormItemRequiredKey : @(YES),
-               kFormItemSubmissionKeyKey : @"pitch_category",
+               kFormItemSubmissionKeyKey : @"should_post_fb",
                kFormItemInputTypeKey : @(FormCellTypePicker),
-               kFormItemOptionsKey : @[@"Art & Interactive Media",
-                                       @"Community Impact",
-                                       @"Education",
-                                       @"Enterprise & Commerce",
-                                       @"Environment",
-                                       @"Health & Biotech",
-                                       @"Household & Everyday Products",
-                                       @"Media & Entertainment",
-                                       @"Services",
-                                       @"Small Business",
-                                       @"Social & Lifestyle",
-                                       @"USC Community"]},
-             
-             @{kFormItemTitleKey : @"Short Pitch Description",
-               kFormItemRequiredKey : @(YES),
-               kFormItemSubmissionKeyKey : @"pitch_short_description",
-               kFormItemInputTypeKey : @(FormCellTypeShortAnswer)}
+               kFormItemOptionsKey : @[@"Yes, share my pitch! (recommended)",
+                                       @"No, do not share my pitch."]},
+            
              ];
 }
 
@@ -615,10 +634,10 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     [easterEgg setAttributedText:easterString];
     
     // Autolayout
-    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-30-[logo]-50-[easterEgg]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(logo, easterEgg)];
+    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[logo]-50-[easterEgg]" options:nil metrics:nil views:NSDictionaryOfVariableBindings(logo, easterEgg)];
     [view addConstraints:vLogoConstraints];
     
-    [view addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:6]];
     [view addConstraint:[NSLayoutConstraint constraintWithItem:easterEgg attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
     
     // Scroll view
