@@ -30,7 +30,7 @@
 		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>1kp-api-dev.us-west-1.elasticbeanstalk.com</key>
+			<key>1kp-api-2017.us-west-1.elasticbeanstalk.com</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<true/>

@@ -16,7 +16,7 @@
 #define kUploadStateKey @"kUploadStateKey"
 #define kCreatedDateKey @"kCreatedDateKey"
 
-static NSString * kBaseURL = @"http://1kp-api-dev.us-west-1.elasticbeanstalk.com";
+static NSString * kBaseURL = @"http://1kp-api-2017.us-west-1.elasticbeanstalk.com";
 
 static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch.backgroundsession";
 
@@ -370,7 +370,10 @@ static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch
     // Generate a generic AFHTTPRequestSerializer for the headers
     AFHTTPRequestSerializer *requestSerializer = [[AFHTTPRequestSerializer alloc] init];
     [requestSerializer setValue:@"lk2108hio20ascnwb128h398hqln39" forHTTPHeaderField:@"Authorization-Token"];
-    [requestSerializer setValue:@"" forHTTPHeaderField:@"DEVICE-ID"];
+    
+    UIDevice *currentDevice = [UIDevice currentDevice];
+    NSString *deviceId = [[currentDevice identifierForVendor] UUIDString];
+    [requestSerializer setValue:deviceId forHTTPHeaderField:@"DEVICE-ID"];
     
     return requestSerializer;
 }
