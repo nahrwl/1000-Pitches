@@ -180,18 +180,15 @@
     
     // Vertical
     NSArray *verticalLayoutConstraints =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide]-(45@1)-[button(48)]-20-|"
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide]-(45@1)-[button(48)]"
                                             options:NSLayoutFormatAlignAllCenterX
                                             metrics:nil
                                               views:views];
     [view addConstraints:verticalLayoutConstraints];
     
-    NSArray *verticalLayoutConstraints2 =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-25-[settingsbutton]"
-                                            options:NSLayoutFormatAlignAllLeft
-                                            metrics:nil
-                                              views:views];
-    [view addConstraints:verticalLayoutConstraints2];
+    [button.bottomAnchor constraintEqualToAnchor:view.layoutMarginsGuide.bottomAnchor constant:-20.0f].active = YES;
+    
+    [settingsbutton.topAnchor constraintEqualToAnchor:view.layoutMarginsGuide.topAnchor constant:5].active = YES;
     
     // Enforce a margin between the listLabel and the button
     NSLayoutConstraint *listLabelToButtonMargin = [NSLayoutConstraint constraintWithItem:listLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationLessThanOrEqual toItem:button attribute:NSLayoutAttributeTop multiplier:1 constant:-20];
