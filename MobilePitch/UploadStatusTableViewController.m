@@ -23,6 +23,7 @@
     [super viewDidLoad];
     
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonTapped)];
+    doneButton.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
     self.navigationItem.rightBarButtonItem = doneButton;
     self.navigationItem.title = @"Submissions";
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
@@ -32,7 +33,7 @@
     
     self.tableView.separatorInset = UIEdgeInsetsMake(0, 58, 0, 0);
     self.tableView.rowHeight = 44.0f;
-    
+
     [[SubmissionManager sharedManager] setDelegate:self];
 }
 

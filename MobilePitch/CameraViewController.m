@@ -273,6 +273,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // Hide the navigation bar
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
+    // Resets the timer just in case
+    self.timerLabel.text = @"00:00";
+    
     [self begin];
 }
 
