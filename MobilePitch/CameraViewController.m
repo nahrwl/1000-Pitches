@@ -79,6 +79,8 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 // Submission
 @property (nonatomic) NSUInteger submissionIdentifier;
 
+@property (nonatomic, strong) FormViewController *formViewController;
+
 // Methods
 - (void)backButtonTapped:(UIButton *)sender;
 
@@ -324,6 +326,10 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    if (!self.formViewController) {
+        self.formViewController = [[FormViewController alloc] init];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -873,7 +879,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 #pragma mark Finished Recording View Controller Delegate
 - (void)submitVideo {
-    FormViewController *formViewController = [[FormViewController alloc] init];
+    FormViewController *formViewController = self.formViewController;
     
     [self.navigationController pushViewController:formViewController animated:YES];
 }
