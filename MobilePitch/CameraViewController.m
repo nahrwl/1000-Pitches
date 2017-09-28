@@ -1063,7 +1063,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     
     [topView.leadingAnchor constraintEqualToAnchor:view.leadingAnchor].active = YES;
     [topView.trailingAnchor constraintEqualToAnchor:view.trailingAnchor].active = YES;
-    [topView.topAnchor constraintEqualToAnchor:view.topAnchor].active = YES;
+    [topView.topAnchor constraintEqualToAnchor:view.layoutMarginsGuide.topAnchor].active = YES;
     
     NSArray *bottomVLayoutConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[notificationView][bottomView(97)]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views];
     [view addConstraints:bottomVLayoutConstraints];
