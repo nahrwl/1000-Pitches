@@ -610,7 +610,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
                 
             case RecordingStatusTooShort:
                 self.statusView.backgroundColor = [UIColor colorWithRed:0.718 green:0 blue:0 alpha:0.6];
-                textString = @"TOO SHORT";
+                textString = @"KEEP PITCHING";
                 break;
                 
             case RecordingStatusNominal:
