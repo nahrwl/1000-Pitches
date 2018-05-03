@@ -16,8 +16,8 @@
 #import "FinishedRecordingViewController.h"
 #import "FormViewController.h"
 
-#import "VideoSubmissionManager.h"
-#import "VideoSubmission.h"
+#import "SubmissionManager.h"
+
 
 #define kStatusViewAnimationDuration 1.0f
 #define kRecordButtonAnimationDuration 0.2f
@@ -78,6 +78,8 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 // Submission
 @property (nonatomic) NSUInteger submissionIdentifier;
+
+@property (nonatomic, strong) FormViewController *formViewController;
 
 // Methods
 - (void)backButtonTapped:(UIButton *)sender;
@@ -273,6 +275,9 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // Hide the navigation bar
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
+    // Resets the timer just in case
+    self.timerLabel.text = @"00:00";
+    
     [self begin];
 }
 
@@ -321,6 +326,10 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    if (!self.formViewController) {
+        self.formViewController = [[FormViewController alloc] init];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -600,7 +609,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     
     self.recordingStatus = status;
     
-    void (^updateStatus)() = ^ {
+    void (^updateStatus)(void) = ^ {
         NSString *textString;
         switch (status) {
             case RecordingStatusNotRecording:
@@ -610,7 +619,7 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
                 
             case RecordingStatusTooShort:
                 self.statusView.backgroundColor = [UIColor colorWithRed:0.718 green:0 blue:0 alpha:0.6];
-                textString = @"TOO SHORT";
+                textString = @"KEEP PITCHING";
                 break;
                 
             case RecordingStatusNominal:
@@ -735,13 +744,8 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     // This used to be if (success), however I changed it to !error because saving would continue even if
     // errors such as out of space errors occurred. Not really what I want.
     if ( !error ) {
-        VideoSubmissionManager *vsm = [VideoSubmissionManager sharedManager];
-        
-        self.submissionIdentifier = [vsm generateUniqueIdentifier];
-        [vsm queueVideoSubmission:[[VideoSubmission alloc] initWithIdentifier:self.submissionIdentifier forFileURL:outputFileURL]];
-        
         // Queue the video for submission and save the returned submission identifier
-        //self.submissionIdentifier = [psc queueVideoAtURL:outputFileURL];
+        [[SubmissionManager sharedManager] openSubmissionWithVideo:outputFileURL];
         
         // Format the duration
         CMTime duration = captureOutput.recordedDuration;
@@ -875,19 +879,13 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
 
 #pragma mark Finished Recording View Controller Delegate
 - (void)submitVideo {
-#warning Video should actually be submitted here rather than in the end recording delegate method
-    
-    FormViewController *formViewController = [[FormViewController alloc] init];
-    formViewController.submissionIdentifier = self.submissionIdentifier;
+    FormViewController *formViewController = self.formViewController;
     
     [self.navigationController pushViewController:formViewController animated:YES];
 }
 
 - (void)tryAgain {
     [self.navigationController popToViewController:self animated:YES];
-    
-#warning Delete the video submission here
-    
 }
 
 #pragma mark View Setup
@@ -1074,10 +1072,11 @@ typedef NS_ENUM(NSInteger, RecordingStatus) {
     
     [topView.leadingAnchor constraintEqualToAnchor:view.leadingAnchor].active = YES;
     [topView.trailingAnchor constraintEqualToAnchor:view.trailingAnchor].active = YES;
-    [topView.topAnchor constraintEqualToAnchor:view.topAnchor].active = YES;
+    [topView.topAnchor constraintEqualToAnchor:view.layoutMarginsGuide.topAnchor].active = YES;
     
-    NSArray *bottomVLayoutConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[notificationView][bottomView(97)]|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views];
+    NSArray *bottomVLayoutConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[notificationView][bottomView(97)]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views];
     [view addConstraints:bottomVLayoutConstraints];
+    [bottomView.bottomAnchor constraintEqualToAnchor:view.layoutMarginsGuide.bottomAnchor].active = YES;
     
     [notificationView.leadingAnchor constraintEqualToAnchor:view.leadingAnchor].active = YES;
     [notificationView.trailingAnchor constraintEqualToAnchor:view.trailingAnchor].active = YES;

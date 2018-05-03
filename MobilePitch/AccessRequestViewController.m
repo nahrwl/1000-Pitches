@@ -29,6 +29,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     //NSLog(@"Width of titleLabel is: %f",self.titleLabel.frame.size.width);
+    [super viewDidAppear:animated];
 }
 
 - (void)didReceiveMemoryWarning {

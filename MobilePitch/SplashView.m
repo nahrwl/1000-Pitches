@@ -31,7 +31,7 @@
         [self addSubview:_gradientBackground];
         
         _gridView = [[UIView alloc] init];
-        _gridView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
+        //_gridView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"grid-unit"]];
         [self addSubview:_gridView];
     }
     return self;

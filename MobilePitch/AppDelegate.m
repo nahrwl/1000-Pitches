@@ -9,7 +9,7 @@
 #import "AppDelegate.h"
 #import "SplashViewController.h"
 #import "FormViewController.h"
-#import "VideoSubmissionManager.h"
+#import "SubmissionManager.h"
 
 @interface AppDelegate ()
 
@@ -27,7 +27,7 @@
     navigationController.interactivePopGestureRecognizer.enabled = NO;
     
     // Create the video submission manager ahead of time
-    [VideoSubmissionManager sharedManager];
+    [[SubmissionManager sharedManager] checkUploadStatus];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window setRootViewController:navigationController];
@@ -38,13 +38,13 @@
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-    [[VideoSubmissionManager sharedManager] serializeObjectToDefaultFile];
+    [[SubmissionManager sharedManager] serializeObjectToDefaultFile];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    [[VideoSubmissionManager sharedManager] serializeObjectToDefaultFile];
+    //[[SubmissionManager sharedManager] serializeObjectToDefaultFile];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
@@ -53,19 +53,20 @@
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that weres paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    [[SubmissionManager sharedManager] checkUploadStatus];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     //[[PitchSubmissionController sharedPitchSubmissionController] saveData];
-    [[VideoSubmissionManager sharedManager] serializeObjectToDefaultFile];
+    [[SubmissionManager sharedManager] serializeObjectToDefaultFile];
 }
-
-#pragma mark Background Upload
-
-- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)())completionHandler {
-    NSAssert([[VideoSubmissionManager sharedManager].session.configuration.identifier isEqualToString:identifier], @"Identifiers didn't match");
-    [VideoSubmissionManager sharedManager].savedCompletionHandler = completionHandler;
-}
+//
+//#pragma mark Background Upload
+//
+//- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)())completionHandler {
+//    NSAssert([[VideoSubmissionManager sharedManager].session.configuration.identifier isEqualToString:identifier], @"Identifiers didn't match");
+//    [VideoSubmissionManager sharedManager].savedCompletionHandler = completionHandler;
+//}
 
 @end

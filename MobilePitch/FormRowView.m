@@ -61,20 +61,20 @@
 - (void)setTitle:(NSString *)title required:(BOOL)required {
     NSString *titleText;
     if (required) {
-        titleText = [title stringByAppendingString:@" *"];
-    } else {
         titleText = title;
+    } else {
+        titleText = [title stringByAppendingString:@" (optional)"];
     }
     
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:titleText];
     
-    if (required) {
+    if (!required) {
         [attributedString addAttribute:NSForegroundColorAttributeName
-                                 value:[UIColor colorWithRed:0.796 green:0 blue:0 alpha:1]
+                                 value:[UIColor colorWithRed:0.418 green:0.604 blue:0.832 alpha:1]
                                  range:NSMakeRange(0, attributedString.length)];
         [attributedString addAttribute:NSForegroundColorAttributeName
                                  value:[UIColor colorWithRed:0.396 green:0.396 blue:0.396 alpha:1]
-                                 range:NSMakeRange(0, attributedString.length - 1)];
+                                 range:NSMakeRange(0, attributedString.length - 10)];
         
     } else {
         [attributedString addAttribute:NSForegroundColorAttributeName
@@ -89,6 +89,24 @@
 
 - (NSString *)title {
     return self.titleLabel.text;
+}
+
+- (NSString *)value {
+    return @"";
+}
+
+- (BOOL)needsKeyboard
+{
+    return NO;
+}
+
+- (void)setError:(BOOL)error
+{
+    if (error) {
+        self.inputView.layer.borderColor = [UIColor colorWithRed:0.796 green:0 blue:0 alpha:1].CGColor;
+    } else {
+        self.inputView.layer.borderColor = [UIColor colorWithRed:0.886 green:0.886 blue:0.886 alpha:1].CGColor;
+    }
 }
 
 #pragma mark First Responder Status

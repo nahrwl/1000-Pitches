@@ -9,11 +9,13 @@
 #import "FormViewController.h"
 #import "FormRowTextFieldView.h"
 #import "FormRowTextViewView.h"
+#import "FormRowListView.h"
 #import "NicerLookingPickerView.h"
 #import "SmarterTextField.h"
 #import "ShadowView.h"
 #import "SplashView.h"
-#import "VideoSubmissionManager.h"
+#import "SubmissionManager.h"
+#import "FinishedViewController.h"
 
 // Form item constants
 #define kFormItemTitleKey @"kFormItemTitleKey"
@@ -23,20 +25,22 @@
 #define kFormItemSubmissionKeyKey @"kFormItemSubmissionKeyKey"
 #define kFormItemOptionsKey @"kFormItemOptionsKey"
 
-#define kScrollViewTopInset 268
+#define kScrollViewTopInset 208
 
 typedef NS_ENUM(NSInteger, FormCellType) {
     FormCellTypeTextField,
     FormCellTypePicker,
-    FormCellTypeShortAnswer
+    FormCellTypeShortAnswer,
+    FormCellTypeSpace
 };
 
-@interface FormViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UITextViewDelegate>
+@interface FormViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UITextViewDelegate, FormRowListViewDelegate>
 
 // Views
 @property (weak, nonatomic) UIScrollView *scrollView;
 @property (weak, nonatomic) UIStackView *stackView;
 @property (weak, nonatomic) UIPickerView *pickerView;
+@property (strong, nonatomic) NSArray<FormRowView *> *formRows;
 
 // Editing
 @property (strong, nonatomic) NSArray *formItems;
@@ -61,6 +65,12 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     // Set tint color
     self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
     
+    // Remove nav bar transparency
+    self.navigationController.navigationBar.translucent = NO;
+    
+    // Change the bar tint color to match the form background
+    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
+    
     // Create the form items. Technically could be loaded in from a plist or something.
     NSArray *formItems = [FormViewController createFormItems];
     self.formItems = formItems;
@@ -82,25 +92,65 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissInputView)];
     [toolbar setItems:@[previous, next, spacer, doneButton]];
     
+    // Create a temporary array for the views
+    NSMutableArray *tempRows = [NSMutableArray arrayWithCapacity:formItems.count];
+    
     // Populate the Stack View
     for (int i = 0; i < formItems.count; i++) {
         NSDictionary *row = formItems[i];
         
-        if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypeShortAnswer) {
+        if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypeShortAnswer)
+        {
             FormRowTextViewView *rowView = [[FormRowTextViewView alloc] init];
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            [tempRows addObject:rowView];
             
             // Configure the row
             rowView.textView.delegate = self;
             
             // Store the row index in the text view's tag... don't judge me
             rowView.textView.tag = 1000 + i;
-        } else {
+        }
+        else if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypeSpace) {
+            // Add top spacer to stack view
+            UIView *rowView = [[UIView alloc] init];
+            rowView.translatesAutoresizingMaskIntoConstraints = NO;
             
+            [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            [tempRows addObject:rowView];
+            
+            // Appearance
+            rowView.backgroundColor = [UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1];
+            [rowView addConstraint:[NSLayoutConstraint constraintWithItem:rowView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:44]];
+        }
+        else if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker)
+        {
+            NSArray *listItems = self.formItems[i][kFormItemOptionsKey];
+            FormRowListView *rowView = [[FormRowListView alloc] initWithRows:listItems.count];
+            rowView.delegate = self;
+            for (int j = 0; j < rowView.textFields.count; j++)
+            {
+                rowView.textFields[j].text = listItems[j];
+            }
+            [tempRows addObject:rowView];
+            
+            [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
+            [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            
+            if ([row[kFormItemSubmissionKeyKey] isEqualToString:@"should_post_fb"]) {
+                [rowView setSelectedRowIndex:0];
+            }
+            
+            // Store the row index in the text field's tag... don't judge me
+            rowView.textFields[0].tag = 1000 + i;
+        }
+        else
+        {
             FormRowTextFieldView *rowView = [[FormRowTextFieldView alloc] init];
             [rowView setTitle:row[kFormItemTitleKey] required:[(NSNumber *)row[kFormItemRequiredKey] boolValue]];
             [self.stackView insertArrangedSubview:rowView atIndex:self.stackView.arrangedSubviews.count - 1];
+            [tempRows addObject:rowView];
             
             // Configure the row
             
@@ -113,19 +163,6 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // Disable autocorrect
             rowView.textField.autocorrectionType = UITextAutocorrectionTypeNo;
             
-            // If the row requires the picker view, configure that now
-            if ([(NSNumber *)row[kFormItemInputTypeKey] integerValue] == FormCellTypePicker) {
-                // Add the picker view as the text field's input view
-                // This replaces the keyboard
-                rowView.textField.inputView = pickerView;
-                
-                // Disable the text field cursor so we don't get the blue input indicator thingy
-                rowView.textField.cursorEnabled = NO;
-                
-                // Set an initial value for the field
-                rowView.textField.text = row[kFormItemOptionsKey][0];
-            }
-            
             // If the row is the email row, give it the right kind of keyboard
             if ([row[kFormItemSubmissionKeyKey] isEqualToString:@"email"]) {
                 [rowView.textField setKeyboardType:UIKeyboardTypeEmailAddress];
@@ -133,8 +170,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             }
         }
         
+        // Finally, set the property to the immutable tempRows array
+        self.formRows = [tempRows copy];
     }
-    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -206,7 +244,7 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     [self.navigationItem setHidesBackButton:YES animated:YES];
     
     NSDictionary* info = [aNotification userInfo];
-    CGSize kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     
     UIEdgeInsets contentInsets = UIEdgeInsetsMake(kScrollViewTopInset, 0.0, kbSize.height, 0.0);
     self.scrollView.contentInset = contentInsets;
@@ -226,7 +264,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
             // I don't think this ever gets called
             // Some magic being is scrolling my views for me
             // Or I'm just crazy...
-            [self.scrollView scrollRectToVisible:activeField.frame animated:YES];
+            CGRect scrollToRect = [self.scrollView convertRect:activeField.frame fromView:activeField.superview];
+            scrollToRect.size.height += 10;
+            [self.scrollView scrollRectToVisible:scrollToRect animated:YES];
         }
     }
 }
@@ -259,9 +299,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     NSDictionary *formRow = self.formItems[index];
     if ([(NSNumber *)formRow[kFormItemRequiredKey] boolValue] && [textView.text isEqualToString:@""]) {
         // Error!
-        [self setError:YES forView:textView];
+        [self.formRows[index] setError:YES];
     } else {
-        [self setError:NO forView:textView];
+        [self.formRows[index] setError:NO];
     }
 }
 
@@ -301,12 +341,12 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     NSDictionary *formRow = self.formItems[index];
     if ([(NSNumber *)formRow[kFormItemRequiredKey] boolValue] && [textField.text isEqualToString:@""]) {
         // Error!
-        [self setError:YES forView:textField];
+        [self.formRows[index] setError:YES];
     } else if ([formRow[kFormItemSubmissionKeyKey] isEqualToString:@"email"] && ![textField.text hasSuffix:@"@usc.edu"]) {
         // the if expression is just a jank way to check for the email field
-        [self setError:YES forView:textField];
+        [self.formRows[index] setError:YES];
     } else {
-        [self setError:NO forView:textField];
+        [self.formRows[index] setError:NO];
     }
 }
 
@@ -318,25 +358,28 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         return NO;
     }
     
-    // Insert @usc.edu when the @ key is pressed for the email field
-    NSUInteger index = textField.tag - 1000;
-    NSDictionary *formRow = self.formItems[index];
-    if ([formRow[kFormItemSubmissionKeyKey] isEqualToString:@"email"] && [string isEqualToString:@"@"]) {
-        if ([textField.text containsString:@"@"]) {
-            return NO;
-        } else {
-            textField.text = [textField.text stringByAppendingString:@"@usc.edu"];
-            return NO;
-        }
-    }
-    
     return YES;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    // Find the next text field to edit
-    UIView *nextInputView = [self.view viewWithTag:textField.tag + 1];
-    [nextInputView becomeFirstResponder];
+    NSInteger index = textField.tag - 1000;
+    
+    if (self.formRows[index + 1] && self.formRows[index + 1].needsKeyboard)
+    {
+        // Find the next text field to edit
+        UIView *nextInputView = [self.view viewWithTag:textField.tag + 1];
+        [nextInputView becomeFirstResponder];
+    }
+    else
+    {
+        // Else dismiss the keyboard
+        [self dismissInputView];
+        
+        // Scroll so the list is visible
+        // actually, this scrolls so the PREVIOUS form row is visible
+        // this is probably the jankiest thing in this entire app
+        [self.scrollView scrollRectToVisible:CGRectMake(0, self.formRows[index].frame.origin.y, 1, self.scrollView.frame.size.height) animated:YES];
+    }
     
     // Not sure what default behavior is here, but we don't want it.
     return NO;
@@ -371,6 +414,14 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     textField.text = self.formItems[self.selectedRow][kFormItemOptionsKey][row];
 }
 
+#pragma mark Form Row List View Delegate
+
+- (void)rowSelected:(NSInteger)index forView:(FormRowListView *)sender
+{
+    [sender setError:NO];
+    [self dismissInputView];
+}
+
 #pragma mark Actions
 
 - (void)submitButtonTapped:(id)sender {
@@ -386,7 +437,17 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         FormCellType cellType = [(NSNumber *)formItem[kFormItemInputTypeKey] integerValue];
         NSString *rowValue = @"";
         switch (cellType) {
-            case FormCellTypePicker:
+            case FormCellTypePicker: {
+                rowValue = self.formRows[i].value;
+                if ([formItem[kFormItemSubmissionKeyKey] isEqualToString:@"should_post_fb"]) {
+                    if ([rowValue isEqualToString:@"No, do not share my pitch."]) {
+                        rowValue = @"false";
+                    } else {
+                        rowValue = @"true";
+                    }
+                }
+                break;
+            }
             case FormCellTypeTextField: {
                 UITextField *textField = (UITextField *)[self.view viewWithTag:i + 1000];
                 rowValue = textField.text;
@@ -397,21 +458,25 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                 rowValue = textView.text;
                 break;
             }
+            case FormCellTypeSpace:
+                break;
         }
         
         // Trim the string
         rowValue = [rowValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
-        if ([(NSNumber *)formItem[kFormItemRequiredKey] boolValue] && [rowValue isEqualToString:@""]) {
+        if (!rowValue || ([(NSNumber *)formItem[kFormItemRequiredKey] boolValue] && [rowValue isEqualToString:@""])) {
             // If the item is required, check that the string is not empty
             
             // errorIndex should be the first field with a problem
             if (errorIndex == -1) {
                 errorIndex = i;
             }
-            [self setError:YES forView:[self.view viewWithTag:i + 1000]];
+            [self.formRows[i] setError:YES];
         } else {
-            [parameters setObject:rowValue forKey:formItem[kFormItemSubmissionKeyKey]];
+            if (formItem[kFormItemSubmissionKeyKey] != nil) {
+                [parameters setObject:rowValue forKey:formItem[kFormItemSubmissionKeyKey]];
+            }
         }
     }
     
@@ -422,9 +487,9 @@ static NSString *cellIdentifier = @"kCellIdentifier";
         // Set the highest field to become the first responder
         [[self.view viewWithTag:errorIndex + 1000] becomeFirstResponder];
     } else {
-        [[VideoSubmissionManager sharedManager] setFormData:[parameters copy] forIdentifier:self.submissionIdentifier];
+        [[SubmissionManager sharedManager] submitCurrentSubmissionWithFormData:[parameters copy]];
         
-        [self.navigationController popToRootViewControllerAnimated:YES];
+        [self.navigationController pushViewController:[[FinishedViewController alloc] init] animated:YES];
     }
 }
 
@@ -442,16 +507,29 @@ static NSString *cellIdentifier = @"kCellIdentifier";
 
 #pragma mark Helpers
 
-- (void)setError:(BOOL)error forView:(UIView *)view {
-    if (error) {
-        view.layer.borderColor = [UIColor colorWithRed:0.796 green:0 blue:0 alpha:1].CGColor;
-    } else {
-        view.layer.borderColor = [UIColor colorWithRed:0.886 green:0.886 blue:0.886 alpha:1].CGColor;
-    }
-}
-
 + (NSArray *)createFormItems {
     return @[
+             @{kFormItemTitleKey : @"Pitch Title",
+               kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_title",
+               kFormItemInputTypeKey : @(FormCellTypeTextField)},
+             
+             @{kFormItemTitleKey : @"Pitch Category",
+               kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_category",
+               kFormItemInputTypeKey : @(FormCellTypePicker),
+               kFormItemOptionsKey : @[@"Arts, Media & Culture",
+                                       @"Community Impact & Education",
+                                       @"Environment",
+                                       @"Health & Biotech",
+                                       @"Life Hacks & Other",
+                                       @"Politics"]},
+             
+             @{kFormItemTitleKey : @"Short Pitch Description",
+               kFormItemRequiredKey : @(YES),
+               kFormItemSubmissionKeyKey : @"pitch_short_description",
+               kFormItemInputTypeKey : @(FormCellTypeShortAnswer)},
+             @{kFormItemInputTypeKey : @(FormCellTypeSpace)},
              @{kFormItemTitleKey : @"First Name",
                kFormItemPlaceholderKey : @"Tommy",
                kFormItemRequiredKey : @(YES),
@@ -470,10 +548,10 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                kFormItemSubmissionKeyKey : @"email",
                kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
-             @{kFormItemTitleKey : @"Student Organization Name",
-               kFormItemRequiredKey : @(NO),
-               kFormItemSubmissionKeyKey : @"student_org",
-               kFormItemInputTypeKey : @(FormCellTypeTextField)},
+//             @{kFormItemTitleKey : @"Student Organization Name",
+//               kFormItemRequiredKey : @(NO),
+//               kFormItemSubmissionKeyKey : @"student_org",
+//               kFormItemInputTypeKey : @(FormCellTypeTextField)},
              
              @{kFormItemTitleKey : @"College",
                kFormItemRequiredKey : @(YES),
@@ -482,10 +560,11 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                kFormItemOptionsKey : @[@"Letters, Arts and Sciences",
                                        @"Accounting",
                                        @"Architecture",
-                                       @"Business",
                                        @"Arts, Technology, Business",
+                                       @"Business",
                                        @"Cinematic Arts",
                                        @"Communication",
+                                       @"Dance",
                                        @"Dramatic Arts",
                                        @"Dentistry",
                                        @"Education",
@@ -503,36 +582,20 @@ static NSString *cellIdentifier = @"kCellIdentifier";
                kFormItemRequiredKey : @(YES),
                kFormItemSubmissionKeyKey : @"grad_year",
                kFormItemInputTypeKey : @(FormCellTypePicker),
-               kFormItemOptionsKey : @[@"2019",
+               kFormItemOptionsKey : @[@"2017",
                                        @"2018",
-                                       @"2017",
-                                       @"2016"]},
-             
-             @{kFormItemTitleKey : @"Pitch Title",
+                                       @"2019",
+                                       @"2020",
+                                       @"2021",
+                                       @"2022",
+                                       @"2023"]},
+             @{kFormItemTitleKey : @"Sharing Online",
                kFormItemRequiredKey : @(YES),
-               kFormItemSubmissionKeyKey : @"pitch_title",
-               kFormItemInputTypeKey : @(FormCellTypeTextField)},
-             
-             @{kFormItemTitleKey : @"Pitch Category",
-               kFormItemRequiredKey : @(YES),
-               kFormItemSubmissionKeyKey : @"pitch_category",
+               kFormItemSubmissionKeyKey : @"should_post_fb",
                kFormItemInputTypeKey : @(FormCellTypePicker),
-               kFormItemOptionsKey : @[@"Consumer Products & Small Business",
-                                       @"Education",
-                                       @"Environment",
-                                       @"Film",
-                                       @"Health",
-                                       @"Mobile Apps",
-                                       @"Music",
-                                       @"Research",
-                                       @"Tech & Hardware",
-                                       @"University Improvements",
-                                       @"Web & Software"]},
-             
-             @{kFormItemTitleKey : @"Short Pitch Description",
-               kFormItemRequiredKey : @(YES),
-               kFormItemSubmissionKeyKey : @"pitch_short_description",
-               kFormItemInputTypeKey : @(FormCellTypeShortAnswer)}
+               kFormItemOptionsKey : @[@"Yes, share my pitch! (recommended)",
+                                       @"No, do not share my pitch."]},
+            
              ];
 }
 
@@ -546,11 +609,36 @@ static NSString *cellIdentifier = @"kCellIdentifier";
     UIImageView *logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"form-logo"]];
     logo.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:logo];
+    
+    UILabel *easterEgg = [[UILabel alloc] init];
+    easterEgg.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:easterEgg];
+    
+    easterEgg.text = @"MADE WITH 💛 BY SPARK SC";
+    easterEgg.numberOfLines = 1;
+    easterEgg.textAlignment = NSTextAlignmentCenter;
+    
+    NSMutableAttributedString *easterString = [[NSMutableAttributedString alloc] initWithString:@"MADE WITH 💛 BY SPARK SC"];
+    [easterString addAttribute:NSForegroundColorAttributeName
+                             value:[UIColor colorWithRed:0.953 green:0.953 blue:0.953 alpha:1]
+                             range:NSMakeRange(0, easterString.length)];
+    [easterString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:12 weight:UIFontWeightBold]
+                             range:NSMakeRange(0, 9)];
+    [easterString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:16 weight:UIFontWeightBold]
+                             range:NSMakeRange(9, 3)];
+    [easterString addAttribute:NSFontAttributeName
+                             value:[UIFont systemFontOfSize:12 weight:UIFontWeightBold]
+                             range:NSMakeRange(13, easterString.length-13)];
+    [easterEgg setAttributedText:easterString];
+    
     // Autolayout
-    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-115-[logo]" options:NSLayoutFormatAlignAllCenterX metrics:nil views:NSDictionaryOfVariableBindings(logo)];
+    NSArray *vLogoConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[logo]-50-[easterEgg]" options:nil metrics:nil views:NSDictionaryOfVariableBindings(logo, easterEgg)];
     [view addConstraints:vLogoConstraints];
     
-    [view addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:6]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:easterEgg attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
     
     // Scroll view
     UIScrollView *scrollView = [[UIScrollView alloc] init];

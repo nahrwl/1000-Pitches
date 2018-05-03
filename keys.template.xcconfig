@@ -1,0 +1,12 @@
+//
+//  keys.template.xcconfig
+//  MobilePitch
+//
+//  Duplicate this file and rename the duplicate to "keys.xcconfig"
+//  This will remove the file from source control.
+//
+//  Then, insert the keys below.
+
+
+// Use an auth token for a very simple layer of security
+AUTH_TOKEN =

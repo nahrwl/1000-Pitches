@@ -9,6 +9,7 @@
 #import "SplashViewController.h"
 #import "CameraViewController.h"
 #import "SplashView.h"
+#import "UploadStatusTableViewController.h"
 
 @interface SplashViewController ()
 
@@ -40,6 +41,11 @@
 
 - (void)pitchButtonTapped:(UIButton *)sender {
     [self.navigationController pushViewController:[[CameraViewController alloc] init] animated:YES];
+}
+
+- (void)settingsButtonTapped:(UIButton *)sender {
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:[[UploadStatusTableViewController alloc] init]];
+    [self presentViewController:nav animated:YES completion:nil];
 }
 
 - (UIStatusBarStyle) preferredStatusBarStyle {
@@ -80,7 +86,7 @@
     headerLabel.text = @"It's simple:";
     headerLabel.textAlignment = NSTextAlignmentNatural;
     headerLabel.font = [UIFont systemFontOfSize:36 weight:UIFontWeightSemibold];
-    headerLabel.textColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    headerLabel.textColor = [UIColor colorWithRed:0.482 green:0.349 blue:0 alpha:1];
     
     // List text
     UILabel *listLabel = [[UILabel alloc] init];
@@ -97,15 +103,14 @@
     listLabel.numberOfLines = 3;
     listLabel.textAlignment = NSTextAlignmentNatural;
     listLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightLight];
-    listLabel.textColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
-    listLabel.textColor = [UIColor whiteColor];
+    listLabel.textColor = [UIColor colorWithRed:0.569 green:0.412 blue:0 alpha:1];
     
     // Button
     UIButton *button = [[UIButton alloc] init];
     button.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:button];
     // Button formatting
-    button.backgroundColor = [UIColor colorWithRed:0.984 green:0.741 blue:0.098 alpha:1];
+    button.backgroundColor = [UIColor colorWithRed:0.741 green:0.0627 blue:0.878 alpha:1];
     button.layer.cornerRadius = 8;
     // Button titleLabel formatting
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString: @"I HAVE A PITCH"];
@@ -128,6 +133,18 @@
     // Button Action
     [button addTarget:self action:@selector(pitchButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     
+    // Settings button
+    UIButton *settingsbutton = [[UIButton alloc] init];
+    settingsbutton.translatesAutoresizingMaskIntoConstraints = NO;
+    [view addSubview:settingsbutton];
+    
+    [settingsbutton setTitle:@"Status" forState:UIControlStateNormal];
+    [settingsbutton setTitleColor:[UIColor colorWithRed:0.796 green:0.604 blue:0.0863 alpha:1] forState:UIControlStateNormal];
+    [settingsbutton setTitleColor:[UIColor colorWithRed:0.625 green:0.496 blue:0.0757 alpha:1] forState:UIControlStateHighlighted];
+    
+    // Settings button action
+    [settingsbutton addTarget:self action:@selector(settingsButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    
     // Layout guides
     UILayoutGuide *topLayoutGuide = [[UILayoutGuide alloc] init];
     UILayoutGuide *bottomLayoutGuide = [[UILayoutGuide alloc] init];
@@ -136,10 +153,10 @@
     [view addConstraint:[NSLayoutConstraint constraintWithItem:topLayoutGuide attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:bottomLayoutGuide attribute:NSLayoutAttributeHeight multiplier:1 constant:0]];
     
     // AUTOLAYOUT
-    NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, logo, headerLabel, listLabel, button, topLayoutGuide, bottomLayoutGuide);
+    NSDictionary *views = NSDictionaryOfVariableBindings(titleLabel, logo, headerLabel, listLabel, button, topLayoutGuide, bottomLayoutGuide, settingsbutton);
     
     // Aspect ratio for the image
-    [logo addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:logo attribute:NSLayoutAttributeHeight multiplier:2.1441 constant:0]];
+    [logo addConstraint:[NSLayoutConstraint constraintWithItem:logo attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:logo attribute:NSLayoutAttributeHeight multiplier:1.6528 constant:0]];
     
     // Horizontal
     NSArray *horizontalButtonLayoutConstraints =
@@ -149,6 +166,13 @@
                                               views:views];
     [view addConstraints:horizontalButtonLayoutConstraints];
     
+    NSArray *horizontalButtonLayoutConstraints2 =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"H:[settingsbutton]-20-|"
+                                            options:NSLayoutFormatAlignAllTop
+                                            metrics:nil
+                                              views:views];
+    [view addConstraints:horizontalButtonLayoutConstraints2];
+    
     // for the image LOGO
     [view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|->=39-[logo]->=38-|" options:NSLayoutFormatAlignAllCenterX metrics:nil views:views]];
     
@@ -156,11 +180,15 @@
     
     // Vertical
     NSArray *verticalLayoutConstraints =
-    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide][button(48)]-20-|"
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=57@1000)-[titleLabel]-(<=39@1000)-[logo][topLayoutGuide][headerLabel]-19-[listLabel][bottomLayoutGuide]-(45@1)-[button(48)]"
                                             options:NSLayoutFormatAlignAllCenterX
                                             metrics:nil
                                               views:views];
     [view addConstraints:verticalLayoutConstraints];
+    
+    [button.bottomAnchor constraintEqualToAnchor:view.layoutMarginsGuide.bottomAnchor constant:-20.0f].active = YES;
+    
+    [settingsbutton.topAnchor constraintEqualToAnchor:view.layoutMarginsGuide.topAnchor constant:5].active = YES;
     
     // Enforce a margin between the listLabel and the button
     NSLayoutConstraint *listLabelToButtonMargin = [NSLayoutConstraint constraintWithItem:listLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationLessThanOrEqual toItem:button attribute:NSLayoutAttributeTop multiplier:1 constant:-20];
