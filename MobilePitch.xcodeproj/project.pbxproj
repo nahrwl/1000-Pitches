@@ -75,6 +75,8 @@
 		D86944791F7333BA00E38481 /* UploadStatusTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UploadStatusTableViewCell.xib; sourceTree = "<group>"; };
 		D86994161BECA9F900C2CBF8 /* SplashView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashView.h; sourceTree = "<group>"; };
 		D86994171BECA9F900C2CBF8 /* SplashView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SplashView.m; sourceTree = "<group>"; };
+		D8858F45209A9F460016D302 /* keys.template.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = keys.template.xcconfig; sourceTree = "<group>"; };
+		D8858F46209A9F630016D302 /* keys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = keys.xcconfig; sourceTree = "<group>"; };
 		D89503601BE0A61300E0BCF9 /* FormRowTextViewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FormRowTextViewView.h; sourceTree = "<group>"; };
 		D89503611BE0A61300E0BCF9 /* FormRowTextViewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FormRowTextViewView.m; sourceTree = "<group>"; };
 		D89DD4081BDB15CD008284D4 /* MobilePitch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobilePitch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -177,6 +179,8 @@
 		D89DD3FF1BDB15CD008284D4 = {
 			isa = PBXGroup;
 			children = (
+				D8858F46209A9F630016D302 /* keys.xcconfig */,
+				D8858F45209A9F460016D302 /* keys.template.xcconfig */,
 				D89DD40A1BDB15CD008284D4 /* MobilePitch */,
 				D89DD4271BDB15CD008284D4 /* MobilePitchTests */,
 				D89DD4321BDB15CD008284D4 /* MobilePitchUITests */,

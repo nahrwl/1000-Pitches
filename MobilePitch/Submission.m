@@ -305,7 +305,8 @@ static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch
         manager.responseSerializer = [AFJSONResponseSerializer serializer];
         
         // Really trivial and pretty much useless "security..."
-        [manager.requestSerializer setValue:@"lk2108hio20ascnwb128h398hqln39" forHTTPHeaderField:@"Authorization-Token"];
+        NSString *token = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Auth Token"];
+        [manager.requestSerializer setValue:token forHTTPHeaderField:@"Authorization-Token"];
         
         // Some unique device-value. What used to be a UDID. Just for tracking device useage
         [manager.requestSerializer setValue:@"" forHTTPHeaderField:@"DEVICE-ID"];
@@ -369,7 +370,8 @@ static NSString * const kBackgroundSessionIdentifier = @"org.sparksc.MobilePitch
 {
     // Generate a generic AFHTTPRequestSerializer for the headers
     AFHTTPRequestSerializer *requestSerializer = [[AFHTTPRequestSerializer alloc] init];
-    [requestSerializer setValue:@"lk2108hio20ascnwb128h398hqln39" forHTTPHeaderField:@"Authorization-Token"];
+    NSString *token = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Auth Token"];
+    [requestSerializer setValue:token forHTTPHeaderField:@"Authorization-Token"];
     
     UIDevice *currentDevice = [UIDevice currentDevice];
     NSString *deviceId = [[currentDevice identifierForVendor] UUIDString];
